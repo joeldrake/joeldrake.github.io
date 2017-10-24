@@ -1,0 +1,17 @@
+.site {
+  text-align: center;
+  font-family: Montserrat, sans-serif;
+}
+
+.site_logo {
+  height: 80px;
+}
+
+.site_header {
+  height: 150px;
+  padding: 20px;
+}
+
+.site_title {
+  font-size: 1.5em;
+}
