@@ -1,3 +1,3 @@
 ## joel drake
 
-[mailto](mailto:joel@infoping.se)
+[joel@infoping.se](mailto:joel@infoping.se)
