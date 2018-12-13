@@ -91,9 +91,13 @@ function resetBubble() {
 
 function changeColors() {
   document.body.style.backgroundColor = colors[colorChangeCount];
+  //also change the background-color on the html node
+  document.documentElement.style.backgroundColor = colors[colorChangeCount];
+
   changableColor.forEach(box => {
     box.style.color = colors[colorChangeCount];
   });
+
   colorChangeCount++;
   if (colorChangeCount >= colors.length) {
     colorChangeCount = 0;
