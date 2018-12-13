@@ -20,10 +20,41 @@ a {
   color: white;
 }
 
-img {
-  transform: scale(2);
-  display: block;
+.track {
+  position: relative;
+  max-width: 300px;
   margin: 20px auto;
+}
+
+.mario {
+  transform: translateY(-4px) scale(2);
+}
+
+.mushroom {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  animation-name: glideIn;
+  animation-duration: 2.4s;
+  animation-delay: 1.4s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  opacity: 0;
+}
+
+@keyframes glideIn {
+  0% {
+    right: 0;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+
+  100% {
+    right: calc(50% - 25px);
+    opacity: 1;
+  }
 }
 
 canvas {

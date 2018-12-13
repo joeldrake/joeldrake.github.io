@@ -13,7 +13,7 @@ class Snowflake {
     this.x = this.randomBetween(0, window.innerWidth);
     this.y = this.randomBetween(0, -window.innerHeight);
 
-    this.radius = this.randomBetween(1, 5);
+    this.radius = this.randomBetween(1, 4);
     this.vy = this.randomBetween(0.5, 2);
     this.vx = this.randomBetween(-1, 1);
     this.alpha = this.randomBetween(0.1, 0.9);
