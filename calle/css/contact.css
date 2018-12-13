@@ -1,0 +1,44 @@
+.contact {
+  padding: 20px;
+  text-align: center;
+}
+
+.contact > * {
+  display: inline-block;
+  background-color: #222;
+  color: peachpuff;
+  padding: 0.6em 1em;
+  margin: 10px;
+  transition: 0.4s color;
+  text-decoration: none;
+}
+
+.contact > *:nth-child(1) {
+  transform: rotate(5deg);
+}
+
+.contact > *:nth-child(2) {
+  transform: rotate(2deg);
+}
+.contact > *:nth-child(3) {
+  transform: rotate(-3deg);
+}
+.contact > *:nth-child(4) {
+  transform: rotate(4deg);
+}
+
+@media only screen and (min-width: 400px) {
+  .contact {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+}
+
+@media only screen and (min-width: 900px) {
+  .contact {
+    font-size: 1.2em;
+  }
+}
