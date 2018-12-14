@@ -15,14 +15,16 @@
   </head>
   <body>
     <div class="spotify" id="spotify">
-      <iframe
-        src="https://open.spotify.com/embed/track/1nbzG1yqmbg8b7EByobVRW"
-        width="80"
-        height="80"
-        frameborder="0"
-        allowtransparency="true"
-        allow="encrypted-media"
-      ></iframe>
+      <div class="spotifyIframeWrapper">
+        <iframe
+          src="https://open.spotify.com/embed/track/1nbzG1yqmbg8b7EByobVRW"
+          width="80"
+          height="80"
+          frameborder="0"
+          allowtransparency="true"
+          allow="encrypted-media"
+        ></iframe>
+      </div>
       <button onClick="togglePlayer()" class="spotifyToggleButton">
         <img src="img/music.svg" />
       </button>
