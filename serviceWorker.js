@@ -1,4 +1,4 @@
-const CUSTOM_CACHE = 'custom-cache-v2';
+const CUSTOM_CACHE = 'custom-cache-v1';
 
 // A list of local resources we always want to be cached.
 const PRECACHE_URLS = ['./'];
