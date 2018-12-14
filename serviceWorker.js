@@ -65,6 +65,7 @@ self.addEventListener('fetch', event => {
     //network first fetch, on error check cache
     fetch(event.request)
       .then(response => {
+        /*
         // Put a copy of the response in the cache if respons.status is 200
         if (response.status === 200) {
           return caches.open(CUSTOM_CACHE).then(cache => {
@@ -75,6 +76,8 @@ self.addEventListener('fetch', event => {
         } else {
           return response;
         }
+        */
+        return response;
       })
       .catch(error => {
         return caches.open(CUSTOM_CACHE).then(cache => {
