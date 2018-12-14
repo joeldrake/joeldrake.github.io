@@ -4,6 +4,10 @@
   box-sizing: border-box;
 }
 
+html {
+  background: #090527;
+}
+
 html,
 body {
   font-size: 16px;
