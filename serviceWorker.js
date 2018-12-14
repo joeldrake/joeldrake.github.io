@@ -1,4 +1,4 @@
-const CUSTOM_CACHE = 'custom-cache-v1';
+const CUSTOM_CACHE = 'custom-cache-v2';
 
 // A list of local resources we always want to be cached.
 const PRECACHE_URLS = ['./'];
@@ -65,21 +65,9 @@ self.addEventListener('fetch', event => {
     //network first fetch, on error check cache
     fetch(event.request)
       .then(response => {
-        /*
-        // Put a copy of the response in the cache if respons.status is 200
-        if (response.status === 200) {
-          return caches.open(CUSTOM_CACHE).then(cache => {
-            return cache.put(event.request, response.clone()).then(() => {
-              return response;
-            });
-          });
-        } else {
-          return response;
-        }
-        */
         return response;
       })
-      .catch(error => {
+      .catch(() => {
         return caches.open(CUSTOM_CACHE).then(cache => {
           return cache.match(event.request).then(matching => {
             return matching || Promise.reject('no-match');
