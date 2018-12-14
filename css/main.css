@@ -18,7 +18,6 @@ body {
   padding: 0;
   color: white;
   -webkit-font-smoothing: antialiased;
-  text-align: center;
 }
 body {
   min-height: 100%;
@@ -33,11 +32,42 @@ a {
   color: white;
 }
 
+.spotify {
+  position: absolute;
+  top: -80px;
+  left: 0;
+  width: 80px;
+  height: 80px;
+  padding-top: 80px;
+  transition: 0.25s transform;
+}
+
+.spotify.open {
+  padding-top: 0;
+  transform: translateY(80px);
+}
+
+.spotify iframe {
+  width: 100%;
+  display: none;
+}
+
+.spotify.open iframe {
+  display: block;
+}
+
+.spotifyToggleButton {
+  margin: 15px;
+  background: transparent;
+  border: 0;
+}
+
 .track {
   position: relative;
   width: 100%;
   max-width: 300px;
   margin: 20px auto;
+  text-align: center;
 }
 
 .mario {
