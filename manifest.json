@@ -1,5 +1,19 @@
 {
   "name": "Joel Drake",
+  "short_name": "Joel Drake",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon.ico",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "display": "minimal-ui",
   "theme_color": "#090527",
   "background_color": "#090527"
 }
