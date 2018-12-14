@@ -54,6 +54,28 @@ class Snow {
     this.height = window.innerHeight;
     this.canvas.width = this.width;
     this.canvas.height = this.height;
+
+    this.createVignette();
+  }
+
+  createVignette() {
+    const xMid = this.width / 2;
+    const yMid = this.height / 2;
+    const radius = Math.sqrt(xMid * xMid + yMid * yMid);
+    this.vignette = this.ctx.createRadialGradient(
+      xMid,
+      yMid,
+      0,
+      xMid,
+      yMid,
+      radius,
+    );
+
+    this.vignette.addColorStop(0.44, `rgba(0,0,0,0)`);
+    for (let i = 0; i <= 1; i += 0.1) {
+      const alpha = Math.pow(i, 3);
+      this.vignette.addColorStop(0.45 + i * 0.5, `rgba(0,0,0, ${alpha})`);
+    }
   }
 
   createSnowflakes() {
@@ -77,6 +99,10 @@ class Snow {
       this.ctx.fill();
       this.ctx.restore();
     }
+
+    this.ctx.fillStyle = this.vignette;
+    this.ctx.fillRect(0, 0, this.width, this.height);
+
     requestAnimationFrame(this.updateBound);
   }
 }
