@@ -31,7 +31,22 @@ a {
 }
 
 .mario {
-  transform: translateY(-4px) scale(2);
+  transform: translateY(4px) scale(1);
+  animation-name: grow;
+  animation-duration: 0.6s;
+  animation-delay: 4s;
+  animation-iteration-count: 1;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes grow {
+  0% {
+    transform: translateY(4px) scale(1);
+  }
+  100% {
+    transform: translateY(-4px) scale(2);
+  }
 }
 
 .mushroom {
