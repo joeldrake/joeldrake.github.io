@@ -10,8 +10,6 @@
     <link rel="manifest" href="manifest.json" />
   </head>
   <style>
-    @import "https://unpkg.com/open-props";
-
     *,
     *::before,
     *::after {
@@ -45,11 +43,18 @@
       padding: 1rem;
     }
 
+    .app_items {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
     .app_item {
       position: relative;
       display: grid;
+      grid-template-columns: subgrid;
+      grid-column: span 2;
       font-size: clamp(1rem, 2rem, 5vw);
-      grid-template-columns: minmax(50px, 1fr) minmax(50px, 1fr);
+
       padding: 1rem;
       gap: 1rem;
       overflow-wrap: break-word;
@@ -57,7 +62,7 @@
     }
 
     .app_item--empty {
-      opacity: 0.3;
+      color: #ccc;
     }
 
     .app_item_date {
@@ -74,8 +79,23 @@
       hyphens: auto;
     }
 
+    .app_item_count {
+      position: absolute;
+      top: 0;
+      left: 0;
+
+      font-size: 0.75rem;
+      color: #ccc;
+
+      @media (min-width: 600px) {
+        font-size: 1rem;
+        top: 1.75rem;
+      }
+    }
+
     #app_form {
       padding: 0;
+      border-bottom: 1px solid #eee;
 
       .app_item_date {
         align-items: center;
@@ -90,6 +110,8 @@
     #app_form_input {
       border: 0;
       padding: 1rem 0;
+
+      outline: none;
     }
 
     #app_form_button {
@@ -102,18 +124,23 @@
   </style>
   <body>
     <div class="app">
-      <form id="app_form" class="app_item">
-        <div class="app_item_date">
-          <input type="date" id="app_form_datepicker" />
-        </div>
-        <input
-          type="text"
-          id="app_form_input"
-          class="app_item"
-          placeholder="Jag är tacksam för..."
-        />
-      </form>
-      <div id="app_items"></div>
+      <div class="app_items">
+        <form id="app_form" class="app_item">
+          <div class="app_item_date">
+            <input type="date" id="app_form_datepicker" />
+          </div>
+          <div>
+            <input
+              type="text"
+              id="app_form_input"
+              class="app_item"
+              placeholder="..."
+            />
+          </div>
+        </form>
+      </div>
+
+      <div id="app_items" class="app_items"></div>
     </div>
   </body>
 
@@ -131,6 +158,10 @@
       item: {},
     };
 
+    if (!state.item[today]) {
+      app_form_datepicker.value = timestampToDateString(today);
+    }
+
     function handleSubmit(e) {
       e.preventDefault();
 
@@ -147,25 +178,17 @@
       app_form_input.value = "";
       app_form_datepicker.value = "";
 
-      setInputTransitionName(`app_item_${timestamp}`);
-
       setState();
 
-      document.getElementById(`app_item_${timestamp}`)?.scrollIntoView({
-        behavior: "smooth",
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          document.getElementById(`app_item_${timestamp}`)?.scrollIntoView({
+            behavior: "smooth",
+          });
+        });
       });
 
       app_form_input.blur();
-    }
-
-    function setInputTransitionName(name = "none") {
-      if (name === "none") {
-        app_form.style.viewTransitionName = "none";
-      } else {
-        const elem = document.getElementById(`${name}`);
-        if (elem) elem.style.viewTransitionName = "none";
-        app_form.style.viewTransitionName = name;
-      }
     }
 
     function getState() {
@@ -188,13 +211,19 @@
         Object.keys(state.item)
       );
 
+      let count = 1;
+
       for (const timestamp of datesFromEarliestToToday) {
+        if (!state.item[timestamp]) count = 0;
         new_app_items =
           html`<div
             class="app_item${!state.item[timestamp] ? ` app_item--empty` : ``}"
             id="app_item_${timestamp}"
             style="view-transition-name: app_item_${timestamp};"
           >
+            ${state.item[timestamp]
+              ? `<div class="app_item_count">#${count}</div>`
+              : ``}
             <div
               class="app_item_date"
               onclick="handleItemDateClick(${timestamp})"
@@ -204,6 +233,8 @@
 
             <div>${state.item[timestamp]}</div>
           </div>` + new_app_items;
+
+        count++;
       }
 
       if (!document.startViewTransition) {
@@ -217,7 +248,6 @@
 
     function changeDom(newInnerHTML) {
       app_items.innerHTML = newInnerHTML;
-      setInputTransitionName(`none`);
     }
 
     function fillMissingDates(dateList) {
@@ -296,9 +326,5 @@
     app_form.addEventListener("submit", handleSubmit);
 
     getState();
-
-    if (!state.item[today]) {
-      app_form_datepicker.value = timestampToDateString(today);
-    }
   </script>
 </html>
