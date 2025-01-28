@@ -53,6 +53,14 @@
       text-wrap: pretty;
     }
 
+    .app_item--empty {
+      opacity: 0.3;
+
+      #app_item_button {
+        display: none;
+      }
+    }
+
     .app_item_date {
       display: grid;
       align-items: center;
@@ -68,7 +76,8 @@
     }
 
     #app_item_button {
-      font-size: 1rem;
+      font-size: 0.75rem;
+      padding: 1rem;
       position: absolute;
       top: 0;
       right: 0;
@@ -105,7 +114,7 @@
           <input
             type="date"
             id="app_form_datepicker"
-            onchange="handleDateChange()"
+            oninput="handleDateChange()"
           />
         </div>
         <input
@@ -181,10 +190,14 @@
     function renderState() {
       let new_app_items = "";
 
-      for (const timestamp in state.item) {
+      const datesFromEarliestToToday = fillMissingDates(
+        Object.keys(state.item)
+      );
+
+      for (const timestamp of datesFromEarliestToToday) {
         new_app_items =
           html`<div
-            class="app_item"
+            class="app_item${!state.item[timestamp] ? ` app_item--empty` : ``}"
             id="app_item_${timestamp}"
             style="view-transition-name: app_item_${timestamp};"
           >
@@ -221,6 +234,46 @@
       setInputTransitionName(`none`);
     }
 
+    function fillMissingDates(dateList) {
+      // Funktion för att formatera datum till "YYYYMMDD"
+      function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}${month}${day}`;
+      }
+
+      // Funktion för att lägga till en dag till ett datum
+      function addDay(date) {
+        date.setDate(date.getDate() + 1);
+        return date;
+      }
+
+      // Konvertera strängdatum till Date-objekt
+      const dates = dateList.map((dateStr) => {
+        const year = dateStr.slice(0, 4);
+        const month = dateStr.slice(4, 6) - 1; // Månader är 0-indexerade i JavaScript
+        const day = dateStr.slice(6, 8);
+        return new Date(year, month, day);
+      });
+
+      // Hitta det tidigaste och senaste datumet
+      const earliestDate = dates[0];
+      const latestDate = new Date(); // Dagens datum
+
+      // Skapa en ny lista för att hålla alla datum
+      const completeDateList = [];
+      let currentDate = new Date(earliestDate);
+
+      // Loopa från det tidigaste datumet till dagens datum
+      while (currentDate <= latestDate) {
+        completeDateList.push(formatDate(currentDate));
+        currentDate = addDay(new Date(currentDate)); // Lägg till en dag
+      }
+
+      return completeDateList;
+    }
+
     function setState() {
       localStorage.state = JSON.stringify(state);
       renderState();
@@ -229,7 +282,7 @@
     function handleItemDateClick(timestamp) {
       console.log("timestamp", `${timestamp}`);
       app_form_datepicker.value = timestampToDateString(`${timestamp}`);
-      app_form_input.value = state.item[timestamp];
+      app_form_input.value = state.item[timestamp] ?? "";
       app_form_input.focus();
     }
 
