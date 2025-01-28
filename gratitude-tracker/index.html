@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Complement Tracker</title>
+  </head>
+  <style>
+    @import "https://unpkg.com/open-props";
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    :root {
+      view-transition-name: none;
+    }
+    ::view-transition {
+      pointer-events: none;
+    }
+
+    input,
+    button,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    body,
+    html {
+      color: var(--gray-9);
+      background-color: white;
+      font-family: "Times New Roman", serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      padding: 1rem;
+    }
+
+    .app_item {
+      position: relative;
+      display: grid;
+      font-size: clamp(1rem, 2rem, 5vw);
+      grid-template-columns: minmax(50px, 1fr) minmax(50px, 1fr);
+      padding: 1rem;
+      gap: 1rem;
+      border-bottom: var(--border-size-1) solid var(--gray-4);
+      overflow-wrap: break-word;
+      text-wrap: pretty;
+    }
+
+    .app_item_date {
+      display: grid;
+      align-items: center;
+      justify-content: flex-end;
+
+      font-size: clamp(1rem, 2rem, 5vw);
+
+      font-family: Times, "Times New Roman", Serif;
+      font-weight: bold;
+      overflow-wrap: break-word;
+      text-wrap: pretty;
+      hyphens: auto;
+    }
+
+    #app_item_button {
+      font-size: 1rem;
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: none;
+      border: 0;
+      cursor: pointer;
+    }
+
+    #app_form {
+      padding: 0;
+    }
+
+    #app_form_datepicker {
+      text-align: right;
+      border: 0;
+    }
+
+    #app_form_input {
+      border: 0;
+    }
+
+    #app_form_button {
+      background: none;
+      border: 0;
+      cursor: pointer;
+      padding: 0 1rem;
+      color: var(--indigo-9);
+    }
+  </style>
+  <body>
+    <div class="app">
+      <form id="app_form" class="app_item">
+        <div class="app_item_date">
+          <input
+            type="date"
+            id="app_form_datepicker"
+            onchange="handleDateChange()"
+          />
+        </div>
+        <input
+          type="text"
+          id="app_form_input"
+          class="app_item"
+          autofocus
+          placeholder="Jag är tacksam för..."
+        />
+      </form>
+      <div id="app_items"></div>
+    </div>
+  </body>
+
+  <script>
+    const today = dateToTimeStamp(new Date());
+
+    const dateFriendly = new Intl.DateTimeFormat(navigator.language, {
+      month: "short",
+      day: "numeric",
+      weekday: "long",
+    });
+
+    let state = {
+      /** @type {{[key: string]: {text: string}} */
+      item: {},
+    };
+
+    function handleDateChange() {
+      app_form_input.focus();
+    }
+
+    function handleSubmit(e) {
+      e.preventDefault();
+
+      if (!app_form_input.value || !app_form_datepicker.value) return;
+
+      const date = dateStringToTimestamp(app_form_datepicker.value);
+
+      state.item[date] = app_form_input.value;
+
+      app_form_input.value = "";
+      app_form_datepicker.value = "";
+
+      setInputTransitionName(`app_item_${date}`);
+
+      setState();
+    }
+
+    function setInputTransitionName(name = "none") {
+      if (name === "none") {
+        app_form.style.viewTransitionName = "none";
+      } else {
+        const elem = document.getElementById(`${name}`);
+        if (elem) elem.style.viewTransitionName = "none";
+        app_form.style.viewTransitionName = name;
+      }
+    }
+
+    function getState() {
+      try {
+        state = JSON.parse(localStorage.state);
+      } catch (e) {
+        console.error(e);
+        state = {
+          item: {},
+        };
+      }
+
+      renderState();
+    }
+
+    function renderState() {
+      let new_app_items = "";
+
+      for (const timestamp in state.item) {
+        new_app_items =
+          html`<div
+            class="app_item"
+            id="app_item_${timestamp}"
+            style="view-transition-name: app_item_${timestamp};"
+          >
+            <div
+              class="app_item_date"
+              onclick="handleItemDateClick(${timestamp})"
+            >
+              ${dateFriendly.format(new Date(timestampToDateString(timestamp)))}
+            </div>
+            <div class="app_item_right_wrapper">
+              <div>${state.item[timestamp]}</div>
+              <button
+                id="app_item_button"
+                aria-label="Remove item"
+                onclick="handleRemoveButtonClick(${timestamp})"
+              >
+                ✖️
+              </button>
+            </div>
+          </div>` + new_app_items;
+      }
+
+      if (!document.startViewTransition) {
+        changeDom(new_app_items);
+      } else {
+        document.startViewTransition(() => {
+          changeDom(new_app_items);
+        });
+      }
+    }
+
+    function changeDom(newInnerHTML) {
+      app_items.innerHTML = newInnerHTML;
+      setInputTransitionName(`none`);
+    }
+
+    function setState() {
+      localStorage.state = JSON.stringify(state);
+      renderState();
+    }
+
+    function handleItemDateClick(timestamp) {
+      console.log("timestamp", `${timestamp}`);
+      app_form_datepicker.value = timestampToDateString(`${timestamp}`);
+      app_form_input.value = state.item[timestamp];
+      app_form_input.focus();
+    }
+
+    function handleRemoveButtonClick(date) {
+      delete state.item[date];
+      setState();
+    }
+
+    function timestampToDateString(input) {
+      return `${input.slice(0, 4)}-${input.slice(4, 6)}-${input.slice(6, 8)}`;
+    }
+
+    function dateStringToTimestamp(input) {
+      return input.replace(/-/g, "");
+    }
+
+    function dateToTimeStamp(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}${month}${day}`;
+    }
+
+    function html(strings, ...values) {
+      return strings.reduce(
+        (result, str, i) => result + str + (values[i] || ""),
+        ""
+      );
+    }
+
+    app_form.addEventListener("submit", handleSubmit);
+
+    getState();
+
+    if (!state.item[today]) {
+      app_form_datepicker.value = timestampToDateString(today);
+    }
+  </script>
+</html>
