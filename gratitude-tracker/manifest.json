@@ -13,5 +13,6 @@
       "type": "image/jpg"
     }
   ],
-  "display": "standalone"
+  "display": "standalone",
+  "background_color": "#ffffff"
 }
