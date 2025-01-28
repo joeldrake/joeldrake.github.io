@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Complement Tracker</title>
+
+    <link rel="icon" href="../img/icon.jpg" />
+    <link rel="apple-touch-icon" href="../img/icon.jpg" />
+    <link rel="manifest" href="manifest.json" />
   </head>
   <style>
     @import "https://unpkg.com/open-props";
@@ -63,7 +67,7 @@
 
     .app_item_date {
       display: grid;
-      align-items: center;
+      align-items: flex-start;
       justify-content: flex-end;
 
       font-size: clamp(1rem, 2rem, 5vw);
@@ -91,6 +95,7 @@
     }
 
     #app_form_datepicker {
+      background: transparent;
       text-align: right;
       border: 0;
     }
@@ -114,14 +119,13 @@
           <input
             type="date"
             id="app_form_datepicker"
-            oninput="handleDateChange()"
+            placeholder="yyyy-mm-dd"
           />
         </div>
         <input
           type="text"
           id="app_form_input"
           class="app_item"
-          autofocus
           placeholder="Jag är tacksam för..."
         />
       </form>
@@ -143,25 +147,28 @@
       item: {},
     };
 
-    function handleDateChange() {
-      app_form_input.focus();
-    }
-
     function handleSubmit(e) {
       e.preventDefault();
 
       if (!app_form_input.value || !app_form_datepicker.value) return;
 
-      const date = dateStringToTimestamp(app_form_datepicker.value);
+      const timestamp = dateStringToTimestamp(app_form_datepicker.value);
 
-      state.item[date] = app_form_input.value;
+      state.item[timestamp] = app_form_input.value;
 
       app_form_input.value = "";
       app_form_datepicker.value = "";
 
-      setInputTransitionName(`app_item_${date}`);
+      setInputTransitionName(`app_item_${timestamp}`);
 
       setState();
+
+      console.log(
+        "document.getElementById(`app_item_${timestamp}`)",
+        document.getElementById(`app_item_${timestamp}`)
+      );
+
+      app_form_input.blur();
     }
 
     function setInputTransitionName(name = "none") {
@@ -280,7 +287,6 @@
     }
 
     function handleItemDateClick(timestamp) {
-      console.log("timestamp", `${timestamp}`);
       app_form_datepicker.value = timestampToDateString(`${timestamp}`);
       app_form_input.value = state.item[timestamp] ?? "";
       app_form_input.focus();

@@ -1,0 +1,17 @@
+{
+  "name": "Joel Drake",
+  "short_name": "Joel Drake",
+  "icons": [
+    {
+      "src": "../img/favicon.png",
+      "sizes": "160x160",
+      "type": "image/png"
+    },
+    {
+      "src": "../img/icon.jpg",
+      "sizes": "512x512",
+      "type": "image/jpg"
+    }
+  ],
+  "display": "standalone"
+}
