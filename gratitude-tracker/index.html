@@ -84,16 +84,15 @@
       top: 0;
       left: 0;
 
-      font-size: 0.75rem;
+      font-size: 1rem;
       color: #ccc;
 
-      @media (min-width: 600px) {
-        font-size: 1rem;
-        top: 1.75rem;
-      }
+      height: 100%;
+      display: grid;
+      align-items: center;
     }
 
-    #app_form {
+    .app_form {
       padding: 0;
       border-bottom: 1px solid #eee;
 
@@ -102,30 +101,34 @@
       }
     }
 
-    #app_form_datepicker {
+    .app_form_datepicker {
       text-align: right;
       border: 0;
     }
 
-    #app_form_input {
+    .app_form_input {
+      width: 100%;
       border: 0;
       padding: 1rem 0;
-
       outline: none;
     }
   </style>
   <body>
     <div class="app">
       <div class="app_items">
-        <form id="app_form" class="app_item">
+        <form id="app_form" class="app_form app_item">
           <div class="app_item_date">
-            <input type="date" id="app_form_datepicker" />
+            <input
+              type="date"
+              id="app_form_datepicker"
+              class="app_form_datepicker"
+            />
           </div>
           <div>
             <input
               type="text"
               id="app_form_input"
-              class="app_item"
+              class="app_form_input app_item"
               placeholder="..."
             />
           </div>
@@ -146,13 +149,8 @@
     });
 
     let state = {
-      /** @type {{[key: string]: {text: string}} */
       item: {},
     };
-
-    if (!state.item[today]) {
-      app_form_datepicker.value = timestampToDateString(today);
-    }
 
     function handleSubmit(e) {
       e.preventDefault();
@@ -243,39 +241,25 @@
     }
 
     function fillMissingDates(dateList) {
-      // Funktion för att formatera datum till "YYYYMMDD"
-      function formatDate(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        return `${year}${month}${day}`;
-      }
-
-      // Funktion för att lägga till en dag till ett datum
       function addDay(date) {
         date.setDate(date.getDate() + 1);
         return date;
       }
 
-      // Konvertera strängdatum till Date-objekt
       const dates = dateList.map((dateStr) => {
         const year = dateStr.slice(0, 4);
         const month = dateStr.slice(4, 6) - 1; // Månader är 0-indexerade i JavaScript
         const day = dateStr.slice(6, 8);
         return new Date(year, month, day);
       });
-
-      // Hitta det tidigaste och senaste datumet
       const earliestDate = dates[0];
-      const latestDate = new Date(); // Dagens datum
+      const latestDate = new Date();
 
-      // Skapa en ny lista för att hålla alla datum
       const completeDateList = [];
       let currentDate = new Date(earliestDate);
 
-      // Loopa från det tidigaste datumet till dagens datum
       while (currentDate <= latestDate) {
-        completeDateList.push(formatDate(currentDate));
+        completeDateList.push(dateToTimeStamp(currentDate));
         currentDate = addDay(new Date(currentDate)); // Lägg till en dag
       }
 
@@ -315,8 +299,12 @@
       );
     }
 
-    app_form.addEventListener("submit", handleSubmit);
-
     getState();
+
+    if (!state.item[today]) {
+      app_form_datepicker.value = timestampToDateString(today);
+    }
+
+    app_form.addEventListener("submit", handleSubmit);
   </script>
 </html>
