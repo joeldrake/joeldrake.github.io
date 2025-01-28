@@ -52,17 +52,12 @@
       grid-template-columns: minmax(50px, 1fr) minmax(50px, 1fr);
       padding: 1rem;
       gap: 1rem;
-      border-bottom: var(--border-size-1) solid var(--gray-4);
       overflow-wrap: break-word;
       text-wrap: pretty;
     }
 
     .app_item--empty {
       opacity: 0.3;
-
-      #app_item_button {
-        display: none;
-      }
     }
 
     .app_item_date {
@@ -77,17 +72,6 @@
       overflow-wrap: break-word;
       text-wrap: pretty;
       hyphens: auto;
-    }
-
-    #app_item_button {
-      font-size: 0.75rem;
-      padding: 1rem;
-      position: absolute;
-      top: 0;
-      right: 0;
-      background: none;
-      border: 0;
-      cursor: pointer;
     }
 
     #app_form {
@@ -149,11 +133,15 @@
     function handleSubmit(e) {
       e.preventDefault();
 
-      if (!app_form_input.value || !app_form_datepicker.value) return;
+      if (!app_form_datepicker.value) return;
 
       const timestamp = dateStringToTimestamp(app_form_datepicker.value);
 
-      state.item[timestamp] = app_form_input.value;
+      if (app_form_input.value) {
+        state.item[timestamp] = app_form_input.value;
+      } else {
+        delete state.item[timestamp];
+      }
 
       app_form_input.value = "";
       app_form_datepicker.value = "";
@@ -162,10 +150,9 @@
 
       setState();
 
-      console.log(
-        "document.getElementById(`app_item_${timestamp}`)",
-        document.getElementById(`app_item_${timestamp}`)
-      );
+      document.getElementById(`app_item_${timestamp}`)?.scrollIntoView({
+        behavior: "smooth",
+      });
 
       app_form_input.blur();
     }
@@ -213,16 +200,8 @@
             >
               ${dateFriendly.format(new Date(timestampToDateString(timestamp)))}
             </div>
-            <div class="app_item_right_wrapper">
-              <div>${state.item[timestamp]}</div>
-              <button
-                id="app_item_button"
-                aria-label="Remove item"
-                onclick="handleRemoveButtonClick(${timestamp})"
-              >
-                ✖️
-              </button>
-            </div>
+
+            <div>${state.item[timestamp]}</div>
           </div>` + new_app_items;
       }
 
@@ -287,13 +266,8 @@
 
     function handleItemDateClick(timestamp) {
       app_form_datepicker.value = timestampToDateString(`${timestamp}`);
-      app_form_input.value = state.item[timestamp] ?? "";
+      if (state.item[timestamp]) app_form_input.value = state.item[timestamp];
       app_form_input.focus();
-    }
-
-    function handleRemoveButtonClick(date) {
-      delete state.item[date];
-      setState();
     }
 
     function timestampToDateString(input) {
