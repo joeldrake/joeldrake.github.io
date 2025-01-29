@@ -38,12 +38,25 @@
       color: #212529;
       background-color: white;
       font-family: "Times New Roman", serif;
-      line-height: 1.5;
+      line-height: 1;
       -webkit-font-smoothing: antialiased;
     }
 
     .app {
       padding: 1rem;
+    }
+
+    .app_item_headline_month {
+      font-size: clamp(1rem, 6rem, 18vw);
+      grid-column: span 2;
+      text-align: center;
+      padding: clamp(1rem, 6rem, 18vw) 0;
+      letter-spacing: -2px;
+
+      font-weight: bold;
+      overflow-wrap: break-word;
+      text-wrap: pretty;
+      hyphens: auto;
     }
 
     .app_items {
@@ -72,8 +85,11 @@
       display: grid;
       align-items: flex-start;
       justify-content: flex-end;
+      grid-template-rows: auto 1fr;
 
-      font-size: clamp(1rem, 2rem, 5vw);
+      line-height: 1;
+
+      font-size: clamp(1rem, 4rem, 10vw);
 
       font-family: Times, "Times New Roman", Serif;
       font-weight: bold;
@@ -82,9 +98,19 @@
       hyphens: auto;
     }
 
+    .app_item_text {
+      padding-top: 0.75rem;
+      display: grid;
+      align-items: center;
+    }
+
+    .app_item_date_day {
+      font-size: 1rem;
+    }
+
     .app_item_count {
       position: absolute;
-      top: 0;
+      top: 1rem;
       left: 0;
 
       font-size: 1rem;
@@ -92,7 +118,7 @@
 
       height: 100%;
       display: grid;
-      align-items: center;
+      align-items: flex-start;
     }
 
     .app_form {
@@ -101,10 +127,12 @@
 
       .app_item_date {
         align-items: center;
+        font-size: clamp(1rem, 2rem, 5vw);
       }
     }
 
     .app_form_datepicker {
+      grid-row: span 2;
       text-align: right;
       border: 0;
     }
@@ -132,6 +160,7 @@
               type="text"
               id="app_form_input"
               class="app_form_input app_item"
+              autofocus
               placeholder="..."
             />
           </div>
@@ -143,17 +172,53 @@
   </body>
 
   <script>
-    const today = dateToTimeStamp(new Date());
+    // UTILS
+    const html = (strings, ...values) =>
+      strings.reduce((result, str, i) => result + str + (values[i] || ""), "");
 
-    const dateFriendly = new Intl.DateTimeFormat(navigator.language, {
-      month: "short",
-      day: "numeric",
-      weekday: "long",
+    const timestampToDateString = (input) =>
+      `${input.slice(0, 4)}-${input.slice(4, 6)}-${input.slice(6, 8)}`;
+
+    const dateStringToTimestamp = (input) => input.replace(/-/g, "");
+
+    const dateToTimeStamp = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}${month}${day}`;
+    };
+
+    const changeDom = (newInnerHTML) => (app_items.innerHTML = newInnerHTML);
+
+    const dateDay = new Intl.DateTimeFormat(navigator.language, {
+      weekday: "short",
     });
 
+    const dateDayMonth = new Intl.DateTimeFormat(navigator.language, {
+      month: "numeric",
+      day: "numeric",
+    });
+
+    const dateMonth = new Intl.DateTimeFormat(navigator.language, {
+      month: "long",
+    });
+
+    // STATE
     let state = {
       item: {},
     };
+
+    const today = dateToTimeStamp(new Date());
+
+    // APP
+    function initApp() {
+      getState();
+      renderState();
+
+      if (!state.item[today]) {
+        app_form_datepicker.value = timestampToDateString(today);
+      }
+    }
 
     function handleSubmit(e) {
       e.preventDefault();
@@ -172,6 +237,7 @@
       app_form_datepicker.value = "";
 
       setState();
+      renderState();
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -193,21 +259,35 @@
           item: {},
         };
       }
+    }
 
-      renderState();
+    function setState() {
+      localStorage.state = JSON.stringify(state);
     }
 
     function renderState() {
       let new_app_items = "";
 
-      const datesFromEarliestToToday = fillMissingDates(
+      const datesFromEarliestToLatest = fillMissingDates(
         Object.keys(state.item)
       );
 
       let count = 1;
 
-      for (const timestamp of datesFromEarliestToToday) {
+      let monthOfPrevDate = "";
+
+      for (const timestamp of datesFromEarliestToLatest) {
         if (!state.item[timestamp]) count = 0;
+        const date = new Date(timestampToDateString(timestamp));
+        const monthOfCurrentDate = timestamp.slice(4, 6);
+
+        if (monthOfPrevDate && monthOfPrevDate != monthOfCurrentDate) {
+          new_app_items =
+            html`<div class="app_item_headline_month">
+              ${dateMonth.format(date)}
+            </div>` + new_app_items;
+        }
+
         new_app_items =
           html`<div
             class="app_item${!state.item[timestamp] ? ` app_item--empty` : ``}"
@@ -221,11 +301,14 @@
               class="app_item_date"
               onclick="handleItemDateClick(${timestamp})"
             >
-              ${dateFriendly.format(new Date(timestampToDateString(timestamp)))}
+              <div class="app_item_date_day">${dateDay.format(date)}</div>
+              ${dateDayMonth.format(date)}
             </div>
 
-            <div>${state.item[timestamp]}</div>
+            <div class="app_item_text">${state.item[timestamp]}</div>
           </div>` + new_app_items;
+
+        monthOfPrevDate = monthOfCurrentDate;
 
         count++;
       }
@@ -237,10 +320,6 @@
           changeDom(new_app_items);
         });
       }
-    }
-
-    function changeDom(newInnerHTML) {
-      app_items.innerHTML = newInnerHTML;
     }
 
     function fillMissingDates(dateList) {
@@ -255,8 +334,8 @@
         const day = dateStr.slice(6, 8);
         return new Date(year, month, day);
       });
-      const earliestDate = dates[0];
-      const latestDate = new Date();
+      const earliestDate = dates.at(0);
+      const latestDate = dates.at(-1);
 
       const completeDateList = [];
       let currentDate = new Date(earliestDate);
@@ -269,44 +348,14 @@
       return completeDateList;
     }
 
-    function setState() {
-      localStorage.state = JSON.stringify(state);
-      renderState();
-    }
-
     function handleItemDateClick(timestamp) {
       app_form_datepicker.value = timestampToDateString(`${timestamp}`);
       if (state.item[timestamp]) app_form_input.value = state.item[timestamp];
       app_form_input.focus();
+      app_form_input.select();
     }
 
-    function timestampToDateString(input) {
-      return `${input.slice(0, 4)}-${input.slice(4, 6)}-${input.slice(6, 8)}`;
-    }
-
-    function dateStringToTimestamp(input) {
-      return input.replace(/-/g, "");
-    }
-
-    function dateToTimeStamp(date) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      return `${year}${month}${day}`;
-    }
-
-    function html(strings, ...values) {
-      return strings.reduce(
-        (result, str, i) => result + str + (values[i] || ""),
-        ""
-      );
-    }
-
-    getState();
-
-    if (!state.item[today]) {
-      app_form_datepicker.value = timestampToDateString(today);
-    }
+    initApp();
 
     app_form.addEventListener("submit", handleSubmit);
   </script>
