@@ -62,6 +62,10 @@
     .app_items {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+
+      @media (max-width: 768px) {
+        grid-template-columns: minmax(0, 0.66fr) minmax(0, 1fr);
+      }
     }
 
     .app_item {
@@ -334,11 +338,13 @@
         const day = dateStr.slice(6, 8);
         return new Date(year, month, day);
       });
-      const earliestDate = dates.at(0);
-      const latestDate = dates.at(-1);
+
+      const earliestDate = dates.at(0) ?? "";
+      const latestDate =
+        dateList.at(-1) ?? "" < today ? new Date() : dates.at(-1);
 
       const completeDateList = [];
-      let currentDate = new Date(earliestDate);
+      let currentDate = earliestDate ? new Date(earliestDate) : new Date();
 
       while (currentDate <= latestDate) {
         completeDateList.push(dateToTimeStamp(currentDate));
