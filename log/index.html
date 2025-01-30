@@ -8,9 +8,13 @@
     <link rel="icon" href="../img/icon.jpg" />
     <link rel="apple-touch-icon" href="../img/icon.jpg" />
     <link rel="manifest" href="manifest.json" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="theme-color" content="#ffffff" />
+
+    <script src="https://unpkg.com/dexie"></script>
+    <script src="https://unpkg.com/rxjs@7/dist/bundles/rxjs.umd.js"></script>
+    <script src="https://unpkg.com/dexie-cloud-addon/dist/umd/dexie-cloud-addon.js"></script>
   </head>
   <style>
     *,
@@ -147,9 +151,17 @@
       padding: 1rem 0;
       outline: none;
     }
+
+    .app_user {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      color: #ccc;
+    }
   </style>
   <body>
     <div class="app">
+      <div class="app_user" id="app_user" onclick="handleUserClick()"></div>
       <div class="app_items">
         <form id="app_form" class="app_form app_item">
           <div class="app_item_date">
@@ -176,6 +188,45 @@
   </body>
 
   <script>
+    // STATE
+    let state = {
+      item: {},
+    };
+
+    const db = new Dexie("Log", { addons: [DexieCloud.dexieCloud] });
+
+    db.cloud.configure({
+      databaseUrl: "https://z5sn3mfy1.dexie.cloud",
+    });
+
+    db.version(1).stores({
+      items: "id, text",
+    });
+
+    db.cloud.login().then(() => {
+      app_user.innerHTML = db.cloud.currentUserId;
+    });
+
+    const itemsObservable = Dexie.liveQuery(() => db.items.toArray());
+    const subscription = itemsObservable.subscribe({
+      next: (items) => {
+        console.log("items", items);
+        const newItem = {};
+        for (const item of items) {
+          newItem[item.id] = item.text;
+        }
+
+        if (!Object.keys(state.item).length && !newItem[today]) {
+          app_form_datepicker.value = timestampToDateString(today);
+        }
+
+        state.item = newItem;
+
+        renderState();
+      },
+      error: (error) => console.error(error),
+    });
+
     // UTILS
     const html = (strings, ...values) =>
       strings.reduce((result, str, i) => result + str + (values[i] || ""), "");
@@ -207,22 +258,7 @@
       month: "long",
     });
 
-    // STATE
-    let state = {
-      item: {},
-    };
-
     const today = dateToTimeStamp(new Date());
-
-    // APP
-    function initApp() {
-      getState();
-      renderState();
-
-      if (!state.item[today]) {
-        app_form_datepicker.value = timestampToDateString(today);
-      }
-    }
 
     function handleSubmit(e) {
       e.preventDefault();
@@ -233,15 +269,14 @@
 
       if (app_form_input.value) {
         state.item[timestamp] = app_form_input.value;
+        db.items.put({ id: timestamp, text: app_form_input.value });
       } else {
         delete state.item[timestamp];
+        db.items.delete(timestamp);
       }
 
       app_form_input.value = "";
       app_form_datepicker.value = "";
-
-      setState();
-      renderState();
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -254,22 +289,7 @@
       app_form_input.blur();
     }
 
-    function getState() {
-      try {
-        state = JSON.parse(localStorage.state);
-      } catch (e) {
-        console.error(e);
-        state = {
-          item: {},
-        };
-      }
-    }
-
-    function setState() {
-      localStorage.state = JSON.stringify(state);
-    }
-
-    function renderState() {
+    async function renderState() {
       let new_app_items = "";
 
       const datesFromEarliestToLatest = fillMissingDates(
@@ -366,7 +386,14 @@
       app_form_input.select();
     }
 
-    initApp();
+    function handleUserClick() {
+      const confirmed = confirm("Logout?");
+      if (confirmed) {
+        db.cloud.logout().then(() => {
+          app_user.innerHTML = "";
+        });
+      }
+    }
 
     app_form.addEventListener("submit", handleSubmit);
   </script>
