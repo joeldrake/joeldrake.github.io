@@ -120,9 +120,9 @@
       font-size: 1rem;
       color: #ccc;
 
-      height: 100%;
+      height: calc(100% - 2rem);
       display: grid;
-      align-items: flex-start;
+      align-items: center;
     }
 
     .app_form {
@@ -339,9 +339,14 @@
         return new Date(year, month, day);
       });
 
-      const earliestDate = dates.at(0) ?? "";
+      const earliestDate =
+        (dateList.at(0) ?? "\ufffd") < today ? dates.at(0) : new Date();
+
       const latestDate =
-        dateList.at(-1) ?? "" < today ? new Date() : dates.at(-1);
+        (dateList.at(-1) ?? "") > today ? dates.at(-1) : new Date();
+
+      earliestDate?.setHours(0, 0, 0, 0);
+      latestDate?.setHours(0, 0, 0, 0);
 
       const completeDateList = [];
       let currentDate = earliestDate ? new Date(earliestDate) : new Date();
