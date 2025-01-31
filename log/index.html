@@ -126,7 +126,8 @@
 
       height: calc(100% - 2rem);
       display: grid;
-      align-items: center;
+      align-items: flex-start;
+      padding-top: 1.5rem;
     }
 
     .app_form {
@@ -157,11 +158,43 @@
       top: 0.5rem;
       right: 0.5rem;
       color: #ccc;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+    }
+
+    .dxc-login-dlg {
+      input {
+        margin-bottom: 1rem;
+        border: 0;
+        padding: 0 !important;
+      }
+      button {
+        padding: 0.5rem 1rem;
+        border-radius: 1rem;
+        border: 0;
+        margin-right: 0.5rem;
+        float: right;
+      }
+
+      div:has(form) {
+        border: 0 !important;
+        border-radius: 1rem !important;
+        padding-bottom: 1.5rem;
+
+        h3 {
+          margin-top: 0;
+        }
+
+        button[type="submit"] {
+          background-color: #1864ab;
+          color: white;
+        }
+      }
     }
   </style>
   <body>
     <div class="app">
-      <div class="app_user" id="app_user" onclick="handleUserClick()"></div>
       <div class="app_items">
         <form id="app_form" class="app_form app_item">
           <div class="app_item_date">
@@ -184,6 +217,9 @@
       </div>
 
       <div id="app_items" class="app_items"></div>
+      <button class="app_user" id="app_user" onclick="handleUserClick()">
+        login
+      </button>
     </div>
   </body>
 
@@ -203,8 +239,10 @@
       items: "id, text",
     });
 
-    db.cloud.login().then(() => {
-      app_user.innerHTML = db.cloud.currentUserId;
+    db.open().then(() => {
+      if (db.cloud.currentUser.value.userId != "unauthorized") {
+        app_user.innerHTML = db.cloud.currentUserId;
+      }
     });
 
     const itemsObservable = Dexie.liveQuery(() => db.items.toArray());
@@ -387,11 +425,17 @@
     }
 
     function handleUserClick() {
-      const confirmed = confirm("Logout?");
-      if (confirmed) {
-        db.cloud.logout().then(() => {
-          app_user.innerHTML = "";
+      if (db.cloud.currentUser.value.userId === "unauthorized") {
+        db.cloud.login().then(() => {
+          app_user.innerHTML = db.cloud.currentUserId;
         });
+      } else {
+        const confirmed = confirm("Logout?");
+        if (confirmed) {
+          db.cloud.logout().then(() => {
+            app_user.innerHTML = "login";
+          });
+        }
       }
     }
 
