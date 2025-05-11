@@ -215,9 +215,18 @@
                 const horizontalFOV = 60;
                 const verticalFOV = (horizontalFOV * canvas.height) / canvas.width;
                 
+                // Apply device tilt to alter the y-coordinate too
+                // Use beta (front/back tilt) to adjust the y-position
+                let verticalTilt = 0;
+                if (deviceOrientation.beta !== null) {
+                    // Convert beta from range -180 to 180 to a normalized position shift
+                    verticalTilt = (deviceOrientation.beta) / 90; // Normalize to roughly -1 to 1
+                }
+                
                 // Standard projection for device orientation mode
                 const x = centerX + (adjustedAz - 180) * (canvas.width / horizontalFOV);
-                const y = centerY - altitude * (canvas.height / verticalFOV);
+                // Add vertical tilt influence to the y-coordinate
+                const y = centerY - altitude * (canvas.height / verticalFOV) - (verticalTilt * canvas.height / 4);
                 
                 return { x, y, isVisible: altitude > 0 };
             } else {
@@ -283,6 +292,9 @@
             const rotationOffset = !useDeviceOrientation ? 
                 ((now.getHours() + now.getMinutes()/60) * 15) : 0;
             
+            // Store star positions for constellation lines
+            const starPositions = {};
+            
             // Draw each star
             for (let star of stars) {
                 const ra = star[0];
@@ -301,6 +313,11 @@
                 
                 // Skip if star is not visible
                 if (!screenPos.isVisible && useDeviceOrientation) continue;
+                
+                // Store position for constellation lines (if named)
+                if (name) {
+                    starPositions[name] = { x: screenPos.x, y: screenPos.y };
+                }
                 
                 // Adjust star size based on magnitude (brightness)
                 // Magnitude scale is reverse: lower numbers are brighter
@@ -331,6 +348,92 @@
                     ctx.fillStyle = 'rgba(200, 200, 255, 0.7)';
                     ctx.font = '12px Arial';
                     ctx.fillText(name, screenPos.x + 8, screenPos.y);
+                }
+            }
+            
+            // Draw Ursa Major (Big Dipper) constellation lines
+            if (starPositions["Dubhe"] && starPositions["Merak"] && 
+                starPositions["Phecda"] && starPositions["Megrez"] && 
+                starPositions["Alioth"] && starPositions["Mizar"] && 
+                starPositions["Alkaid"]) {
+                
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(100, 180, 255, 0.6)';
+                ctx.lineWidth = 2;
+                
+                // Draw the Big Dipper bowl
+                ctx.moveTo(starPositions["Dubhe"].x, starPositions["Dubhe"].y);
+                ctx.lineTo(starPositions["Merak"].x, starPositions["Merak"].y);
+                ctx.lineTo(starPositions["Phecda"].x, starPositions["Phecda"].y);
+                ctx.lineTo(starPositions["Megrez"].x, starPositions["Megrez"].y);
+                ctx.lineTo(starPositions["Alioth"].x, starPositions["Alioth"].y);
+                ctx.lineTo(starPositions["Mizar"].x, starPositions["Mizar"].y);
+                ctx.lineTo(starPositions["Alkaid"].x, starPositions["Alkaid"].y);
+                
+                ctx.stroke();
+                
+                // Add Ursa Major label
+                const avgX = (starPositions["Dubhe"].x + starPositions["Merak"].x + 
+                              starPositions["Phecda"].x + starPositions["Megrez"].x + 
+                              starPositions["Alioth"].x + starPositions["Mizar"].x + 
+                              starPositions["Alkaid"].x) / 7;
+                              
+                const avgY = (starPositions["Dubhe"].y + starPositions["Merak"].y + 
+                              starPositions["Phecda"].y + starPositions["Megrez"].y + 
+                              starPositions["Alioth"].y + starPositions["Mizar"].y + 
+                              starPositions["Alkaid"].y) / 7;
+                
+                ctx.fillStyle = 'rgba(100, 180, 255, 0.8)';
+                ctx.font = 'bold 14px Arial';
+                ctx.fillText('Stora Björnen', avgX, avgY + 20);
+            }
+            
+            // Draw Ursa Minor (Little Dipper) constellation lines
+            if (starPositions["Polaris"] && starPositions["Kochab"]) {
+                
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(255, 180, 100, 0.6)';
+                ctx.lineWidth = 2;
+                
+                // Connect stars from Kochab to Polaris
+                // Find the unmarked stars by index
+                let ursaMinorPositions = [];
+                for (let i = 2; i < 5; i++) {
+                    const star = stars[i];
+                    const ra = star[0];
+                    const dec = star[1];
+                    const horizontal = equatorialToHorizontal(ra, dec, lat, long, now);
+                    const rotatedAzimuth = (horizontal.azimuth + rotationOffset) % 360;
+                    const screenPos = horizontalToScreen(rotatedAzimuth, horizontal.altitude, orientationAdjustment);
+                    if (screenPos.isVisible || !useDeviceOrientation) {
+                        ursaMinorPositions.push(screenPos);
+                    }
+                }
+                
+                // Draw the Little Dipper if we have enough stars visible
+                if (ursaMinorPositions.length >= 2) {
+                    ctx.moveTo(starPositions["Polaris"].x, starPositions["Polaris"].y);
+                    
+                    // Connect stars in sequence
+                    for (let pos of ursaMinorPositions) {
+                        ctx.lineTo(pos.x, pos.y);
+                    }
+                    
+                    ctx.lineTo(starPositions["Kochab"].x, starPositions["Kochab"].y);
+                    ctx.stroke();
+                    
+                    // Add Ursa Minor label
+                    const avgX = (starPositions["Polaris"].x + starPositions["Kochab"].x + 
+                                ursaMinorPositions.reduce((sum, pos) => sum + pos.x, 0)) / 
+                                (2 + ursaMinorPositions.length);
+                                
+                    const avgY = (starPositions["Polaris"].y + starPositions["Kochab"].y + 
+                                ursaMinorPositions.reduce((sum, pos) => sum + pos.y, 0)) / 
+                                (2 + ursaMinorPositions.length);
+                    
+                    ctx.fillStyle = 'rgba(255, 180, 100, 0.8)';
+                    ctx.font = 'bold 14px Arial';
+                    ctx.fillText('Lilla Björnen', avgX, avgY - 15);
                 }
             }
             
@@ -420,7 +523,7 @@
                 
                 useDeviceOrientation = true;
                 drawStars();
-            });
+            }, { frequency: 100 }); // Add a modest update frequency to not overwhelm the device
         }
         
         // Setup button event to initialize app
