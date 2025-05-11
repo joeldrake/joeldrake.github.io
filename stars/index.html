@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Starry Sky Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background-color: #001833; /* Very dark blue */
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-family: Arial, sans-serif;
+            z-index: 10;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            pointer-events: none;
+        }
+        
+        .permission-request {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 10, 30, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            max-width: 300px;
+            z-index: 100;
+        }
+        
+        .permission-request button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="skyCanvas"></canvas>
+    <div class="overlay" id="info"></div>
+    <div class="permission-request" id="permissionRequest">
+        <h3>Starry Sky Viewer</h3>
+        <p>This app shows you a realistic view of the night sky. For the best experience, please allow access to your location and device orientation.</p>
+        <button id="allowPermission">Enable Star Tracking</button>
+    </div>
+    
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('skyCanvas');
+        const ctx = canvas.getContext('2d');
+        const infoDiv = document.getElementById('info');
+        const permissionDiv = document.getElementById('permissionRequest');
+        const allowButton = document.getElementById('allowPermission');
+        
+        // Set canvas to full window size
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            drawStars(); // Redraw on resize
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        // Star data (simplified for demonstration)
+        // Format: [RA (hours), Dec (degrees), magnitude, name (if notable)]
+        const stars = [
+            // Polaris (North Star)
+            [2.530, 89.264, 1.97, "Polaris"],
+            // Other bright stars in Ursa Minor
+            [15.734, 77.794, 2.08, "Kochab"],
+            [15.346, 71.834, 3.05],
+            [16.766, 82.037, 3.07],
+            [15.843, 77.549, 3.21],
+            // Some stars from Ursa Major
+            [11.062, 61.751, 1.79, "Dubhe"],
+            [11.897, 53.695, 2.37, "Merak"],
+            [12.900, 55.960, 2.44, "Phecda"],
+            [12.257, 57.033, 2.27, "Megrez"],
+            [13.792, 49.313, 1.77, "Alioth"],
+            [14.535, 49.329, 1.85, "Mizar"],
+            [14.845, 74.156, 2.08, "Alkaid"],
+            // Some stars from Cassiopeia
+            [0.675, 56.537, 2.47, "Schedar"],
+            [0.945, 60.235, 2.68, "Caph"],
+            [1.430, 60.232, 2.27, "Gamma Cas"],
+            [1.906, 63.670, 2.10, "Ruchbah"],
+            [2.294, 67.401, 3.38],
+            // Other bright stars
+            [6.752, -16.713, 0.50, "Sirius"],
+            [6.399, -52.696, 0.40, "Canopus"],
+            [14.661, -60.835, 0.01, "Alpha Centauri"],
+            [5.242, 45.998, 0.08, "Capella"],
+            [5.920, 7.407, 0.12, "Rigel"],
+            [4.599, 16.509, 0.85, "Aldebaran"],
+            [7.655, 5.225, 0.38, "Procyon"],
+            [5.278, -8.202, 0.18, "Betelgeuse"],
+            [19.846, 8.868, 0.76, "Altair"],
+            [18.616, 38.783, 0.03, "Vega"],
+            [22.097, -0.299, 1.16, "Fomalhaut"],
+            [20.626, 45.280, 0.03, "Deneb"]
+        ];
+        
+        // User position and orientation
+        let userLocation = { latitude: 0, longitude: 0 };
+        let deviceOrientation = { alpha: 0, beta: 0, gamma: 0 };
+        let usingDeviceOrientation = false;
+        let usingGPS = false;
+        
+        // Convert equatorial coordinates (RA, Dec) to horizontal (Alt, Az)
+        function equatorialToHorizontal(ra, dec, latitude, longitude, date) {
+            // Convert RA to degrees
+            const raDegrees = ra * 15;
+            
+            // Get local sidereal time (simplified calculation)
+            const now = date || new Date();
+            const utcHours = now.getUTCHours() + now.getUTCMinutes()/60 + now.getUTCSeconds()/3600;
+            const dayOfYear = Math.floor((now - new Date(now.getUTCFullYear(), 0, 0)) / 86400000);
+            const lst = (100.46 + 0.985647 * dayOfYear + longitude + 15 * utcHours) % 360;
+            
+            // Calculate hour angle
+            const ha = (lst - raDegrees + 360) % 360;
+            
+            // Convert to radians
+            const haRad = ha * Math.PI / 180;
+            const decRad = dec * Math.PI / 180;
+            const latRad = latitude * Math.PI / 180;
+            
+            // Calculate altitude
+            const sinAlt = Math.sin(decRad) * Math.sin(latRad) + Math.cos(decRad) * Math.cos(latRad) * Math.cos(haRad);
+            const alt = Math.asin(sinAlt) * 180 / Math.PI;
+            
+            // Calculate azimuth
+            const cosAz = (Math.sin(decRad) - Math.sin(latRad) * sinAlt) / (Math.cos(latRad) * Math.cos(Math.asin(sinAlt)));
+            let az = Math.acos(Math.max(-1, Math.min(1, cosAz))) * 180 / Math.PI;
+            
+            // Adjust azimuth based on hour angle
+            if (Math.sin(haRad) > 0) {
+                az = 360 - az;
+            }
+            
+            return { azimuth: az, altitude: alt };
+        }
+        
+        // Convert horizontal coordinates to screen coordinates
+        function horizontalToScreen(azimuth, altitude, orientationAdjustment) {
+            // Adjust azimuth based on device orientation
+            let adjustedAz = azimuth - orientationAdjustment;
+            // Normalize to 0-360
+            adjustedAz = (adjustedAz + 360) % 360;
+            
+            // Convert to screen coordinates
+            // Azimuth: 0=North, 90=East, 180=South, 270=West
+            // Map this to screen where center of screen is where device points
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            // Field of view in degrees (adjust as needed)
+            const horizontalFOV = 60;
+            const verticalFOV = (horizontalFOV * canvas.height) / canvas.width;
+            
+            // Calculate position on screen
+            // To add: complex projection calculation for more accuracy
+            // This is a simple approximation
+            const x = centerX + (adjustedAz - 180) * (canvas.width / horizontalFOV);
+            const y = centerY - altitude * (canvas.height / verticalFOV);
+            
+            return { x, y, isVisible: altitude > 0 }; // Only visible if above horizon
+        }
+        
+        // Draw the stars on the canvas
+        function drawStars() {
+            // Clear canvas
+            ctx.fillStyle = '#001833'; // Very dark blue
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Current date for star position calculations
+            const now = new Date();
+            
+            // Orientation adjustment (heading)
+            let orientationAdjustment = 0;
+            if (usingDeviceOrientation) {
+                // Alpha is the compass direction (0 = North, 90 = East, etc.)
+                orientationAdjustment = deviceOrientation.alpha || 0;
+            }
+            
+            // Draw a simple horizon line if we have location
+            if (usingGPS) {
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(100, 100, 120, 0.5)';
+                ctx.moveTo(0, canvas.height/2);
+                ctx.lineTo(canvas.width, canvas.height/2);
+                ctx.stroke();
+            }
+            
+            // Draw stars
+            for (let star of stars) {
+                const ra = star[0];
+                const dec = star[1];
+                const magnitude = star[2];
+                const name = star[3];
+                
+                let screenPos;
+                
+                if (usingGPS) {
+                    // Calculate horizontal coordinates based on user's location
+                    const horizontal = equatorialToHorizontal(ra, dec, userLocation.latitude, userLocation.longitude, now);
+                    
+                    // Convert to screen coordinates
+                    screenPos = horizontalToScreen(horizontal.azimuth, horizontal.altitude, orientationAdjustment);
+                    
+                    // Skip if not visible
+                    if (!screenPos.isVisible) continue;
+                } else {
+                    // Simplified placement for demonstration when no GPS
+                    // Just distribute stars across the sky
+                    const x = (ra / 24) * canvas.width;
+                    const y = ((90 - dec) / 180) * canvas.height;
+                    screenPos = { x, y, isVisible: true };
+                }
+                
+                // Adjust star size based on magnitude (brightness)
+                // Magnitude scale is reverse: lower numbers are brighter
+                const size = Math.max(1, 5 - magnitude);
+                
+                // Draw the star
+                ctx.beginPath();
+                ctx.fillStyle = 'white';
+                ctx.arc(screenPos.x, screenPos.y, size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Mark Polaris with special styling
+                if (name === "Polaris") {
+                    // Draw a circle around Polaris
+                    ctx.beginPath();
+                    ctx.strokeStyle = 'rgba(255, 255, 150, 0.7)';
+                    ctx.arc(screenPos.x, screenPos.y, size + 5, 0, Math.PI * 2);
+                    ctx.stroke();
+                    
+                    // Add text label
+                    ctx.fillStyle = 'rgba(255, 255, 150, 0.9)';
+                    ctx.font = '14px Arial';
+                    ctx.fillText('Polaris', screenPos.x + 10, screenPos.y);
+                }
+                
+                // Label other major stars
+                if (name && name !== "Polaris") {
+                    ctx.fillStyle = 'rgba(200, 200, 255, 0.7)';
+                    ctx.font = '12px Arial';
+                    ctx.fillText(name, screenPos.x + 8, screenPos.y);
+                }
+            }
+            
+            // Update info overlay
+            updateInfoOverlay();
+        }
+        
+        // Update the information overlay
+        function updateInfoOverlay() {
+            let info = '';
+            
+            if (usingGPS) {
+                info += `Location: ${userLocation.latitude.toFixed(4)}°, ${userLocation.longitude.toFixed(4)}°<br>`;
+            } else {
+                info += 'Location: Not available<br>';
+            }
+            
+            if (usingDeviceOrientation) {
+                info += `Heading: ${Math.round(deviceOrientation.alpha || 0)}°<br>`;
+                info += `Tilt: ${Math.round(deviceOrientation.beta || 0)}°<br>`;
+            } else {
+                info += 'Device orientation: Not available<br>';
+            }
+            
+            infoDiv.innerHTML = info;
+        }
+        
+        // Function to request permissions and initialize sensors
+        function initializeApp() {
+            // Hide the permission request UI
+            permissionDiv.style.display = 'none';
+            
+            // Request location access
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        userLocation.latitude = position.coords.latitude;
+                        userLocation.longitude = position.coords.longitude;
+                        usingGPS = true;
+                        drawStars();
+                        
+                        // Watch for position updates
+                        navigator.geolocation.watchPosition(
+                            (pos) => {
+                                userLocation.latitude = pos.coords.latitude;
+                                userLocation.longitude = pos.coords.longitude;
+                                drawStars();
+                            },
+                            (err) => {
+                                console.warn('Location error:', err);
+                            },
+                            { enableHighAccuracy: true }
+                        );
+                    },
+                    (error) => {
+                        console.warn('Geolocation error:', error);
+                    }
+                );
+            }
+            
+            // Request and setup device orientation
+            if ('DeviceOrientationEvent' in window) {
+                // For iOS 13+ which requires permission
+                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    DeviceOrientationEvent.requestPermission()
+                        .then(permissionState => {
+                            if (permissionState === 'granted') {
+                                setupOrientationListener();
+                            }
+                        })
+                        .catch(console.error);
+                } else {
+                    // For other browsers that don't require permission
+                    setupOrientationListener();
+                }
+            }
+        }
+        
+        // Set up the orientation event listener
+        function setupOrientationListener() {
+            window.addEventListener('deviceorientation', (event) => {
+                deviceOrientation.alpha = event.alpha; // compass direction
+                deviceOrientation.beta = event.beta;   // front/back tilt
+                deviceOrientation.gamma = event.gamma; // left/right tilt
+                
+                usingDeviceOrientation = true;
+                drawStars();
+            });
+        }
+        
+        // Setup button event to initialize app
+        allowButton.addEventListener('click', initializeApp);
+        
+        // Initial drawing of stars
+        drawStars();
+        
+        // Animation loop for smooth updates
+        function animate() {
+            if (usingDeviceOrientation || usingGPS) {
+                drawStars();
+            }
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+    </script>
+</body>
+</html>
