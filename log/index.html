@@ -1,455 +1,434 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Log</title>
-
-    <link rel="icon" href="../img/icon.jpg" />
-    <link rel="apple-touch-icon" href="../img/icon.jpg" />
-    <link rel="manifest" href="manifest.json" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="theme-color" content="#ffffff" />
-
-    <script src="/js/dexie.js"></script>
-    <script src="/js/rxjs.umd.js"></script>
-    <script src="/js/dexie-cloud-addon.js"></script>
-  </head>
-  <style>
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
-
-    :root {
-      view-transition-name: none;
-    }
-    ::view-transition {
-      pointer-events: none;
-    }
-
-    input,
-    button,
-    textarea,
-    select {
-      font: inherit;
-    }
-
-    body,
-    html {
-      color: #212529;
-      background-color: white;
-      font-family: "Times New Roman", serif;
-      line-height: 1;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    .app {
-      padding: 1rem;
-    }
-
-    .app_item_headline_month {
-      font-size: clamp(1rem, 6rem, 18vw);
-      grid-column: span 2;
-      text-align: center;
-      padding: clamp(1rem, 6rem, 18vw) 0;
-      letter-spacing: -2px;
-
-      font-weight: bold;
-      overflow-wrap: break-word;
-      text-wrap: pretty;
-      hyphens: auto;
-    }
-
-    .app_items {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-
-      @media (max-width: 768px) {
-        grid-template-columns: minmax(0, 0.66fr) minmax(0, 1fr);
-      }
-    }
-
-    .app_item {
-      position: relative;
-      display: grid;
-      grid-template-columns: subgrid;
-      grid-column: span 2;
-      font-size: clamp(1rem, 2rem, 5vw);
-
-      padding: 1rem;
-      gap: 1rem;
-      overflow-wrap: break-word;
-      text-wrap: pretty;
-    }
-
-    .app_item--empty {
-      color: #ccc;
-    }
-
-    .app_item_date {
-      display: grid;
-      align-items: flex-start;
-      justify-content: flex-end;
-      grid-template-rows: auto 1fr;
-
-      line-height: 1;
-
-      font-size: clamp(1rem, 4rem, 10vw);
-
-      font-family: Times, "Times New Roman", Serif;
-      font-weight: bold;
-      overflow-wrap: break-word;
-      text-wrap: pretty;
-      hyphens: auto;
-    }
-
-    .app_item_text {
-      padding-top: 0.75rem;
-      display: grid;
-      align-items: center;
-    }
-
-    .app_item_date_day {
-      font-size: 1rem;
-    }
-
-    .app_item_count {
-      position: absolute;
-      top: 1rem;
-      left: 0;
-
-      font-size: 1rem;
-      color: #ccc;
-
-      height: calc(100% - 2rem);
-      display: grid;
-      align-items: flex-start;
-      padding-top: 1.5rem;
-    }
-
-    .app_form {
-      padding: 0;
-      border-bottom: 1px solid #eee;
-
-      .app_item_date {
-        align-items: center;
-        font-size: clamp(1rem, 2rem, 5vw);
-      }
-    }
-
-    .app_form_datepicker {
-      grid-row: span 2;
-      text-align: right;
-      border: 0;
-    }
-
-    .app_form_input {
-      width: 100%;
-      border: 0;
-      padding: 1rem 0;
-      outline: none;
-    }
-
-    .app_user {
-      position: absolute;
-      top: 0.5rem;
-      right: 0.5rem;
-      color: #ccc;
-      cursor: pointer;
-      border: none;
-      background: transparent;
-    }
-
-    .dxc-login-dlg {
-      input {
-        margin-bottom: 1rem;
-        border: 0;
-        padding: 0 !important;
-      }
-      button {
-        padding: 0.5rem 1rem;
-        border-radius: 1rem;
-        border: 0;
-        margin-right: 0.5rem;
-        float: right;
-      }
-
-      div:has(form) {
-        border: 0 !important;
-        border-radius: 1rem !important;
-        padding-bottom: 1.5rem;
-
-        h3 {
-          margin-top: 0;
-        }
-
-        button[type="submit"] {
-          background-color: #1864ab;
-          color: white;
-        }
-      }
-    }
-  </style>
-  <body>
-    <div class="app">
-      <div class="app_items">
-        <form id="app_form" class="app_form app_item">
-          <div class="app_item_date">
-            <input
-              type="date"
-              id="app_form_datepicker"
-              class="app_form_datepicker"
-            />
-          </div>
-          <div>
-            <input
-              type="text"
-              id="app_form_input"
-              class="app_form_input app_item"
-              autofocus
-              placeholder="..."
-            />
-          </div>
-        </form>
-      </div>
-
-      <div id="app_items" class="app_items"></div>
-      <button class="app_user" id="app_user" onclick="handleUserClick()">
-        login
-      </button>
-    </div>
-  </body>
-
-  <script>
-    // STATE
-    let state = {
-      item: {},
-    };
-
-    const db = new Dexie("Log", { addons: [DexieCloud.dexieCloud] });
-
-    db.cloud.configure({
-      databaseUrl: "https://z5sn3mfy1.dexie.cloud",
-    });
-
-    db.version(1).stores({
-      items: "id, text",
-    });
-
-    db.open().then(() => {
-      if (db.cloud.currentUser.value.userId != "unauthorized") {
-        app_user.innerHTML = db.cloud.currentUserId;
-      }
-    });
-
-    const itemsObservable = Dexie.liveQuery(() => db.items.toArray());
-    const subscription = itemsObservable.subscribe({
-      next: (items) => {
-        console.log("items", items);
-        const newItem = {};
-        for (const item of items) {
-          newItem[item.id] = item.text;
-        }
-
-        if (!Object.keys(state.item).length && !newItem[today]) {
-          app_form_datepicker.value = timestampToDateString(today);
-        }
-
-        state.item = newItem;
-
-        renderState();
-      },
-      error: (error) => console.error(error),
-    });
-
-    // UTILS
-    const html = (strings, ...values) =>
-      strings.reduce((result, str, i) => result + str + (values[i] || ""), "");
-
-    const timestampToDateString = (input) =>
-      `${input.slice(0, 4)}-${input.slice(4, 6)}-${input.slice(6, 8)}`;
-
-    const dateStringToTimestamp = (input) => input.replace(/-/g, "");
-
-    const dateToTimeStamp = (date) => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      return `${year}${month}${day}`;
-    };
-
-    const changeDom = (newInnerHTML) => (app_items.innerHTML = newInnerHTML);
-
-    const dateDay = new Intl.DateTimeFormat(navigator.language, {
-      weekday: "short",
-    });
-
-    const dateDayMonth = new Intl.DateTimeFormat(navigator.language, {
-      month: "numeric",
-      day: "numeric",
-    });
-
-    const dateMonth = new Intl.DateTimeFormat(navigator.language, {
-      month: "long",
-    });
-
-    const today = dateToTimeStamp(new Date());
-
-    function handleSubmit(e) {
-      e.preventDefault();
-
-      if (!app_form_datepicker.value) return;
-
-      const timestamp = dateStringToTimestamp(app_form_datepicker.value);
-
-      if (app_form_input.value) {
-        state.item[timestamp] = app_form_input.value;
-        db.items.put({ id: timestamp, text: app_form_input.value });
-      } else {
-        delete state.item[timestamp];
-        db.items.delete(timestamp);
-      }
-
-      app_form_input.value = "";
-      app_form_datepicker.value = "";
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          document.getElementById(`app_item_${timestamp}`)?.scrollIntoView({
-            behavior: "smooth",
-          });
-        });
-      });
-
-      app_form_input.blur();
-    }
-
-    async function renderState() {
-      let new_app_items = "";
-
-      const datesFromEarliestToLatest = fillMissingDates(
-        Object.keys(state.item)
-      );
-
-      let count = 1;
-
-      let monthOfPrevDate = "";
-
-      for (const timestamp of datesFromEarliestToLatest) {
-        if (!state.item[timestamp]) count = 0;
-        const date = new Date(timestampToDateString(timestamp));
-        const monthOfCurrentDate = timestamp.slice(4, 6);
-
-        if (monthOfPrevDate && monthOfPrevDate != monthOfCurrentDate) {
-          new_app_items =
-            html`<div class="app_item_headline_month">
-              ${dateMonth.format(date)}
-            </div>` + new_app_items;
-        }
-
-        new_app_items =
-          html`<div
-            class="app_item${!state.item[timestamp] ? ` app_item--empty` : ``}"
-            id="app_item_${timestamp}"
-            style="view-transition-name: app_item_${timestamp};"
-          >
-            ${state.item[timestamp]
-              ? `<div class="app_item_count">#${count}</div>`
-              : ``}
-            <div
-              class="app_item_date"
-              onclick="handleItemDateClick(${timestamp})"
-            >
-              <div class="app_item_date_day">${dateDay.format(date)}</div>
-              ${dateDayMonth.format(date)}
-            </div>
-
-            <div class="app_item_text">${state.item[timestamp]}</div>
-          </div>` + new_app_items;
-
-        monthOfPrevDate = monthOfCurrentDate;
-
-        count++;
-      }
-
-      if (!document.startViewTransition) {
-        changeDom(new_app_items);
-      } else {
-        document.startViewTransition(() => {
-          changeDom(new_app_items);
-        });
-      }
-    }
-
-    function fillMissingDates(dateList) {
-      function addDay(date) {
-        date.setDate(date.getDate() + 1);
-        return date;
-      }
-
-      const dates = dateList.map((dateStr) => {
-        const year = dateStr.slice(0, 4);
-        const month = dateStr.slice(4, 6) - 1; // Månader är 0-indexerade i JavaScript
-        const day = dateStr.slice(6, 8);
-        return new Date(year, month, day);
-      });
-
-      const earliestDate =
-        (dateList.at(0) ?? "\ufffd") < today ? dates.at(0) : new Date();
-
-      const latestDate =
-        (dateList.at(-1) ?? "") > today ? dates.at(-1) : new Date();
-
-      earliestDate?.setHours(0, 0, 0, 0);
-      latestDate?.setHours(0, 0, 0, 0);
-
-      const completeDateList = [];
-      let currentDate = earliestDate ? new Date(earliestDate) : new Date();
-
-      while (currentDate <= latestDate) {
-        completeDateList.push(dateToTimeStamp(currentDate));
-        currentDate = addDay(new Date(currentDate)); // Lägg till en dag
-      }
-
-      return completeDateList;
-    }
-
-    function handleItemDateClick(timestamp) {
-      app_form_datepicker.value = timestampToDateString(`${timestamp}`);
-      if (state.item[timestamp]) app_form_input.value = state.item[timestamp];
-      app_form_input.focus();
-      app_form_input.select();
-    }
-
-    function handleUserClick() {
-      if (db.cloud.currentUser.value.userId === "unauthorized") {
-        db.cloud.login().then(() => {
-          app_user.innerHTML = db.cloud.currentUserId;
-        });
-      } else {
-        const confirmed = confirm("Logout?");
-        if (confirmed) {
-          db.cloud.logout().then(() => {
-            app_user.innerHTML = "login";
-          });
-        }
-      }
-    }
-
-    app_form.addEventListener("submit", handleSubmit);
-
-    if (
-      "serviceWorker" in navigator &&
-      window.location.hostname !== "localhost"
-    ) {
-      navigator.serviceWorker
-        .register("/serviceWorker.js")
-        .catch((err) =>
-          console.error("Service worker registration failed", err)
-        );
-    }
-  </script>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Log</title>
+
+		<link rel="icon" href="../img/icon.jpg" />
+		<link rel="apple-touch-icon" href="../img/icon.jpg" />
+		<link rel="manifest" href="manifest.json" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+		<meta name="theme-color" content="#ffffff" />
+
+		<script src="/js/dexie.js"></script>
+		<script src="/js/rxjs.umd.js"></script>
+		<script src="/js/dexie-cloud-addon.js"></script>
+	</head>
+	<style>
+		*,
+		*::before,
+		*::after {
+			box-sizing: border-box;
+		}
+
+		:root {
+			view-transition-name: none;
+		}
+		::view-transition {
+			pointer-events: none;
+		}
+
+		input,
+		button,
+		textarea,
+		select {
+			font: inherit;
+		}
+
+		body,
+		html {
+			color: #212529;
+			background-color: white;
+			font-family: 'Times New Roman', serif;
+			line-height: 1;
+			-webkit-font-smoothing: antialiased;
+		}
+
+		.app {
+			padding: 1rem;
+		}
+
+		.app_item_headline_month {
+			font-size: clamp(1rem, 6rem, 18vw);
+			grid-column: span 2;
+			text-align: center;
+			padding: clamp(1rem, 6rem, 18vw) 0;
+			letter-spacing: -2px;
+
+			font-weight: bold;
+			overflow-wrap: break-word;
+			text-wrap: pretty;
+			hyphens: auto;
+		}
+
+		.app_items {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+
+			@media (max-width: 768px) {
+				grid-template-columns: minmax(0, 0.66fr) minmax(0, 1fr);
+			}
+		}
+
+		.app_item {
+			position: relative;
+			display: grid;
+			grid-template-columns: subgrid;
+			grid-column: span 2;
+			font-size: clamp(1rem, 2rem, 5vw);
+
+			padding: 1rem;
+			gap: 1rem;
+			overflow-wrap: break-word;
+			text-wrap: pretty;
+		}
+
+		.app_item--empty {
+			color: #ccc;
+		}
+
+		.app_item_date {
+			display: grid;
+			align-items: flex-start;
+			justify-content: flex-end;
+			grid-template-rows: auto 1fr;
+
+			line-height: 1;
+
+			font-size: clamp(1rem, 4rem, 10vw);
+
+			font-family: Times, 'Times New Roman', Serif;
+			font-weight: bold;
+			overflow-wrap: break-word;
+			text-wrap: pretty;
+			hyphens: auto;
+		}
+
+		.app_item_text {
+			padding-top: 0.75rem;
+			display: grid;
+			align-items: center;
+		}
+
+		.app_item_date_day {
+			font-size: 1rem;
+		}
+
+		.app_item_count {
+			position: absolute;
+			top: 1rem;
+			left: 0;
+
+			font-size: 1rem;
+			color: #ccc;
+
+			height: calc(100% - 2rem);
+			display: grid;
+			align-items: flex-start;
+			padding-top: 1.5rem;
+		}
+
+		.app_form {
+			padding: 0;
+			border-bottom: 1px solid #eee;
+
+			.app_item_date {
+				align-items: center;
+				font-size: clamp(1rem, 2rem, 5vw);
+			}
+		}
+
+		.app_form_datepicker {
+			grid-row: span 2;
+			text-align: right;
+			border: 0;
+		}
+
+		.app_form_input {
+			width: 100%;
+			border: 0;
+			padding: 1rem 0;
+			outline: none;
+		}
+
+		.app_user {
+			position: absolute;
+			top: 0.5rem;
+			right: 0.5rem;
+			color: #ccc;
+			cursor: pointer;
+			border: none;
+			background: transparent;
+		}
+
+		.dxc-login-dlg {
+			input {
+				margin-bottom: 1rem;
+				border: 0;
+				padding: 0 !important;
+			}
+			button {
+				padding: 0.5rem 1rem;
+				border-radius: 1rem;
+				border: 0;
+				margin-right: 0.5rem;
+				float: right;
+			}
+
+			div:has(form) {
+				border: 0 !important;
+				border-radius: 1rem !important;
+				padding-bottom: 1.5rem;
+
+				h3 {
+					margin-top: 0;
+				}
+
+				button[type='submit'] {
+					background-color: #1864ab;
+					color: white;
+				}
+			}
+		}
+	</style>
+	<body>
+		<div class="app">
+			<div class="app_items">
+				<form id="app_form" class="app_form app_item">
+					<div class="app_item_date">
+						<input type="date" id="app_form_datepicker" class="app_form_datepicker" />
+					</div>
+					<div>
+						<input
+							type="text"
+							id="app_form_input"
+							class="app_form_input app_item"
+							autofocus
+							placeholder="..."
+						/>
+					</div>
+				</form>
+			</div>
+
+			<div id="app_items" class="app_items"></div>
+			<button class="app_user" id="app_user" onclick="handleUserClick()">login</button>
+		</div>
+	</body>
+
+	<script>
+		// STATE
+		let state = {
+			item: {}
+		};
+
+		const db = new Dexie('Log', { addons: [DexieCloud.dexieCloud] });
+
+		db.cloud.configure({
+			databaseUrl: 'https://z5sn3mfy1.dexie.cloud'
+		});
+
+		db.version(1).stores({
+			items: 'id, text'
+		});
+
+		db.open().then(() => {
+			if (db.cloud.currentUser.value.userId != 'unauthorized') {
+				app_user.innerHTML = db.cloud.currentUserId;
+			}
+		});
+
+		const itemsObservable = Dexie.liveQuery(() => db.items.toArray());
+		const subscription = itemsObservable.subscribe({
+			next: (items) => {
+				console.log('items', items);
+				const newItem = {};
+				for (const item of items) {
+					newItem[item.id] = item.text;
+				}
+
+				if (!Object.keys(state.item).length && !newItem[today]) {
+					app_form_datepicker.value = timestampToDateString(today);
+				}
+
+				state.item = newItem;
+
+				renderState();
+			},
+			error: (error) => console.error(error)
+		});
+
+		// UTILS
+		const html = (strings, ...values) =>
+			strings.reduce((result, str, i) => result + str + (values[i] || ''), '');
+
+		const timestampToDateString = (input) =>
+			`${input.slice(0, 4)}-${input.slice(4, 6)}-${input.slice(6, 8)}`;
+
+		const dateStringToTimestamp = (input) => input.replace(/-/g, '');
+
+		const dateToTimeStamp = (date) => {
+			const year = date.getFullYear();
+			const month = String(date.getMonth() + 1).padStart(2, '0');
+			const day = String(date.getDate()).padStart(2, '0');
+			return `${year}${month}${day}`;
+		};
+
+		const changeDom = (newInnerHTML) => (app_items.innerHTML = newInnerHTML);
+
+		const dateDay = new Intl.DateTimeFormat(navigator.language, {
+			weekday: 'short'
+		});
+
+		const dateDayMonth = new Intl.DateTimeFormat(navigator.language, {
+			month: 'numeric',
+			day: 'numeric'
+		});
+
+		const dateMonth = new Intl.DateTimeFormat(navigator.language, {
+			month: 'long'
+		});
+
+		const today = dateToTimeStamp(new Date());
+
+		function handleSubmit(e) {
+			e.preventDefault();
+
+			if (!app_form_datepicker.value) return;
+
+			const timestamp = dateStringToTimestamp(app_form_datepicker.value);
+
+			if (app_form_input.value) {
+				state.item[timestamp] = app_form_input.value;
+				db.items.put({ id: timestamp, text: app_form_input.value });
+			} else {
+				delete state.item[timestamp];
+				db.items.delete(timestamp);
+			}
+
+			app_form_input.value = '';
+			app_form_datepicker.value = '';
+
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					document.getElementById(`app_item_${timestamp}`)?.scrollIntoView({
+						behavior: 'smooth'
+					});
+				});
+			});
+
+			app_form_input.blur();
+		}
+
+		async function renderState() {
+			let new_app_items = '';
+
+			const datesFromEarliestToLatest = fillMissingDates(Object.keys(state.item));
+
+			let count = 1;
+
+			let monthOfPrevDate = '';
+
+			for (const timestamp of datesFromEarliestToLatest) {
+				if (!state.item[timestamp]) count = 0;
+				const date = new Date(timestampToDateString(timestamp));
+				const monthOfCurrentDate = timestamp.slice(4, 6);
+
+				if (monthOfPrevDate && monthOfPrevDate != monthOfCurrentDate) {
+					new_app_items =
+						html`<div class="app_item_headline_month">${dateMonth.format(date)}</div>` +
+						new_app_items;
+				}
+
+				new_app_items =
+					html`<div
+						class="app_item${!state.item[timestamp] ? ` app_item--empty` : ``}"
+						id="app_item_${timestamp}"
+						style="view-transition-name: app_item_${timestamp};"
+					>
+						${state.item[timestamp] ? `<div class="app_item_count">#${count}</div>` : ``}
+						<div class="app_item_date" onclick="handleItemDateClick(${timestamp})">
+							<div class="app_item_date_day">${dateDay.format(date)}</div>
+							${dateDayMonth.format(date)}
+						</div>
+
+						<div class="app_item_text">${state.item[timestamp]}</div>
+					</div>` + new_app_items;
+
+				monthOfPrevDate = monthOfCurrentDate;
+
+				count++;
+			}
+
+			if (!document.startViewTransition) {
+				changeDom(new_app_items);
+			} else {
+				document.startViewTransition(() => {
+					changeDom(new_app_items);
+				});
+			}
+		}
+
+		function fillMissingDates(dateList) {
+			function addDay(date) {
+				date.setDate(date.getDate() + 1);
+				return date;
+			}
+
+			const dates = dateList.map((dateStr) => {
+				const year = dateStr.slice(0, 4);
+				const month = dateStr.slice(4, 6) - 1; // Månader är 0-indexerade i JavaScript
+				const day = dateStr.slice(6, 8);
+				return new Date(year, month, day);
+			});
+
+			const earliestDate = (dateList.at(0) ?? '\ufffd') < today ? dates.at(0) : new Date();
+
+			const latestDate = (dateList.at(-1) ?? '') > today ? dates.at(-1) : new Date();
+
+			earliestDate?.setHours(0, 0, 0, 0);
+			latestDate?.setHours(0, 0, 0, 0);
+
+			const completeDateList = [];
+			let currentDate = earliestDate ? new Date(earliestDate) : new Date();
+
+			while (currentDate <= latestDate) {
+				completeDateList.push(dateToTimeStamp(currentDate));
+				currentDate = addDay(new Date(currentDate)); // Lägg till en dag
+			}
+
+			return completeDateList;
+		}
+
+		function handleItemDateClick(timestamp) {
+			app_form_datepicker.value = timestampToDateString(`${timestamp}`);
+			if (state.item[timestamp]) app_form_input.value = state.item[timestamp];
+			app_form_input.focus();
+			app_form_input.select();
+		}
+
+		function handleUserClick() {
+			if (db.cloud.currentUser.value.userId === 'unauthorized') {
+				db.cloud.login().then(() => {
+					app_user.innerHTML = db.cloud.currentUserId;
+				});
+			} else {
+				const confirmed = confirm('Logout?');
+				if (confirmed) {
+					db.cloud.logout().then(() => {
+						app_user.innerHTML = 'login';
+					});
+				}
+			}
+		}
+
+		app_form.addEventListener('submit', handleSubmit);
+
+		if ('serviceWorker' in navigator && window.location.hostname !== 'localhost') {
+			navigator.serviceWorker
+				.register('/serviceWorker.js')
+				.catch((err) => console.error('Service worker registration failed', err));
+		}
+	</script>
 </html>
