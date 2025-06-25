@@ -6,18 +6,18 @@
  * @returns {Function} The debounced function
  */
 export function debounce(func, delay) {
-  let timeoutId = null;
+	let timeoutId = null;
 
-  return function (...args) {
-    // Clear the previous timeout if it exists
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
+	return function (...args) {
+		// Clear the previous timeout if it exists
+		if (timeoutId) {
+			clearTimeout(timeoutId);
+		}
 
-    // Set a new timeout
-    timeoutId = setTimeout(() => {
-      timeoutId = null;
-      func.apply(this, args);
-    }, delay);
-  };
+		// Set a new timeout
+		timeoutId = setTimeout(() => {
+			timeoutId = null;
+			func.apply(this, args);
+		}, delay);
+	};
 }

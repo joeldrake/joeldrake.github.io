@@ -5,14 +5,14 @@
  * @returns {Function} The throttled function
  */
 export function throttle(func, delay) {
-  let timeoutId = null;
+	let timeoutId = null;
 
-  return function (...args) {
-    if (timeoutId) return;
+	return function (...args) {
+		if (timeoutId) return;
 
-    timeoutId = setTimeout(() => {
-      timeoutId = null;
-      func.apply(this, args);
-    }, delay);
-  };
+		timeoutId = setTimeout(() => {
+			timeoutId = null;
+			func.apply(this, args);
+		}, delay);
+	};
 }
