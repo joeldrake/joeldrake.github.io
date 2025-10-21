@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="sv">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Virtual-Scroll Showcase - Joel Drake</title>
+		<meta name="description" content="Virtual-Scroll - En högpresterande virtual scrolling web component med stöd för dynamiska höjder" />
+
+		<link rel="icon" href="../favicon.ico" />
+		<meta name="theme-color" content="#090527" />
+
+		<link rel="stylesheet" type="text/css" href="../css/main.css" />
+		<link rel="stylesheet" type="text/css" href="css/showcase.css" />
+	</head>
+	<body>
+		<div class="container">
+			<header class="header">
+				<a href="../index.html" class="back-link">← Tillbaka</a>
+				<h1>Virtual-Scroll</h1>
+				<p class="subtitle">Högpresterande virtual scrolling web component</p>
+				<div class="links">
+					<a href="https://github.com/joeldrake/Virtual-Scroll" target="_blank" rel="noopener noreferrer" class="github-link">
+						<svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+							<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+						</svg>
+						GitHub Repository
+					</a>
+				</div>
+			</header>
+
+			<section class="info-section">
+				<h2>Funktioner</h2>
+				<ul class="features-list">
+					<li>Stöd för dynamiska höjder med automatisk mätning</li>
+					<li>ResizeObserver-integration för responsiva element</li>
+					<li>Konfigurerbar overscan för mjuk scrollning</li>
+					<li>Template-baserad rendering av element</li>
+					<li>Event-driven arkitektur</li>
+					<li>Endast synliga element renderas - dramatiskt förbättrad prestanda för stora listor</li>
+				</ul>
+			</section>
+
+			<section class="demo-section">
+				<h2>Live Demo</h2>
+				<p class="demo-description">
+					Denna demo visar Virtual-Scroll med 10,000 element. Endast synliga element renderas i DOM:en.
+				</p>
+
+				<div class="controls">
+					<div class="control-group">
+						<label for="itemCount">Antal element:</label>
+						<input type="number" id="itemCount" value="10000" min="100" max="100000" step="1000" />
+					</div>
+					<div class="control-group">
+						<label for="itemHeight">Standard höjd:</label>
+						<input type="number" id="itemHeight" value="60" min="30" max="200" step="10" />
+					</div>
+					<div class="control-group">
+						<label for="overscan">Overscan:</label>
+						<input type="number" id="overscan" value="3" min="0" max="10" step="1" />
+					</div>
+					<button id="updateBtn" class="update-btn">Uppdatera Demo</button>
+					<button id="scrollToBtn" class="scroll-btn">Scrolla till slumpmässigt element</button>
+				</div>
+
+				<div class="stats">
+					<div class="stat">
+						<span class="stat-label">Totalt antal element:</span>
+						<span id="totalItems" class="stat-value">0</span>
+					</div>
+					<div class="stat">
+						<span class="stat-label">Renderade element:</span>
+						<span id="renderedItems" class="stat-value">0</span>
+					</div>
+					<div class="stat">
+						<span class="stat-label">Synligt område:</span>
+						<span id="visibleRange" class="stat-value">-</span>
+					</div>
+				</div>
+
+				<div class="scroller-wrapper">
+					<virtual-scroller id="scroller" item-height="60" overscan="3">
+						<template>
+							<div class="item-content">
+								<div class="item-index">#{{index}}</div>
+								<div class="item-details">
+									<div class="item-title">{{data.title}}</div>
+									<div class="item-description">{{data.description}}</div>
+								</div>
+							</div>
+						</template>
+					</virtual-scroller>
+				</div>
+			</section>
+
+			<section class="code-section">
+				<h2>Användning</h2>
+				<pre><code>&lt;virtual-scroller item-height="50" overscan="3"&gt;
+  &lt;template&gt;
+    &lt;div class="item"&gt;Item {{index}}: {{data.name}}&lt;/div&gt;
+  &lt;/template&gt;
+&lt;/virtual-scroller&gt;
+
+&lt;script type="module"&gt;
+  import VirtualScroller from './virtual-scroller.js';
+
+  const scroller = document.querySelector('virtual-scroller');
+  const items = Array.from({ length: 10000 }, (_, i) => ({
+    name: \`Item \${i}\`,
+    description: \`Description for item \${i}\`
+  }));
+
+  scroller.setItems(items);
+&lt;/script&gt;</code></pre>
+			</section>
+		</div>
+
+		<script type="module" src="js/virtual-scroller.js"></script>
+		<script type="module" src="js/demo.js"></script>
+	</body>
+</html>
