@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
@@ -326,12 +326,12 @@
 
 			const datesFromEarliestToLatest = fillMissingDates(Object.keys(state.item));
 
-			let count = 1;
+			let count = 0;
 
 			let monthOfPrevDate = '';
 
 			for (const timestamp of datesFromEarliestToLatest) {
-				if (!state.item[timestamp]) count = 0;
+				if (state.item[timestamp]) count++;
 				const date = new Date(timestampToDateString(timestamp));
 				const monthOfCurrentDate = timestamp.slice(4, 6);
 
@@ -357,8 +357,6 @@
 					</div>` + new_app_items;
 
 				monthOfPrevDate = monthOfCurrentDate;
-
-				count++;
 			}
 
 			if (!document.startViewTransition) {
