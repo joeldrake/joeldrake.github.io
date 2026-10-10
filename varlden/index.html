@@ -173,13 +173,6 @@
 				flex: none;
 			}
 
-			#soundToggle,
-			#levelToggle {
-				font-size: 1.1rem;
-				padding: 0.3rem 0.7rem;
-				white-space: nowrap;
-			}
-
 			#soundToggle {
 				font-size: 1.4rem;
 				padding: 0.2rem 0.55rem;
@@ -271,6 +264,11 @@
 				overflow: hidden;
 				background: #d6ecff;
 				box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+			}
+
+			/* Lite luft ovanför kartan när den scrollas upp, och fri från notchen */
+			.map-wrap {
+				scroll-margin-top: calc(0.5rem + env(safe-area-inset-top, 0px));
 			}
 
 			.map-wrap.big {
@@ -451,6 +449,19 @@
 				line-height: 1;
 				border-width: 2px;
 				box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+				/* Centrerar ikonerna exakt – Fredokas + och − sitter för lågt i radhöjden */
+				display: grid;
+				place-items: center;
+			}
+
+			.map-tools svg {
+				width: 55%;
+				height: 55%;
+				fill: none;
+				stroke: currentColor;
+				stroke-width: 3;
+				stroke-linecap: round;
+				stroke-linejoin: round;
 			}
 
 			/* Telefon: högre karta och zoomknapparna på en rad så att de inte täcker så mycket */
@@ -635,6 +646,12 @@
 				text-align: right;
 			}
 
+			.facts a {
+				color: var(--accent);
+				font-weight: 600;
+				text-underline-offset: 3px;
+			}
+
 			.more {
 				margin-top: 0.9rem;
 				border-top: 2px dashed #d0d7e2;
@@ -809,7 +826,6 @@
 				<p id="modeText"></p>
 			</div>
 			<div class="header-buttons">
-				<button id="levelToggle" aria-label="Byt nivå"></button>
 				<button id="soundToggle" aria-label="Ljud av eller på"></button>
 			</div>
 		</header>
@@ -841,10 +857,10 @@
 						<g id="markers"></g>
 					</svg>
 					<div class="map-tools">
-						<button id="zoomIn" aria-label="Zooma in">+</button>
-						<button id="zoomOut" aria-label="Zooma ut">−</button>
+						<button id="zoomIn" aria-label="Zooma in"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg></button>
+						<button id="zoomOut" aria-label="Zooma ut"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" /></svg></button>
 						<button id="zoomHome" aria-label="Visa hela världen">🌍</button>
-						<button id="bigMap" aria-label="Större karta">⛶</button>
+						<button id="bigMap" aria-label="Större karta"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" /></svg></button>
 					</div>
 				</div>
 
@@ -1051,6 +1067,11 @@
 			};
 
 			const NAME_FIX = { PS: 'Palestina', MM: 'Myanmar' };
+
+			// Artiklar på svenska Wikipedia där landsnamnet leder till en förgreningssida
+			const WIKI_FIX = { PS: 'Palestina (stat)' };
+			const wikiUrl = (id) =>
+				`https://sv.wikipedia.org/wiki/${encodeURIComponent((WIKI_FIX[id] || COUNTRIES[id].name).replaceAll(' ', '_'))}`;
 
 			// Rolig fakta som ett barn förstår. Länder utan egen fakta får en enkel mening.
 			const FACTS = {
@@ -1487,7 +1508,6 @@
 
 			const state = {
 				mode: 'utforska',
-				level: load('varlden-niva', 'barn'),
 				sound: load('varlden-ljud', 'pa') !== 'av',
 				found: new Set(savedFound.filter((n) => PLACES[n])),
 				selected: null,
@@ -1634,6 +1654,15 @@
 				animateTo(viewForBox([x, y, x, y], 0, w));
 			}
 
+			// Knappar utanför kartan som flyttar den scrollar upp kartan så att man ser vad som händer
+			function scrollToMap() {
+				const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+				// Vänta tills det nya kortet ritats, annars avbryts scrollningen när sidan byter höjd
+				requestAnimationFrame(() =>
+					$('mapWrap').scrollIntoView({ block: 'start', behavior: smooth ? 'smooth' : 'auto' })
+				);
+			}
+
 			function zoomAt(factor, px, py, animate = false) {
 				const k = ppu();
 				const ux = vb.x + px / k;
@@ -1776,7 +1805,7 @@
 					? `<dl class="facts">${c.facts.map(([e, l, v]) => `<div><dt>${e} ${l}</dt><dd>${v}</dd></div>`).join('')}</dl>`
 					: '';
 				const more = c.more
-					? `<details class="more"${state.level === 'vuxen' ? ' open' : ''}><summary>Mer fakta</summary><p>${c.more}</p></details>`
+					? `<details class="more"><summary>Mer fakta</summary><p>${c.more}</p></details>`
 					: '';
 				card.innerHTML = `
 					<div class="card-head">
@@ -1799,11 +1828,15 @@
 				if (id === 'AQ') return showContinent('an', { zoom });
 				const cont = CONTINENTS[c.cont];
 				selectCountry(id);
-				if (zoom) animateTo(viewForBox(c.box));
+				if (zoom) {
+					scrollToMap();
+					animateTo(viewForBox(c.box));
+				}
 				const fact = FACTS[id] || `${c.name} ligger i ${cont.name}.`;
 				const facts = [];
 				if (c.cap) facts.push(['🏛️', 'Huvudstad', c.cap]);
 				facts.push([cont.icon, 'Världsdel', cont.name]);
+				facts.push(['📖', 'Wikipedia', `<a href="${wikiUrl(id)}" target="_blank" rel="noopener">Läs mer ↗</a>`]);
 				renderCard({
 					icon: flag(id),
 					title: c.name,
@@ -1815,7 +1848,7 @@
 					onRender: (card) =>
 						card.querySelector('[data-cont]').addEventListener('click', () => showContinent(c.cont, { zoom: true }))
 				});
-				if (speak && state.level === 'barn') say(`${c.name}. ${fact}`);
+				if (speak) say(`${c.name}. ${fact}`);
 			}
 
 			function showContinent(key, { zoom = false } = {}) {
@@ -1824,7 +1857,10 @@
 				for (const [id, c] of Object.entries(COUNTRIES)) {
 					if (c.cont !== key) landEls[id].classList.add('dim');
 				}
-				if (zoom) animateTo(viewForBox(boxFromLonLat(cont.box), 0.05));
+				if (zoom) {
+					scrollToMap();
+					animateTo(viewForBox(boxFromLonLat(cont.box), 0.05));
+				}
 				const list = Object.values(COUNTRIES)
 					.filter((c) => c.cont === key && c.id !== 'AQ')
 					.sort((a, b) => a.name.localeCompare(b.name, 'sv'));
@@ -1848,7 +1884,7 @@
 						}
 					}
 				});
-				say(`${cont.name}. ${state.level === 'barn' ? cont.kid : ''}`);
+				say(`${cont.name}. ${cont.kid}`);
 			}
 
 			function showOcean(key) {
@@ -1863,7 +1899,7 @@
 					more: o.more,
 					speech: `${o.name}. ${o.kid}`
 				});
-				say(`${o.name}. ${state.level === 'barn' ? o.kid : ''}`);
+				say(`${o.name}. ${o.kid}`);
 			}
 
 			function showPlace(i, { zoom = false } = {}) {
@@ -1877,7 +1913,10 @@
 					renderAlbum(i);
 					confetti(state.found.size === PLACES.length ? 120 : 30);
 				}
-				if (zoom) zoomToPoint(...project(...p.at));
+				if (zoom) {
+					scrollToMap();
+					zoomToPoint(...project(...p.at));
+				}
 				const status = isNew
 					? `✨ Ny upptäckt! Du har hittat ${state.found.size} av ${PLACES.length}.`
 					: '✨ Spännande plats';
@@ -1889,7 +1928,7 @@
 					more: p.more,
 					speech: `${p.name}. ${p.kid}`
 				});
-				say(`${p.name}. ${state.level === 'barn' ? p.kid : ''}`);
+				say(`${p.name}. ${p.kid}`);
 			}
 
 			function showWelcome() {
@@ -1963,15 +2002,8 @@
 				return options[0][1]();
 			}
 
-			function countryQ(id, style) {
+			function countryQ(id) {
 				const c = COUNTRIES[id];
-				if (style === 'flag') {
-					return { type: 'country', id, key: id, icon: flag(id), text: 'Vilket land har den här flaggan? Tryck på det!', speech: 'Vilket land har den här flaggan?' };
-				}
-				if (style === 'capital') {
-					const cap = c.cap.replace(/\s*\(.*\)/, '');
-					return { type: 'country', id, key: id, icon: '🏛️', text: `I vilket land ligger huvudstaden <b>${cap}</b>?`, speech: `I vilket land ligger huvudstaden ${cap}?` };
-				}
 				return { type: 'country', id, key: id, icon: flag(id), text: `Var ligger <b>${c.name}</b>?`, speech: `Var ligger ${c.name}?` };
 			}
 
@@ -1982,8 +2014,7 @@
 			}
 
 			function makeQuestion() {
-				const adultIds = Object.keys(COUNTRIES).filter((id) => COUNTRIES[id].cap);
-				const kid = () =>
+				const next = () =>
 					weighted([
 						[3, () => {
 							const key = pick(Object.keys(CONTINENTS));
@@ -1998,16 +2029,9 @@
 							return { type: 'ocean', ocean: key, key, icon: o.icon, text: `Tryck på <b>${o.name}</b>!`, speech: `Tryck på ${o.name}!` };
 						}]
 					]);
-				const adult = () =>
-					weighted([
-						[4, () => countryQ(pick(adultIds))],
-						[3, () => countryQ(pick(adultIds), 'flag')],
-						[2, () => countryQ(pick(adultIds), 'capital')],
-						[1, placeQ]
-					]);
 				let q;
 				for (let i = 0; i < 20; i++) {
-					q = state.level === 'barn' ? kid() : adult();
+					q = next();
 					if (!state.recent.includes(q.key)) break;
 				}
 				state.recent = [...state.recent, q.key].slice(-10);
@@ -2143,9 +2167,7 @@
 					renderCard({
 						icon: '🎯',
 						title: 'Hitta!',
-						kid: state.level === 'barn'
-							? 'Lyssna på frågan och tryck på rätt ställe på kartan. Du får försöka tre gånger!'
-							: 'Hitta länder, flaggor, huvudstäder och spännande platser. Zooma in för att träffa de små länderna.',
+						kid: 'Lyssna på frågan och tryck på rätt ställe på kartan. Du får försöka tre gånger!',
 						speech: 'Lyssna på frågan och tryck på rätt ställe på kartan.'
 					});
 					newQuestion();
@@ -2159,23 +2181,6 @@
 			for (const t of document.querySelectorAll('.tab')) {
 				t.addEventListener('click', () => setMode(t.dataset.mode));
 			}
-
-			function renderLevel() {
-				$('levelToggle').textContent = state.level === 'barn' ? '🧒 Barn' : '🧑 Vuxen';
-			}
-
-			$('levelToggle').addEventListener('click', () => {
-				state.level = state.level === 'barn' ? 'vuxen' : 'barn';
-				save('varlden-niva', state.level);
-				renderLevel();
-				if (state.mode === 'hitta') {
-					state.recent = [];
-					newQuestion();
-				} else if (state.card) {
-					// Vuxennivån visar "Mer fakta" utfällt
-					for (const d of $('card').querySelectorAll('details.more')) d.open = state.level === 'vuxen';
-				}
-			});
 
 			function renderSound() {
 				$('soundToggle').textContent = state.sound ? '🔊' : '🔇';
@@ -2205,7 +2210,6 @@
 				}
 			}
 
-			renderLevel();
 			renderSound();
 			renderFound();
 			renderAlbum(null);
