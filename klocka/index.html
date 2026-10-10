@@ -122,9 +122,9 @@
 
 			.tabs {
 				display: flex;
-				flex-wrap: wrap;
 				justify-content: center;
-				gap: 0.5rem;
+				gap: clamp(0.3rem, 1.5vw, 0.5rem);
+				max-width: 100%;
 			}
 
 			button {
@@ -146,8 +146,13 @@
 				transform: scale(0.95);
 			}
 
+			/* Flikarna krymper med skärmen i stället för att radbryta */
 			.tab {
-				font-size: 1.1rem;
+				font-size: clamp(0.75rem, 3.6vw, 1.1rem);
+				padding: 0.45rem clamp(0.5rem, 2.5vw, 1rem);
+				white-space: nowrap;
+				flex: 0 1 auto;
+				min-width: 0;
 			}
 
 			.tab.active,
@@ -197,9 +202,19 @@
 				color: var(--hour);
 			}
 
-			.tip {
-				margin: 0.5rem 0;
-				font-size: 1.05rem;
+			/* Tiden i ord får en egen rad. På smala skärmar reserveras två rader så att
+			   panelen inte hoppar när texten växlar mellan kort och lång. */
+			#phrase {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				line-height: 1.25;
+			}
+
+			@media (max-width: 600px) {
+				#phrase {
+					min-height: 2.5em;
+				}
 			}
 
 			.row {
@@ -282,14 +297,23 @@
 
 			.levels {
 				display: flex;
-				flex-wrap: wrap;
 				justify-content: center;
-				gap: 0.4rem;
+				gap: clamp(0.2rem, 1vw, 0.4rem);
 			}
 
+			/* Nivåerna krymper med skärmen i stället för att radbryta */
 			.levels button {
-				font-size: 0.9rem;
-				padding: 0.3rem 0.8rem;
+				font-size: clamp(0.6rem, 3vw, 0.9rem);
+				padding: 0.3rem clamp(0.35rem, 1.6vw, 0.8rem);
+				border-width: 2px;
+				white-space: nowrap;
+				min-width: 0;
+			}
+
+			@media (max-width: 480px) {
+				#quizPanel {
+					padding-inline: 0.75rem;
+				}
 			}
 
 			.answers {
@@ -467,7 +491,6 @@
 				<button type="button" id="resetNow">↺ Nu</button>
 			</div>
 
-			<p id="tip" class="tip"></p>
 
 			<div class="row">
 				<button id="toggleDigital" type="button">Visa digital tid</button>
@@ -612,7 +635,9 @@
 			const hourNumbers = $('hourNumbers');
 			for (let h = 1; h <= 12; h++) {
 				const [x, y] = polar(h * 30, 122);
-				hourNumbers.appendChild(el('circle', { cx: x, cy: y, r: 23, fill: `hsl(${h * 30}, 90%, 82%)` }));
+				hourNumbers.appendChild(
+					el('circle', { cx: x, cy: y, r: 23, fill: `hsl(${h * 30}, 90%, 82%)` })
+				);
 				hourNumbers.appendChild(
 					el(
 						'text',
@@ -633,7 +658,20 @@
 
 			// ---------- Tid i ord ----------
 
-			const HOURS = ['tolv', 'ett', 'två', 'tre', 'fyra', 'fem', 'sex', 'sju', 'åtta', 'nio', 'tio', 'elva'];
+			const HOURS = [
+				'tolv',
+				'ett',
+				'två',
+				'tre',
+				'fyra',
+				'fem',
+				'sex',
+				'sju',
+				'åtta',
+				'nio',
+				'tio',
+				'elva'
+			];
 
 			function phrase(h24, m) {
 				const r = Math.round(m / 5) * 5;
@@ -685,7 +723,8 @@
 			function showTexts(h24, m, s) {
 				$('phrase').textContent = phrase(h24, m);
 				const sec = s === null ? '' : `:<span class="s">${pad(s)}</span>`;
-				$('digitalTime').innerHTML = `<span class="h">${pad(h24)}</span>:<span class="m">${pad(m)}</span>${sec}`;
+				$('digitalTime').innerHTML =
+					`<span class="h">${pad(h24)}</span>:<span class="m">${pad(m)}</span>${sec}`;
 				const [sky, icon, text] = period(h24);
 				document.body.dataset.sky = sky;
 				$('skyIcon').textContent = icon;
@@ -716,15 +755,12 @@
 				showTexts(Math.floor(t / 60), Math.floor(t % 60), null);
 			}
 
-			const TIPS = {
-				live: 'Den korta timvisaren 🐌 pekar på timmen. Den långa minutvisaren 🐇 visar minuterna.',
-				drag: 'Dra den långa minutvisaren 🐇 runt, runt – se hur den korta timvisaren 🐌 följer med! Snurra länge så blir det natt.'
-			};
-
 			function setMode(mode) {
 				state.mode = mode;
 				stopFastForward();
-				document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.mode === mode));
+				document
+					.querySelectorAll('.tab')
+					.forEach((t) => t.classList.toggle('active', t.dataset.mode === mode));
 				$('timePanel').hidden = mode === 'quiz';
 				$('quizPanel').hidden = mode !== 'quiz';
 				$('dragControls').hidden = mode !== 'drag';
@@ -732,10 +768,8 @@
 				svg.classList.toggle('draggable', mode === 'drag');
 
 				if (mode === 'live') {
-					$('tip').textContent = TIPS.live;
 					tickLive();
 				} else if (mode === 'drag') {
-					$('tip').textContent = TIPS.drag;
 					state.total = nowMinutes();
 					renderDrag();
 				} else {
@@ -746,7 +780,9 @@
 				}
 			}
 
-			document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => setMode(t.dataset.mode)));
+			document
+				.querySelectorAll('.tab')
+				.forEach((t) => t.addEventListener('click', () => setMode(t.dataset.mode)));
 
 			setInterval(() => {
 				if (state.mode === 'live') tickLive();
@@ -891,7 +927,9 @@
 			}
 
 			function newQuestion() {
-				document.querySelectorAll('[data-level]').forEach((b) => b.classList.toggle('active', b.dataset.level === quiz.level));
+				document
+					.querySelectorAll('[data-level]')
+					.forEach((b) => b.classList.toggle('active', b.dataset.level === quiz.level));
 
 				let t;
 				do t = randomTime();
