@@ -65,7 +65,6 @@
 				padding: clamp(3rem, 10vh, 7rem) 1.25rem 3rem;
 			}
 
-
 			/* ---------- header ---------- */
 
 			.eyebrow {
@@ -165,7 +164,9 @@
 				color: var(--accent);
 				opacity: 0;
 				transform: translateX(-0.4em);
-				transition: opacity 0.2s, transform 0.2s;
+				transition:
+					opacity 0.2s,
+					transform 0.2s;
 			}
 
 			.projects a:hover .title::after,
@@ -242,11 +243,10 @@
 	<body>
 		<main>
 			<header>
-				<p class="eyebrow"><span class="prompt">~/joeldrake</span> $ ls lab/<span class="cursor"></span></p>
-				<p class="lead">
-					Small projects, prototypes and things built to test an idea. No frameworks unless needed —
-					mostly vanilla HTML, CSS and JavaScript.
+				<p class="eyebrow">
+					<span class="prompt">~/joeldrake</span> $ ls lab/<span class="cursor"></span>
 				</p>
+				<p class="lead">Small projects, prototypes and things</p>
 			</header>
 
 			<!--
@@ -274,7 +274,9 @@
 					<a href="virtual-scroll/index.html">
 						<span class="title">Virtual-Scroll</span>
 						<span class="year">2025</span>
-						<p class="desc">High-performance virtual scrolling component with support for dynamic heights.</p>
+						<p class="desc">
+							High-performance virtual scrolling component with support for dynamic heights.
+						</p>
 						<span class="tags"><span>web component</span><span>performance</span></span>
 					</a>
 				</li>
