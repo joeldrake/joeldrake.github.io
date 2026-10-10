@@ -13,18 +13,66 @@
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 		<meta name="apple-mobile-web-app-title" content="Klockan" />
 		<!-- Ljusblå startskärm på iPhone (Safari använder inte manifestets background_color) -->
-		<link rel="apple-touch-startup-image" href="splash/750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
-		<link rel="apple-touch-startup-image" href="splash/1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-		<link rel="apple-touch-startup-image" href="splash/1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-		<link rel="apple-touch-startup-image" href="splash/828x1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
-		<link rel="apple-touch-startup-image" href="splash/1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-		<link rel="apple-touch-startup-image" href="splash/1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-		<link rel="apple-touch-startup-image" href="splash/1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-		<link rel="apple-touch-startup-image" href="splash/1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-		<link rel="apple-touch-startup-image" href="splash/1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-		<link rel="apple-touch-startup-image" href="splash/1206x2622.png" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-		<link rel="apple-touch-startup-image" href="splash/1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
-		<link rel="apple-touch-startup-image" href="splash/1260x2736.png" media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/750x1334.png"
+			media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1242x2208.png"
+			media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1125x2436.png"
+			media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/828x1792.png"
+			media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1242x2688.png"
+			media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1170x2532.png"
+			media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1284x2778.png"
+			media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1179x2556.png"
+			media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1290x2796.png"
+			media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1206x2622.png"
+			media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1320x2868.png"
+			media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1260x2736.png"
+			media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
@@ -46,6 +94,11 @@
 				box-sizing: border-box;
 			}
 
+			/* Stäng av dubbeltryck-zoom (snabba tryck på knappar), nypzoom fungerar fortfarande */
+			html {
+				touch-action: manipulation;
+			}
+
 			[hidden] {
 				display: none !important;
 			}
@@ -58,8 +111,9 @@
 				align-items: center;
 				gap: 1rem;
 				/* Håll innehållet fritt från notch och hemindikator i helskärmsläge */
-				padding: calc(1rem + env(safe-area-inset-top, 0px)) calc(1rem + env(safe-area-inset-right, 0px))
-					calc(2rem + env(safe-area-inset-bottom, 0px)) calc(1rem + env(safe-area-inset-left, 0px));
+				padding: calc(1rem + env(safe-area-inset-top, 0px))
+					calc(1rem + env(safe-area-inset-right, 0px)) calc(2rem + env(safe-area-inset-bottom, 0px))
+					calc(1rem + env(safe-area-inset-left, 0px));
 				font-family:
 					'Fredoka',
 					system-ui,
@@ -126,6 +180,14 @@
 				align-items: center;
 				gap: 0.75rem;
 				text-align: left;
+			}
+
+			/* På smala skärmar ligger headern fast till vänster, så att den inte
+			   hoppar i sidled när texten byts mellan dag, kväll och natt */
+			@media (max-width: 499px) {
+				header {
+					align-self: stretch;
+				}
 			}
 
 			.sky-icon {
@@ -517,7 +579,6 @@
 				<button type="button" id="resetNow">↺ Nu</button>
 			</div>
 
-
 			<div class="row">
 				<button id="toggleDigital" type="button">Visa digital tid</button>
 				<button id="toggleHelp" type="button">Visa hjälp</button>
@@ -726,11 +787,11 @@
 			const pad = (n) => String(n).padStart(2, '0');
 
 			function period(h) {
-				if (h >= 5 && h < 9) return ['morgon', '🌅', 'Det är morgon – dags att vakna! 🥣'];
-				if (h >= 9 && h < 12) return ['dag', '☀️', 'Det är förmiddag – dags att leka! 🧸'];
-				if (h >= 12 && h < 17) return ['dag', '☀️', 'Det är eftermiddag – dags för mellanmål! 🍎'];
-				if (h >= 17 && h < 21) return ['kvall', '🌇', 'Det är kväll – snart dags att bada! 🛁'];
-				return ['natt', '🌙', 'Det är natt – sov gott! 😴'];
+				if (h >= 5 && h < 9) return ['morgon', '🌅', 'Det är morgon 🥣'];
+				if (h >= 9 && h < 12) return ['dag', '☀️', 'Det är förmiddag 🧸'];
+				if (h >= 12 && h < 17) return ['dag', '☀️', 'Det är eftermiddag 🍎'];
+				if (h >= 17 && h < 21) return ['kvall', '🌇', 'Det är kväll 🛁'];
+				return ['natt', '🌙', 'Det är natt 😴'];
 			}
 
 			// ---------- Visning ----------
