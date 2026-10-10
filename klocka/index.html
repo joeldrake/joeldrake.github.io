@@ -4,17 +4,29 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Klocka</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap"
+			rel="stylesheet"
+		/>
 		<style>
 			:root {
-				--hour: #1f3a5f;
-				--minute: #2f80ed;
-				--second: #e5383b;
-				--face: #fffdf7;
-				--ink: #222;
+				--hour: #7b2cbf;
+				--minute: #0096c7;
+				--second: #ef233c;
+				--ink: #2b2d42;
+				--rim: #ff9f1c;
+				--good: #2a9d8f;
+				--bad: #e63946;
 			}
 
 			* {
 				box-sizing: border-box;
+			}
+
+			[hidden] {
+				display: none !important;
 			}
 
 			body {
@@ -23,80 +35,185 @@
 				display: flex;
 				flex-direction: column;
 				align-items: center;
-				justify-content: center;
-				gap: 1.5rem;
-				padding: 1.5rem 1rem;
+				gap: 1rem;
+				padding: 1rem 1rem 2rem;
 				font-family:
+					'Fredoka',
 					system-ui,
 					-apple-system,
 					'Segoe UI',
 					Roboto,
 					sans-serif;
-				background: #f3efe6;
 				color: var(--ink);
+				background-image: linear-gradient(#74c0fc, #e7f5ff);
+				background-attachment: fixed;
+				overflow-x: hidden;
+				transition: color 0.6s;
 			}
 
-			svg {
-				width: min(92vw, 78vh, 640px);
-				height: auto;
-				display: block;
+			/* Stjärnhimmel, syns bara på natten */
+			body::before {
+				content: '';
+				position: fixed;
+				inset: 0;
+				z-index: -1;
+				pointer-events: none;
+				opacity: 0;
+				transition: opacity 1s;
+				background-image:
+					radial-gradient(2px 2px at 8% 12%, #fff 50%, transparent 51%),
+					radial-gradient(2px 2px at 22% 30%, #fff 50%, transparent 51%),
+					radial-gradient(3px 3px at 35% 8%, #fff 50%, transparent 51%),
+					radial-gradient(2px 2px at 52% 22%, #fff 50%, transparent 51%),
+					radial-gradient(2px 2px at 68% 10%, #fff 50%, transparent 51%),
+					radial-gradient(3px 3px at 80% 26%, #fff 50%, transparent 51%),
+					radial-gradient(2px 2px at 92% 6%, #fff 50%, transparent 51%),
+					radial-gradient(2px 2px at 14% 55%, #fff 50%, transparent 51%),
+					radial-gradient(2px 2px at 88% 50%, #fff 50%, transparent 51%),
+					radial-gradient(3px 3px at 6% 80%, #fff 50%, transparent 51%),
+					radial-gradient(2px 2px at 94% 82%, #fff 50%, transparent 51%),
+					radial-gradient(2px 2px at 45% 92%, #fff 50%, transparent 51%);
 			}
 
-			.legend {
+			body[data-sky='morgon'] {
+				background-image: linear-gradient(#ffc8dd, #fff1c1);
+			}
+			body[data-sky='dag'] {
+				background-image: linear-gradient(#74c0fc, #e7f5ff);
+			}
+			body[data-sky='kvall'] {
+				background-image: linear-gradient(#5f4b8b, #ff8c69 70%, #ffd29d);
+				color: #fff;
+			}
+			body[data-sky='natt'] {
+				background-image: linear-gradient(#0b1d3a, #23395d);
+				color: #fff;
+			}
+			body[data-sky='natt']::before {
+				opacity: 1;
+			}
+			body[data-sky='lek'] {
+				background-image: linear-gradient(#b9fbc0, #fdffb6);
+			}
+
+			header {
 				display: flex;
-				flex-wrap: wrap;
-				justify-content: center;
-				gap: 0.75rem 1.75rem;
+				align-items: center;
+				gap: 0.75rem;
+				text-align: left;
+			}
+
+			.sky-icon {
+				font-size: 3rem;
+				line-height: 1;
+				animation: bob 3s ease-in-out infinite;
+			}
+
+			h1 {
+				margin: 0;
+				font-size: clamp(1.8rem, 6vw, 2.6rem);
+				font-weight: 700;
+			}
+
+			#skyText {
+				margin: 0;
 				font-size: 1.15rem;
 			}
 
-			.legend span {
-				display: inline-flex;
-				align-items: center;
-				gap: 0.5rem;
-			}
-
-			.swatch {
-				display: inline-block;
-				border-radius: 999px;
-			}
-
-			.swatch.hour {
-				width: 2rem;
-				height: 0.7rem;
-				background: var(--hour);
-			}
-			.swatch.minute {
-				width: 3rem;
-				height: 0.4rem;
-				background: var(--minute);
-			}
-			.swatch.second {
-				width: 3.4rem;
-				height: 0.15rem;
-				background: var(--second);
-			}
-
-			.digital {
+			.tabs {
 				display: flex;
-				flex-direction: column;
-				align-items: center;
+				flex-wrap: wrap;
+				justify-content: center;
 				gap: 0.5rem;
 			}
 
 			button {
 				font: inherit;
-				font-size: 1rem;
-				padding: 0.5rem 1rem;
-				border-radius: 0.5rem;
-				border: 2px solid var(--hour);
-				background: #fff;
-				color: var(--hour);
 				cursor: pointer;
+				border-radius: 999px;
+				border: 3px solid var(--ink);
+				background: #fff;
+				color: var(--ink);
+				padding: 0.45rem 1rem;
+				font-size: 1rem;
+				font-weight: 600;
+				transition:
+					transform 0.1s,
+					background 0.2s;
+			}
+
+			button:active {
+				transform: scale(0.95);
+			}
+
+			.tab {
+				font-size: 1.1rem;
+			}
+
+			.tab.active,
+			.levels button.active {
+				background: var(--ink);
+				color: #fff;
+			}
+
+			svg#clock {
+				width: min(90vw, 60vh, 560px);
+				height: auto;
+				display: block;
+				user-select: none;
+				-webkit-user-select: none;
+			}
+
+			svg#clock.draggable {
+				cursor: grab;
+				touch-action: none;
+			}
+
+			svg#clock.draggable:active {
+				cursor: grabbing;
+			}
+
+			.hand.flash {
+				animation: flash 0.35s 4;
+			}
+
+			.panel {
+				width: 100%;
+				max-width: 36rem;
+				background: rgba(255, 255, 255, 0.92);
+				color: var(--ink);
+				border-radius: 1.5rem;
+				padding: 1rem 1.25rem;
+				box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+				text-align: center;
+			}
+
+			.say {
+				margin: 0.25rem 0 0.75rem;
+				font-size: clamp(1.4rem, 5vw, 1.9rem);
+			}
+
+			.say strong {
+				color: var(--hour);
+			}
+
+			.tip {
+				margin: 0.5rem 0;
+				font-size: 1.05rem;
+			}
+
+			.row {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: center;
+				gap: 0.5rem;
+				margin-top: 0.5rem;
 			}
 
 			#digitalTime {
+				margin-top: 0.75rem;
 				font-size: 2.5rem;
+				font-weight: 700;
 				font-variant-numeric: tabular-nums;
 				letter-spacing: 0.05em;
 			}
@@ -110,72 +227,298 @@
 			#digitalTime .s {
 				color: var(--second);
 			}
+
+			.legend {
+				display: grid;
+				gap: 0.6rem;
+				text-align: left;
+			}
+
+			.hand-card {
+				display: grid;
+				grid-template-columns: 3.6rem 2.2rem 1fr;
+				align-items: center;
+				gap: 0.6rem;
+				width: 100%;
+				border-radius: 1rem;
+				border: 2px solid #e9ecef;
+				padding: 0.5rem 0.75rem;
+				text-align: left;
+				font-weight: 400;
+			}
+
+			.hand-card b {
+				display: block;
+			}
+
+			.hand-card small {
+				font-size: 0.95rem;
+			}
+
+			.animal {
+				font-size: 1.8rem;
+			}
+
+			.swatch {
+				display: inline-block;
+				border-radius: 999px;
+			}
+
+			.swatch.hour {
+				width: 2.2rem;
+				height: 0.8rem;
+				background: var(--hour);
+			}
+			.swatch.minute {
+				width: 3.4rem;
+				height: 0.45rem;
+				background: var(--minute);
+			}
+			.swatch.second {
+				width: 3.6rem;
+				height: 0.18rem;
+				background: var(--second);
+			}
+
+			.levels {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: center;
+				gap: 0.4rem;
+			}
+
+			.levels button {
+				font-size: 0.9rem;
+				padding: 0.3rem 0.8rem;
+			}
+
+			.answers {
+				display: grid;
+				gap: 0.6rem;
+			}
+
+			.answers button {
+				font-size: 1.5rem;
+				padding: 0.6rem 1rem;
+				border-radius: 1rem;
+			}
+
+			.answers button.right {
+				background: var(--good);
+				border-color: var(--good);
+				color: #fff;
+			}
+
+			.answers button.wrong {
+				background: #ffe3e3;
+				border-color: var(--bad);
+				color: var(--bad);
+				animation: shake 0.4s;
+			}
+
+			.feedback {
+				min-height: 1.6em;
+				margin: 0.75rem 0 0.25rem;
+				font-size: 1.25rem;
+				font-weight: 600;
+			}
+
+			.stars {
+				margin: 0;
+				font-size: 1.2rem;
+			}
+
+			.stars.pop {
+				animation: pop 0.5s;
+			}
+
+			.confetti {
+				position: fixed;
+				top: -16px;
+				width: 10px;
+				height: 14px;
+				border-radius: 2px;
+				z-index: 10;
+				pointer-events: none;
+				animation: fall linear forwards;
+			}
+
+			@keyframes fall {
+				to {
+					transform: translate(var(--dx), 110vh) rotate(var(--rot));
+				}
+			}
+
+			@keyframes bob {
+				50% {
+					transform: translateY(-6px);
+				}
+			}
+
+			@keyframes flash {
+				50% {
+					opacity: 0.15;
+				}
+			}
+
+			@keyframes shake {
+				20%,
+				60% {
+					transform: translateX(-8px);
+				}
+				40%,
+				80% {
+					transform: translateX(8px);
+				}
+			}
+
+			@keyframes pop {
+				50% {
+					transform: scale(1.4);
+				}
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				*,
+				*::before {
+					animation: none !important;
+				}
+			}
 		</style>
 	</head>
-	<body>
-		<svg id="clock" viewBox="-200 -200 400 400" role="img" aria-label="Analog klocka">
-			<!-- Urtavla -->
-			<circle r="190" fill="var(--face)" stroke="var(--ink)" stroke-width="8" />
+	<body data-sky="dag">
+		<header>
+			<span id="skyIcon" class="sky-icon">☀️</span>
+			<div>
+				<h1>Vad är klockan?</h1>
+				<p id="skyText"></p>
+			</div>
+		</header>
 
+		<nav class="tabs">
+			<button class="tab active" type="button" data-mode="live">🕰️ Nu</button>
+			<button class="tab" type="button" data-mode="drag">✋ Snurra själv</button>
+			<button class="tab" type="button" data-mode="quiz">⭐ Gissa tiden</button>
+		</nav>
+
+		<svg id="clock" viewBox="-200 -200 400 400" role="img" aria-label="Analog klocka">
+			<defs>
+				<filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+					<feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity="0.3" />
+				</filter>
+			</defs>
+
+			<!-- Urtavla -->
+			<circle r="196" fill="var(--rim)" />
+			<circle r="182" fill="#fffdf7" />
+
+			<g id="help" display="none"></g>
 			<g id="ticks"></g>
 			<g id="hourNumbers"></g>
 
 			<!-- Timvisare: kort och tjock -->
-			<g id="hourHand">
-				<line
-					x1="0"
-					y1="18"
-					x2="0"
-					y2="-95"
+			<g id="hourHand" class="hand" filter="url(#shadow)">
+				<path
+					d="M -10 20 L -12 -55 L 0 -90 L 12 -55 L 10 20 Z"
+					fill="var(--hour)"
 					stroke="var(--hour)"
-					stroke-width="16"
-					stroke-linecap="round"
+					stroke-width="6"
+					stroke-linejoin="round"
 				/>
 			</g>
 
-			<!-- Minutvisare: lång och mellantjock -->
-			<g id="minuteHand">
-				<line
-					x1="0"
-					y1="22"
-					x2="0"
-					y2="-160"
+			<!-- Minutvisare: lång och smal -->
+			<g id="minuteHand" class="hand" filter="url(#shadow)">
+				<path
+					d="M -5 24 L -6 -132 L 0 -160 L 6 -132 L 5 24 Z"
+					fill="var(--minute)"
 					stroke="var(--minute)"
-					stroke-width="8"
-					stroke-linecap="round"
+					stroke-width="3"
+					stroke-linejoin="round"
 				/>
 			</g>
 
-			<!-- Sekundvisare: lång, tunn och röd -->
-			<g id="secondHand">
+			<!-- Sekundvisare: tunn och röd -->
+			<g id="secondHand" class="hand">
 				<line
 					x1="0"
 					y1="35"
 					x2="0"
-					y2="-172"
+					y2="-168"
 					stroke="var(--second)"
 					stroke-width="3"
 					stroke-linecap="round"
 				/>
-				<circle r="9" fill="var(--second)" />
+				<circle cy="-140" r="7" fill="var(--second)" />
 			</g>
 
-			<circle r="4" fill="#fff" />
+			<circle r="13" fill="var(--ink)" />
+			<circle r="5" fill="#fff" />
 		</svg>
 
-		<div class="legend">
-			<span><i class="swatch hour"></i> TIMME</span>
-			<span><i class="swatch minute"></i> MINUT</span>
-			<span><i class="swatch second"></i> SEKUND</span>
-		</div>
+		<section id="timePanel" class="panel">
+			<p class="say">Klockan är <strong id="phrase"></strong></p>
 
-		<div class="digital">
-			<button id="toggleDigital" type="button">Visa digital tid</button>
+			<div id="dragControls" class="row" hidden>
+				<button type="button" data-step="-5">−5 min</button>
+				<button type="button" data-step="5">+5 min</button>
+				<button type="button" data-step="60">+1 timme</button>
+				<button type="button" id="fastForward">⏩ Snabbspola</button>
+				<button type="button" id="resetNow">↺ Nu</button>
+			</div>
+
+			<p id="tip" class="tip"></p>
+
+			<div class="row">
+				<button id="toggleDigital" type="button">Visa digital tid</button>
+				<button id="toggleHelp" type="button">Visa hjälp</button>
+			</div>
 			<div id="digitalTime" hidden></div>
-		</div>
+		</section>
+
+		<section id="quizPanel" class="panel" hidden>
+			<div class="levels">
+				<button type="button" data-level="hela">Hela timmar</button>
+				<button type="button" data-level="halv">Halvtimmar</button>
+				<button type="button" data-level="kvart">Kvartar</button>
+				<button type="button" data-level="fem">5 minuter</button>
+			</div>
+			<p class="say">Vad är klockan?</p>
+			<div id="answers" class="answers"></div>
+			<p id="feedback" class="feedback"></p>
+			<p id="stars" class="stars"></p>
+		</section>
+
+		<section class="panel legend">
+			<button class="hand-card" type="button" data-hand="hourHand">
+				<i class="swatch hour"></i>
+				<span class="animal">🐌</span>
+				<span>
+					<b>TIMME</b>
+					<small>Kort och tjock. Går långsamt som en snigel – ett varv på 12 timmar.</small>
+				</span>
+			</button>
+			<button class="hand-card" type="button" data-hand="minuteHand">
+				<i class="swatch minute"></i>
+				<span class="animal">🐇</span>
+				<span>
+					<b>MINUT</b>
+					<small>Lång. Skuttar ett helt varv på en timme.</small>
+				</span>
+			</button>
+			<button class="hand-card" type="button" data-hand="secondHand">
+				<i class="swatch second"></i>
+				<span class="animal">🐝</span>
+				<span>
+					<b>SEKUND</b>
+					<small>Tunn och röd. Surrar ett varv varje minut.</small>
+				</span>
+			</button>
+		</section>
 
 		<script>
 			const SVG_NS = 'http://www.w3.org/2000/svg';
+			const $ = (id) => document.getElementById(id);
 
 			function el(name, attrs, text) {
 				const node = document.createElementNS(SVG_NS, name);
@@ -189,29 +532,87 @@
 				return [Math.cos(rad) * radius, Math.sin(rad) * radius];
 			}
 
+			function load(key, fallback) {
+				try {
+					const v = localStorage.getItem(key);
+					return v === null ? fallback : v;
+				} catch {
+					return fallback;
+				}
+			}
+
+			function save(key, value) {
+				try {
+					localStorage.setItem(key, value);
+				} catch {}
+			}
+
+			// ---------- Urtavlan ----------
+
+			// Hjälp-fält: ÖVER / HALV / I
+			const help = $('help');
+			const sector = (a1, a2, fill) => {
+				const [x1, y1] = polar(a1, 150);
+				const [x2, y2] = polar(a2, 150);
+				return el('path', {
+					d: `M 0 0 L ${x1} ${y1} A 150 150 0 0 1 ${x2} ${y2} Z`,
+					fill,
+					opacity: 0.55
+				});
+			};
+			help.append(
+				sector(0, 135, '#b7efc5'),
+				sector(135, 225, '#ffe066'),
+				sector(225, 360, '#a5d8ff')
+			);
+			for (const [label, angle] of [
+				['ÖVER', 67.5],
+				['HALV', 180],
+				['I', 292.5]
+			]) {
+				const [x, y] = polar(angle, 64);
+				help.appendChild(
+					el(
+						'text',
+						{
+							x,
+							y,
+							'text-anchor': 'middle',
+							'dominant-baseline': 'central',
+							'font-size': 20,
+							'font-weight': 700,
+							fill: '#495057',
+							'font-family': 'Fredoka, system-ui, sans-serif'
+						},
+						label
+					)
+				);
+			}
+
 			// Markeringar: 60 minutstreck, tjockare vid varje timme
-			const ticks = document.getElementById('ticks');
+			const ticks = $('ticks');
 			for (let i = 0; i < 60; i++) {
 				const isHour = i % 5 === 0;
-				const [x1, y1] = polar(i * 6, isHour ? 160 : 172);
-				const [x2, y2] = polar(i * 6, 184);
+				const [x1, y1] = polar(i * 6, isHour ? 154 : 166);
+				const [x2, y2] = polar(i * 6, 176);
 				ticks.appendChild(
 					el('line', {
 						x1,
 						y1,
 						x2,
 						y2,
-						stroke: isHour ? 'var(--ink)' : '#777',
+						stroke: isHour ? 'var(--ink)' : '#868e96',
 						'stroke-width': isHour ? 6 : 2,
 						'stroke-linecap': 'round'
 					})
 				);
 			}
 
-			// Timsiffror 1–12, i timvisarens färg
-			const hourNumbers = document.getElementById('hourNumbers');
+			// Timsiffror 1–12 i färgglada bubblor
+			const hourNumbers = $('hourNumbers');
 			for (let h = 1; h <= 12; h++) {
-				const [x, y] = polar(h * 30, 128);
+				const [x, y] = polar(h * 30, 122);
+				hourNumbers.appendChild(el('circle', { cx: x, cy: y, r: 23, fill: `hsl(${h * 30}, 90%, 82%)` }));
 				hourNumbers.appendChild(
 					el(
 						'text',
@@ -220,44 +621,357 @@
 							y,
 							'text-anchor': 'middle',
 							'dominant-baseline': 'central',
-							'font-size': 40,
+							'font-size': 30,
 							'font-weight': 700,
-							fill: 'var(--hour)',
-							'font-family': 'system-ui, -apple-system, sans-serif'
+							fill: 'var(--ink)',
+							'font-family': 'Fredoka, system-ui, sans-serif'
 						},
 						h
 					)
 				);
 			}
 
-			const hourHand = document.getElementById('hourHand');
-			const minuteHand = document.getElementById('minuteHand');
-			const secondHand = document.getElementById('secondHand');
-			const digitalTime = document.getElementById('digitalTime');
-			const toggle = document.getElementById('toggleDigital');
+			// ---------- Tid i ord ----------
 
-			const pad = (n) => String(n).padStart(2, '0');
+			const HOURS = ['tolv', 'ett', 'två', 'tre', 'fyra', 'fem', 'sex', 'sju', 'åtta', 'nio', 'tio', 'elva'];
 
-			function update() {
-				const now = new Date();
-				const h = now.getHours();
-				const m = now.getMinutes();
-				const s = now.getSeconds();
-
-				hourHand.setAttribute('transform', `rotate(${((h % 12) + m / 60) * 30})`);
-				minuteHand.setAttribute('transform', `rotate(${(m + s / 60) * 6})`);
-				secondHand.setAttribute('transform', `rotate(${s * 6})`);
-
-				digitalTime.innerHTML = `<span class="h">${pad(h)}</span>:<span class="m">${pad(m)}</span>:<span class="s">${pad(s)}</span>`;
+			function phrase(h24, m) {
+				const r = Math.round(m / 5) * 5;
+				const prefix = m === r ? '' : m < r ? 'nästan ' : 'strax efter ';
+				const H = HOURS[h24 % 12];
+				const N = HOURS[(h24 + 1) % 12];
+				const words = {
+					0: H,
+					5: `fem över ${H}`,
+					10: `tio över ${H}`,
+					15: `kvart över ${H}`,
+					20: `tjugo över ${H}`,
+					25: `fem i halv ${N}`,
+					30: `halv ${N}`,
+					35: `fem över halv ${N}`,
+					40: `tjugo i ${N}`,
+					45: `kvart i ${N}`,
+					50: `tio i ${N}`,
+					55: `fem i ${N}`,
+					60: N
+				};
+				return prefix + words[r];
 			}
 
-			toggle.addEventListener('click', () => {
-				digitalTime.hidden = !digitalTime.hidden;
-				toggle.textContent = digitalTime.hidden ? 'Visa digital tid' : 'Dölj digital tid';
+			const capitalize = (s) => s[0].toUpperCase() + s.slice(1);
+			const pad = (n) => String(n).padStart(2, '0');
+
+			function period(h) {
+				if (h >= 5 && h < 9) return ['morgon', '🌅', 'Det är morgon – dags att vakna! 🥣'];
+				if (h >= 9 && h < 12) return ['dag', '☀️', 'Det är förmiddag – dags att leka! 🧸'];
+				if (h >= 12 && h < 17) return ['dag', '☀️', 'Det är eftermiddag – dags för mellanmål! 🍎'];
+				if (h >= 17 && h < 21) return ['kvall', '🌇', 'Det är kväll – snart dags att bada! 🛁'];
+				return ['natt', '🌙', 'Det är natt – sov gott! 😴'];
+			}
+
+			// ---------- Visning ----------
+
+			const hourHand = $('hourHand');
+			const minuteHand = $('minuteHand');
+			const secondHand = $('secondHand');
+			const svg = $('clock');
+
+			function setHands(hourDeg, minuteDeg, secondDeg) {
+				hourHand.setAttribute('transform', `rotate(${hourDeg})`);
+				minuteHand.setAttribute('transform', `rotate(${minuteDeg})`);
+				if (secondDeg !== null) secondHand.setAttribute('transform', `rotate(${secondDeg})`);
+			}
+
+			function showTexts(h24, m, s) {
+				$('phrase').textContent = phrase(h24, m);
+				const sec = s === null ? '' : `:<span class="s">${pad(s)}</span>`;
+				$('digitalTime').innerHTML = `<span class="h">${pad(h24)}</span>:<span class="m">${pad(m)}</span>${sec}`;
+				const [sky, icon, text] = period(h24);
+				document.body.dataset.sky = sky;
+				$('skyIcon').textContent = icon;
+				$('skyText').textContent = text;
+			}
+
+			// ---------- Lägen ----------
+
+			const state = { mode: 'live', total: 0, ff: false };
+
+			const nowMinutes = () => {
+				const d = new Date();
+				return d.getHours() * 60 + d.getMinutes();
+			};
+
+			function tickLive() {
+				const d = new Date();
+				const h = d.getHours();
+				const m = d.getMinutes();
+				const s = d.getSeconds();
+				setHands(((h % 12) + m / 60) * 30, (m + s / 60) * 6, s * 6);
+				showTexts(h, m, s);
+			}
+
+			function renderDrag() {
+				const t = ((state.total % 1440) + 1440) % 1440;
+				setHands((t % 720) / 2, (t % 60) * 6, null);
+				showTexts(Math.floor(t / 60), Math.floor(t % 60), null);
+			}
+
+			const TIPS = {
+				live: 'Den korta timvisaren 🐌 pekar på timmen. Den långa minutvisaren 🐇 visar minuterna.',
+				drag: 'Dra den långa minutvisaren 🐇 runt, runt – se hur den korta timvisaren 🐌 följer med! Snurra länge så blir det natt.'
+			};
+
+			function setMode(mode) {
+				state.mode = mode;
+				stopFastForward();
+				document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.mode === mode));
+				$('timePanel').hidden = mode === 'quiz';
+				$('quizPanel').hidden = mode !== 'quiz';
+				$('dragControls').hidden = mode !== 'drag';
+				secondHand.setAttribute('display', mode === 'live' ? 'inline' : 'none');
+				svg.classList.toggle('draggable', mode === 'drag');
+
+				if (mode === 'live') {
+					$('tip').textContent = TIPS.live;
+					tickLive();
+				} else if (mode === 'drag') {
+					$('tip').textContent = TIPS.drag;
+					state.total = nowMinutes();
+					renderDrag();
+				} else {
+					document.body.dataset.sky = 'lek';
+					$('skyIcon').textContent = '🎯';
+					$('skyText').textContent = 'Kan du läsa klockan?';
+					newQuestion();
+				}
+			}
+
+			document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => setMode(t.dataset.mode)));
+
+			setInterval(() => {
+				if (state.mode === 'live') tickLive();
+			}, 250);
+
+			// ---------- Snurra själv ----------
+
+			function clockAngle(e) {
+				const pt = svg.createSVGPoint();
+				pt.x = e.clientX;
+				pt.y = e.clientY;
+				const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+				const angle = ((Math.atan2(p.x, -p.y) * 180) / Math.PI + 360) % 360;
+				return { angle, dist: Math.hypot(p.x, p.y) };
+			}
+
+			const drag = { which: null, last: 0 };
+
+			svg.addEventListener('pointerdown', (e) => {
+				if (state.mode !== 'drag') return;
+				stopFastForward();
+				const { angle, dist } = clockAngle(e);
+				const hourAngle = ((((state.total % 720) + 720) % 720) / 2) % 360;
+				const diff = Math.abs(((angle - hourAngle + 540) % 360) - 180);
+				drag.which = dist < 100 && diff < 25 ? 'hour' : 'minute';
+				drag.last = angle;
+				svg.setPointerCapture(e.pointerId);
 			});
 
-			update();
-			setInterval(update, 250);
+			svg.addEventListener('pointermove', (e) => {
+				if (!drag.which) return;
+				const { angle } = clockAngle(e);
+				const delta = ((angle - drag.last + 540) % 360) - 180;
+				drag.last = angle;
+				// Ett varv med minutvisaren = 60 min, ett varv med timvisaren = 12 timmar
+				state.total += drag.which === 'minute' ? delta / 6 : delta * 2;
+				renderDrag();
+			});
+
+			const endDrag = () => {
+				if (!drag.which) return;
+				drag.which = null;
+				state.total = Math.round(state.total);
+				renderDrag();
+			};
+			svg.addEventListener('pointerup', endDrag);
+			svg.addEventListener('pointercancel', endDrag);
+
+			document.querySelectorAll('[data-step]').forEach((b) =>
+				b.addEventListener('click', () => {
+					stopFastForward();
+					state.total = Math.round(state.total) + Number(b.dataset.step);
+					renderDrag();
+				})
+			);
+
+			$('resetNow').addEventListener('click', () => {
+				stopFastForward();
+				state.total = nowMinutes();
+				renderDrag();
+			});
+
+			let lastFrame = 0;
+			function fastForwardFrame(ts) {
+				if (!state.ff) return;
+				if (lastFrame) state.total += ((ts - lastFrame) / 1000) * 20; // 20 minuter per sekund
+				lastFrame = ts;
+				renderDrag();
+				requestAnimationFrame(fastForwardFrame);
+			}
+
+			function stopFastForward() {
+				if (!state.ff) return;
+				state.ff = false;
+				state.total = Math.round(state.total);
+				$('fastForward').textContent = '⏩ Snabbspola';
+				if (state.mode === 'drag') renderDrag();
+			}
+
+			$('fastForward').addEventListener('click', () => {
+				if (state.ff) return stopFastForward();
+				state.ff = true;
+				lastFrame = 0;
+				$('fastForward').textContent = '⏸ Stopp';
+				requestAnimationFrame(fastForwardFrame);
+			});
+
+			// ---------- Knappar under klockan ----------
+
+			$('toggleDigital').addEventListener('click', (e) => {
+				const d = $('digitalTime');
+				d.hidden = !d.hidden;
+				e.currentTarget.textContent = d.hidden ? 'Visa digital tid' : 'Dölj digital tid';
+			});
+
+			$('toggleHelp').addEventListener('click', (e) => {
+				const show = help.getAttribute('display') === 'none';
+				help.setAttribute('display', show ? 'inline' : 'none');
+				e.currentTarget.textContent = show ? 'Dölj hjälp' : 'Visa hjälp';
+			});
+
+			document.querySelectorAll('[data-hand]').forEach((card) =>
+				card.addEventListener('click', () => {
+					const hand = $(card.dataset.hand);
+					hand.classList.remove('flash');
+					void hand.getBBox();
+					hand.classList.add('flash');
+				})
+			);
+
+			// ---------- Gissa tiden ----------
+
+			const LEVELS = {
+				hela: [0],
+				halv: [0, 30],
+				kvart: [0, 15, 30, 45],
+				fem: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+			};
+			const PRAISE = ['Rätt! 🎉', 'Snyggt! 🌟', 'Superbra! 🚀', 'Du kan klockan! 🏆', 'Toppen! 🥳'];
+			const HINTS = [
+				'Försök igen! Vart pekar den korta timvisaren? 🐌',
+				'Titta på den långa minutvisaren också! 🐇'
+			];
+
+			const quiz = {
+				level: LEVELS[load('klocka-level', 'hela')] ? load('klocka-level', 'hela') : 'hela',
+				stars: Number(load('klocka-stars', 0)) || 0,
+				answer: null,
+				misses: 0,
+				locked: false,
+				last: ''
+			};
+
+			const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+			function randomTime() {
+				return { h: 1 + Math.floor(Math.random() * 12), m: pick(LEVELS[quiz.level]) };
+			}
+
+			function renderStars() {
+				$('stars').textContent = `⭐ ${quiz.stars} ${quiz.stars === 1 ? 'stjärna' : 'stjärnor'}`;
+			}
+
+			function newQuestion() {
+				document.querySelectorAll('[data-level]').forEach((b) => b.classList.toggle('active', b.dataset.level === quiz.level));
+
+				let t;
+				do t = randomTime();
+				while (phrase(t.h, t.m) === quiz.last);
+
+				setHands(((t.h % 12) + t.m / 60) * 30, t.m * 6, null);
+				quiz.answer = phrase(t.h, t.m);
+				quiz.last = quiz.answer;
+				quiz.misses = 0;
+				quiz.locked = false;
+
+				// Ett av felsvaren är en timme fel – det vanligaste misstaget
+				const options = new Set([quiz.answer, phrase(t.h + pick([1, 11]), t.m)]);
+				while (options.size < 3) {
+					const r = randomTime();
+					options.add(phrase(r.h, r.m));
+				}
+
+				const answers = $('answers');
+				answers.replaceChildren();
+				for (const text of [...options].sort(() => Math.random() - 0.5)) {
+					const b = document.createElement('button');
+					b.type = 'button';
+					b.textContent = capitalize(text);
+					b.addEventListener('click', () => answer(b, text));
+					answers.appendChild(b);
+				}
+				$('feedback').textContent = '';
+				renderStars();
+			}
+
+			function answer(button, text) {
+				if (quiz.locked || button.disabled) return;
+				if (text === quiz.answer) {
+					quiz.locked = true;
+					button.classList.add('right');
+					quiz.stars++;
+					save('klocka-stars', quiz.stars);
+					renderStars();
+					$('stars').classList.remove('pop');
+					void $('stars').offsetWidth;
+					$('stars').classList.add('pop');
+					const milestone = quiz.stars % 10 === 0;
+					$('feedback').textContent = milestone ? `Wow, ${quiz.stars} stjärnor! 🏆` : pick(PRAISE);
+					confetti(milestone ? 160 : 60);
+					setTimeout(newQuestion, milestone ? 2500 : 1600);
+				} else {
+					button.classList.add('wrong');
+					button.disabled = true;
+					$('feedback').textContent = HINTS[Math.min(quiz.misses, HINTS.length - 1)];
+					quiz.misses++;
+				}
+			}
+
+			document.querySelectorAll('[data-level]').forEach((b) =>
+				b.addEventListener('click', () => {
+					quiz.level = b.dataset.level;
+					save('klocka-level', quiz.level);
+					newQuestion();
+				})
+			);
+
+			function confetti(count) {
+				if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+				const colors = ['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93', '#ff9f1c'];
+				for (let i = 0; i < count; i++) {
+					const c = document.createElement('span');
+					c.className = 'confetti';
+					c.style.left = `${Math.random() * 100}vw`;
+					c.style.background = pick(colors);
+					c.style.setProperty('--dx', `${(Math.random() - 0.5) * 200}px`);
+					c.style.setProperty('--rot', `${Math.random() * 1080}deg`);
+					c.style.animationDuration = `${1.4 + Math.random() * 1.4}s`;
+					c.style.animationDelay = `${Math.random() * 0.3}s`;
+					c.addEventListener('animationend', () => c.remove());
+					document.body.appendChild(c);
+				}
+			}
+
+			setMode('live');
 		</script>
 	</body>
 </html>
