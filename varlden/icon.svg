@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+	<rect width="512" height="512" fill="#a2d2ff" />
+	<defs>
+		<clipPath id="globe"><circle cx="256" cy="268" r="148" /></clipPath>
+	</defs>
+	<circle cx="256" cy="268" r="148" fill="#6cb4ee" />
+	<g clip-path="url(#globe)" stroke="#2b2d42" stroke-width="8" stroke-linejoin="round">
+		<path fill="#8fd694" d="M118 170 C160 140 220 150 222 192 C224 226 192 236 198 268 C204 300 236 318 226 356 C218 388 192 398 178 378 C160 350 166 318 148 296 C126 268 92 206 118 170 Z" />
+		<path fill="#ffb26b" d="M292 236 C330 222 372 238 372 270 C372 300 352 320 340 350 C330 376 306 388 296 366 C288 346 290 322 278 300 C266 278 262 246 292 236 Z" />
+		<path fill="#8fb0ff" d="M282 158 C312 136 362 140 384 168 C398 186 380 210 354 212 C326 214 300 222 284 206 C270 192 268 170 282 158 Z" />
+	</g>
+	<circle cx="256" cy="268" r="148" fill="none" stroke="#2b2d42" stroke-width="16" />
+	<g transform="translate(372 132)">
+		<path d="M0 64 C-16 40 -38 22 -38 0 A38 38 0 0 1 38 0 C38 22 16 40 0 64 Z" fill="#e63946" stroke="#2b2d42" stroke-width="8" stroke-linejoin="round" />
+		<circle cx="0" cy="0" r="13" fill="#fff" />
+	</g>
+</svg>

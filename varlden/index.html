@@ -1,0 +1,2216 @@
+<!doctype html>
+<html lang="sv">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+		<title>Världen</title>
+		<link rel="manifest" href="manifest.json" />
+		<link rel="icon" href="icon.svg" type="image/svg+xml" />
+		<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+		<meta name="theme-color" content="#a2d2ff" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="apple-mobile-web-app-title" content="Världen" />
+		<!-- Blå startskärm på iPhone (Safari använder inte manifestets background_color) -->
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/750x1334.png"
+			media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1242x2208.png"
+			media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1125x2436.png"
+			media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/828x1792.png"
+			media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1242x2688.png"
+			media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1170x2532.png"
+			media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1284x2778.png"
+			media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1179x2556.png"
+			media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1290x2796.png"
+			media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1206x2622.png"
+			media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1320x2868.png"
+			media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1260x2736.png"
+			media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap"
+			rel="stylesheet"
+		/>
+		<style>
+			:root {
+				--ink: #2b2d42;
+				--accent: #7b2cbf;
+				--good: #2a9d8f;
+				--bad: #e63946;
+				--gold: #ffb703;
+				--ocean: #6cb4ee;
+				/* Världsdelarnas färger på kartan */
+				--af: #ffb26b;
+				--eu: #8fb0ff;
+				--as: #ffd966;
+				--na: #8fd694;
+				--sa: #ff9ebb;
+				--oc: #c9a7ff;
+				--an: #f4f9ff;
+			}
+
+			* {
+				box-sizing: border-box;
+			}
+
+			/* Stäng av dubbeltryck-zoom (snabba tryck på knappar), nypzoom fungerar fortfarande */
+			html {
+				touch-action: manipulation;
+			}
+
+			[hidden] {
+				display: none !important;
+			}
+
+			body {
+				margin: 0;
+				min-height: 100vh;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 0.9rem;
+				/* Håll innehållet fritt från notch och hemindikator i helskärmsläge */
+				padding: calc(1rem + env(safe-area-inset-top, 0px))
+					calc(1rem + env(safe-area-inset-right, 0px)) calc(2rem + env(safe-area-inset-bottom, 0px))
+					calc(1rem + env(safe-area-inset-left, 0px));
+				font-family:
+					'Fredoka',
+					system-ui,
+					-apple-system,
+					'Segoe UI',
+					Roboto,
+					sans-serif;
+				color: var(--ink);
+				/* Blå grundfärg så att det aldrig blinkar vitt innan bakgrunden ritats */
+				background-color: #a2d2ff;
+				background-image: linear-gradient(#a2d2ff, #e7f5ff);
+				background-attachment: fixed;
+				overflow-x: hidden;
+			}
+
+			body[data-mode='hitta'] {
+				background-image: linear-gradient(#b9fbc0, #fdffb6);
+			}
+
+			header {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+				width: 100%;
+				max-width: 72rem;
+			}
+
+			.mode-icon {
+				font-size: 3rem;
+				line-height: 1;
+				animation: spin-bob 4s ease-in-out infinite;
+			}
+
+			h1 {
+				margin: 0;
+				font-size: clamp(1.8rem, 6vw, 2.6rem);
+				font-weight: 700;
+			}
+
+			#modeText {
+				margin: 0;
+				font-size: 1.1rem;
+				text-wrap: pretty;
+			}
+
+			.header-buttons {
+				margin-left: auto;
+				display: flex;
+				gap: 0.4rem;
+				flex: none;
+			}
+
+			#soundToggle,
+			#levelToggle {
+				font-size: 1.1rem;
+				padding: 0.3rem 0.7rem;
+				white-space: nowrap;
+			}
+
+			#soundToggle {
+				font-size: 1.4rem;
+				padding: 0.2rem 0.55rem;
+			}
+
+			.tabs {
+				display: flex;
+				justify-content: center;
+				gap: 0.5rem;
+			}
+
+			button {
+				font: inherit;
+				cursor: pointer;
+				border-radius: 999px;
+				border: 3px solid var(--ink);
+				background: #fff;
+				color: var(--ink);
+				padding: 0.45rem 1rem;
+				font-size: 1rem;
+				font-weight: 600;
+				transition:
+					transform 0.1s,
+					background 0.2s;
+			}
+
+			button:active {
+				transform: scale(0.95);
+			}
+
+			.tab {
+				font-size: clamp(0.95rem, 4vw, 1.15rem);
+				white-space: nowrap;
+			}
+
+			.tab.active {
+				background: var(--ink);
+				color: #fff;
+			}
+
+			/* ---------- Layout: kartan till vänster, kortet till höger på stora skärmar ---------- */
+
+			.layout {
+				width: 100%;
+				max-width: 72rem;
+				display: grid;
+				gap: 0.9rem;
+				align-items: start;
+			}
+
+			@media (min-width: 62rem) {
+				.layout {
+					grid-template-columns: minmax(0, 1fr) 21rem;
+				}
+			}
+
+			.map-col,
+			.side {
+				display: flex;
+				flex-direction: column;
+				gap: 0.75rem;
+				min-width: 0;
+			}
+
+			.panel {
+				width: 100%;
+				background: rgba(255, 255, 255, 0.94);
+				color: var(--ink);
+				border-radius: 1.5rem;
+				padding: 1rem 1.25rem;
+				box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+			}
+
+			@media (max-width: 480px) {
+				.panel {
+					padding-inline: 0.9rem;
+				}
+			}
+
+			/* ---------- Kartan ---------- */
+
+			.map-wrap {
+				position: relative;
+				width: 100%;
+				aspect-ratio: 1000 / 560;
+				max-height: 76vh;
+				border: 3px solid var(--ink);
+				border-radius: 1.5rem;
+				overflow: hidden;
+				background: #d6ecff;
+				box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+			}
+
+			.map-wrap.big {
+				aspect-ratio: auto;
+				height: 72vh;
+			}
+
+			#map {
+				display: block;
+				width: 100%;
+				height: 100%;
+				touch-action: none;
+				user-select: none;
+				-webkit-user-select: none;
+				-webkit-tap-highlight-color: transparent;
+				cursor: grab;
+			}
+
+			#map:active {
+				cursor: grabbing;
+			}
+
+			.sphere {
+				fill: var(--ocean);
+			}
+
+			.grat {
+				fill: none;
+				stroke: #fff;
+				stroke-opacity: 0.25;
+				stroke-width: 0.6;
+				vector-effect: non-scaling-stroke;
+			}
+
+			.land {
+				stroke: var(--ink);
+				stroke-opacity: 0.45;
+				stroke-width: 0.7;
+				stroke-linejoin: round;
+				vector-effect: non-scaling-stroke;
+				cursor: pointer;
+				transition:
+					fill 0.25s,
+					fill-opacity 0.25s;
+			}
+
+			.c-af {
+				fill: var(--af);
+			}
+			.c-eu {
+				fill: var(--eu);
+			}
+			.c-as {
+				fill: var(--as);
+			}
+			.c-na {
+				fill: var(--na);
+			}
+			.c-sa {
+				fill: var(--sa);
+			}
+			.c-oc {
+				fill: var(--oc);
+			}
+			.c-an {
+				fill: var(--an);
+			}
+
+			@media (hover: hover) {
+				.land:hover {
+					fill-opacity: 0.7;
+				}
+			}
+
+			.land.dim {
+				fill-opacity: 0.35;
+			}
+
+			.land.sel {
+				fill: var(--accent);
+				fill-opacity: 1;
+				stroke: #fff;
+				stroke-width: 2;
+				stroke-opacity: 1;
+			}
+
+			.land.right,
+			.land.reveal {
+				fill: var(--good);
+				fill-opacity: 1;
+				stroke: #fff;
+				stroke-width: 2;
+				stroke-opacity: 1;
+			}
+
+			.land.reveal {
+				animation: blink 0.8s ease-in-out infinite;
+			}
+
+			.land.wrong {
+				fill: var(--bad);
+				fill-opacity: 1;
+			}
+
+			.marker,
+			.ocean-label {
+				cursor: pointer;
+			}
+
+			.marker .pin {
+				transform-box: fill-box;
+				transform-origin: center;
+			}
+
+			.marker circle {
+				fill: #fff;
+				stroke: var(--accent);
+				stroke-width: 3;
+			}
+
+			.marker.found circle {
+				fill: #fff3c4;
+				stroke: var(--gold);
+			}
+
+			.marker.reveal .pin,
+			.marker.right .pin {
+				animation: glow 0.8s ease-in-out infinite;
+			}
+
+			.marker.right circle,
+			.marker.reveal circle {
+				stroke: var(--good);
+				stroke-width: 5;
+			}
+
+			.marker text {
+				font-size: 17px;
+			}
+
+			.ocean-label text {
+				font-size: 14px;
+				font-weight: 600;
+				font-style: italic;
+				fill: #12406e;
+				stroke: #fff;
+				stroke-width: 3px;
+				stroke-opacity: 0.6;
+				paint-order: stroke;
+				letter-spacing: 0.04em;
+			}
+
+			.ocean-label.reveal text,
+			.ocean-label.right text {
+				fill: var(--good);
+				stroke-opacity: 1;
+				animation: blink 0.8s ease-in-out infinite;
+			}
+
+			#map.hide-markers .marker {
+				display: none;
+			}
+
+			.map-tools {
+				position: absolute;
+				right: 0.5rem;
+				bottom: 0.5rem;
+				display: flex;
+				flex-direction: column;
+				gap: 0.35rem;
+			}
+
+			.map-tools button {
+				width: 2.6rem;
+				height: 2.6rem;
+				padding: 0;
+				font-size: 1.3rem;
+				line-height: 1;
+				border-width: 2px;
+				box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+			}
+
+			/* Telefon: högre karta och zoomknapparna på en rad så att de inte täcker så mycket */
+			@media (max-width: 600px) {
+				.map-wrap {
+					aspect-ratio: 1 / 0.82;
+					border-radius: 1.1rem;
+				}
+
+				.map-tools {
+					flex-direction: row;
+					right: 0.4rem;
+					bottom: 0.4rem;
+					gap: 0.3rem;
+				}
+
+				.map-tools button {
+					width: 2.2rem;
+					height: 2.2rem;
+					font-size: 1.1rem;
+				}
+			}
+
+			/* ---------- Världsdelsknappar ---------- */
+
+			.continents {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: center;
+				gap: 0.4rem;
+			}
+
+			.continents button {
+				font-size: clamp(0.85rem, 3.4vw, 1rem);
+				padding: 0.35rem 0.8rem;
+				border-width: 2px;
+				white-space: nowrap;
+				background: var(--c);
+			}
+
+			/* ---------- Frågeraden ---------- */
+
+			.quiz-bar {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+				text-align: left;
+			}
+
+			#qIcon {
+				font-size: clamp(2.6rem, 10vw, 3.4rem);
+				line-height: 1;
+				flex: none;
+			}
+
+			#qText {
+				margin: 0;
+				font-size: clamp(1.15rem, 4.5vw, 1.5rem);
+				font-weight: 600;
+				text-wrap: balance;
+			}
+
+			#qText b {
+				color: var(--accent);
+			}
+
+			#qFeedback {
+				margin: 0.2rem 0 0;
+				font-size: 1.05rem;
+				min-height: 1.4em;
+			}
+
+			#qFeedback.good {
+				color: var(--good);
+				font-weight: 600;
+			}
+
+			#qFeedback.bad {
+				color: var(--bad);
+			}
+
+			.quiz-side {
+				margin-left: auto;
+				display: flex;
+				flex-direction: column;
+				align-items: flex-end;
+				gap: 0.4rem;
+				flex: none;
+			}
+
+			#score {
+				font-size: 1.25rem;
+				font-weight: 700;
+				white-space: nowrap;
+			}
+
+			#score.pop {
+				animation: pop 0.4s;
+			}
+
+			#nextQ {
+				background: var(--good);
+				border-color: var(--good);
+				color: #fff;
+				white-space: nowrap;
+			}
+
+			#nextQ.ready {
+				background: var(--accent);
+				border-color: var(--accent);
+				animation: glow 1.2s ease-in-out infinite;
+			}
+
+			/* ---------- Infokortet ---------- */
+
+			.card {
+				animation: card-in 0.25s ease-out;
+			}
+
+			.card-head {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+			}
+
+			.card-icon {
+				font-size: clamp(3.2rem, 14vw, 4.2rem);
+				line-height: 1;
+				flex: none;
+			}
+
+			.card h2 {
+				margin: 0;
+				font-size: clamp(1.4rem, 5.5vw, 1.8rem);
+				line-height: 1.15;
+				text-wrap: balance;
+			}
+
+			.card .sub {
+				margin: 0.15rem 0 0;
+				font-size: 1rem;
+				opacity: 0.75;
+			}
+
+			.card .say {
+				margin-left: auto;
+				flex: none;
+				font-size: 1.4rem;
+				padding: 0.2rem 0.55rem;
+				align-self: flex-start;
+			}
+
+			.card .kid {
+				font-size: 1.2rem;
+				line-height: 1.45;
+				margin: 0.8rem 0 0;
+				text-wrap: pretty;
+			}
+
+			.facts {
+				display: grid;
+				gap: 0.4rem;
+				margin: 0.9rem 0 0;
+			}
+
+			.facts div {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: space-between;
+				gap: 0 0.75rem;
+				padding: 0.4rem 0.7rem;
+				background: #eef6ff;
+				border-radius: 0.75rem;
+			}
+
+			.facts dt {
+				font-weight: 600;
+			}
+
+			.facts dd {
+				margin: 0;
+				text-align: right;
+			}
+
+			.more {
+				margin-top: 0.9rem;
+				border-top: 2px dashed #d0d7e2;
+				padding-top: 0.6rem;
+			}
+
+			.more summary {
+				cursor: pointer;
+				font-weight: 600;
+				color: var(--accent);
+			}
+
+			.more p {
+				margin: 0.5rem 0 0;
+				line-height: 1.5;
+				text-wrap: pretty;
+			}
+
+			.card-actions {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.4rem;
+				margin-top: 0.9rem;
+			}
+
+			.card-actions button {
+				font-size: 0.95rem;
+				border-width: 2px;
+			}
+
+			.flags {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(4.4rem, 1fr));
+				gap: 0.3rem;
+				margin-top: 0.9rem;
+				max-height: 18rem;
+				overflow-y: auto;
+				padding: 0.2rem;
+			}
+
+			.flags button {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 0.1rem;
+				padding: 0.3rem 0.2rem;
+				border: 2px solid transparent;
+				border-radius: 0.75rem;
+				background: #f4f7fb;
+				font-size: 0.7rem;
+				font-weight: 400;
+				line-height: 1.1;
+				text-align: center;
+			}
+
+			.flags button span {
+				font-size: 1.9rem;
+				line-height: 1.1;
+			}
+
+			@media (hover: hover) {
+				.flags button:hover {
+					border-color: var(--ink);
+				}
+			}
+
+			/* ---------- Albumet med spännande platser ---------- */
+
+			.album h2 {
+				margin: 0 0 0.6rem;
+				font-size: 1.25rem;
+			}
+
+			.album-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(3.2rem, 1fr));
+				gap: 0.35rem;
+			}
+
+			.album-grid > * {
+				aspect-ratio: 1;
+				display: grid;
+				place-items: center;
+				border-radius: 0.9rem;
+				font-size: 1.7rem;
+				padding: 0;
+			}
+
+			.album-grid button {
+				background: #fff3c4;
+				border: 2px solid var(--gold);
+			}
+
+			.album-grid .locked {
+				background: #eef1f5;
+				color: #aab3c0;
+				font-size: 1.3rem;
+				font-weight: 700;
+			}
+
+			.album-grid .new {
+				animation: pop 0.5s 2;
+			}
+
+			.album-hint {
+				margin: 0.6rem 0 0;
+				font-size: 0.95rem;
+				opacity: 0.75;
+			}
+
+			.confetti {
+				position: fixed;
+				top: -16px;
+				width: 10px;
+				height: 14px;
+				border-radius: 2px;
+				z-index: 10;
+				pointer-events: none;
+				animation: fall linear forwards;
+			}
+
+			@keyframes fall {
+				to {
+					transform: translate(var(--dx), 110vh) rotate(var(--rot));
+				}
+			}
+
+			@keyframes spin-bob {
+				50% {
+					transform: translateY(-6px) rotate(-12deg);
+				}
+			}
+
+			@keyframes glow {
+				50% {
+					transform: scale(1.18);
+				}
+			}
+
+			@keyframes blink {
+				50% {
+					opacity: 0.45;
+				}
+			}
+
+			@keyframes pop {
+				50% {
+					transform: scale(1.35);
+				}
+			}
+
+			@keyframes card-in {
+				from {
+					opacity: 0;
+					transform: translateY(8px);
+				}
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				*,
+				*::before {
+					animation: none !important;
+				}
+			}
+		</style>
+	</head>
+	<body data-mode="utforska">
+		<header>
+			<span class="mode-icon" id="modeIcon">🌍</span>
+			<div>
+				<h1>Världen</h1>
+				<p id="modeText"></p>
+			</div>
+			<div class="header-buttons">
+				<button id="levelToggle" aria-label="Byt nivå"></button>
+				<button id="soundToggle" aria-label="Ljud av eller på"></button>
+			</div>
+		</header>
+
+		<nav class="tabs">
+			<button class="tab" data-mode="utforska">🗺️ Utforska</button>
+			<button class="tab" data-mode="hitta">🎯 Hitta!</button>
+		</nav>
+
+		<main class="layout">
+			<div class="map-col">
+				<section class="panel quiz-bar" id="quizBar" hidden>
+					<span id="qIcon"></span>
+					<div>
+						<p id="qText"></p>
+						<p id="qFeedback"></p>
+					</div>
+					<div class="quiz-side">
+						<span id="score">⭐ 0</span>
+						<button id="nextQ">Hoppa över ➜</button>
+					</div>
+				</section>
+
+				<div class="map-wrap" id="mapWrap">
+					<svg id="map" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Världskarta">
+						<g id="base"></g>
+						<g id="lands"></g>
+						<g id="oceans"></g>
+						<g id="markers"></g>
+					</svg>
+					<div class="map-tools">
+						<button id="zoomIn" aria-label="Zooma in">+</button>
+						<button id="zoomOut" aria-label="Zooma ut">−</button>
+						<button id="zoomHome" aria-label="Visa hela världen">🌍</button>
+						<button id="bigMap" aria-label="Större karta">⛶</button>
+					</div>
+				</div>
+
+				<nav class="continents" id="continentBar"></nav>
+			</div>
+
+			<div class="side">
+				<section class="panel card" id="card"></section>
+
+				<section class="panel album" id="album">
+					<h2 id="albumTitle"></h2>
+					<div class="album-grid" id="albumGrid"></div>
+					<p class="album-hint" id="albumHint"></p>
+				</section>
+			</div>
+		</main>
+
+		<script src="karta.js"></script>
+		<script>
+			const $ = (id) => document.getElementById(id);
+
+			function load(key, fallback) {
+				try {
+					const v = localStorage.getItem(key);
+					return v === null ? fallback : v;
+				} catch {
+					return fallback;
+				}
+			}
+
+			function save(key, value) {
+				try {
+					localStorage.setItem(key, value);
+				} catch {}
+			}
+
+			const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+			const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+			// Regional indicator-tecken blir en flagga: "SE" -> 🇸🇪
+			const flag = (code) =>
+				String.fromCodePoint(...[...code].map((ch) => 0x1f1a5 + ch.charCodeAt(0)));
+
+			// ---------- Världsdelar ----------
+
+			// box = [väst, öst, syd, nord] i grader, används för att zooma in världsdelen
+			const CONTINENTS = {
+				eu: {
+					name: 'Europa',
+					icon: '🏰',
+					box: [-25, 45, 34, 71],
+					animals: '🫎🐻🦊🦉🦌🐺',
+					kid: 'Europa är en liten världsdel där väldigt många människor bor. Här ligger Sverige! Det finns gamla slott, höga berg och massor av olika språk.',
+					facts: [
+						['🏳️', 'Länder', 'cirka 45'],
+						['🏔️', 'Högsta berg', 'Elbrus, 5 642 m'],
+						['🌊', 'Längsta flod', 'Volga, cirka 3 530 km'],
+						['👥', 'Invånare', 'cirka 745 miljoner'],
+						['📏', 'Största land', 'Ryssland (delvis), annars Ukraina']
+					],
+					more: 'Europa och Asien sitter ihop och kallas ibland tillsammans för Eurasien – gränsen dras oftast vid Uralbergen. Världens minsta land, Vatikanstaten, ligger mitt inne i Rom och är mindre än en halv kvadratkilometer.'
+				},
+				af: {
+					name: 'Afrika',
+					icon: '🦁',
+					box: [-20, 55, -36, 38],
+					animals: '🦁🐘🦒🦓🦛🐊',
+					kid: 'Afrika är en jättestor och varm världsdel med öknar, savanner och regnskogar. Här bor lejon, elefanter och giraffer!',
+					facts: [
+						['🏳️', 'Länder', '54'],
+						['🏔️', 'Högsta berg', 'Kilimanjaro, 5 895 m'],
+						['🌊', 'Längsta flod', 'Nilen, cirka 6 650 km'],
+						['👥', 'Invånare', 'cirka 1,5 miljarder'],
+						['📏', 'Största land', 'Algeriet']
+					],
+					more: 'Människans äldsta förfäder levde i Afrika – alla människor på jorden har sina rötter här. Nilen räknas oftast som världens längsta flod, och Afrika är den världsdel där befolkningen växer snabbast.'
+				},
+				as: {
+					name: 'Asien',
+					icon: '🐼',
+					box: [25, 150, -10, 78],
+					animals: '🐼🐅🐘🐪🐒🦧',
+					kid: 'Asien är den största världsdelen. Här bor fler människor än i alla andra världsdelar tillsammans! Här finns också världens högsta berg.',
+					facts: [
+						['🏳️', 'Länder', '48'],
+						['🏔️', 'Högsta berg', 'Mount Everest, 8 849 m'],
+						['🌊', 'Längsta flod', 'Yangtze, cirka 6 300 km'],
+						['👥', 'Invånare', 'cirka 4,8 miljarder'],
+						['📏', 'Största land', 'Ryssland (delvis), annars Kina']
+					],
+					more: 'Asien täcker nästan en tredjedel av jordens landyta. Både den högsta punkten på jorden (Everest) och den lägsta på land (stranden vid Döda havet, cirka 430 meter under havsytan) finns här.'
+				},
+				na: {
+					name: 'Nordamerika',
+					icon: '🦅',
+					box: [-170, -15, 7, 84],
+					animals: '🦅🐻🦬🦫🦝🐊',
+					kid: 'I Nordamerika finns både isiga Grönland och varma Karibien med palmer. Här bor björnar, bävrar och örnar.',
+					facts: [
+						['🏳️', 'Länder', '23'],
+						['🏔️', 'Högsta berg', 'Denali, 6 190 m'],
+						['🌊', 'Längsta flod', 'Mississippi–Missouri, cirka 6 300 km'],
+						['👥', 'Invånare', 'cirka 600 miljoner'],
+						['📏', 'Största land', 'Kanada']
+					],
+					more: 'Grönland hör geografiskt till Nordamerika men politiskt till Danmark. Centralamerika och öarna i Karibien räknas också till Nordamerika.'
+				},
+				sa: {
+					name: 'Sydamerika',
+					icon: '🦜',
+					box: [-82, -34, -56, 13],
+					animals: '🦜🦙🦥🐒🐆🐸',
+					kid: 'Sydamerika har världens största regnskog, Amazonas, och de långa bergen Anderna. Här bor papegojor, lamor och sengångare.',
+					facts: [
+						['🏳️', 'Länder', '12'],
+						['🏔️', 'Högsta berg', 'Aconcagua, 6 961 m'],
+						['🌊', 'Längsta flod', 'Amazonfloden, cirka 6 400 km'],
+						['👥', 'Invånare', 'cirka 440 miljoner'],
+						['📏', 'Största land', 'Brasilien']
+					],
+					more: 'Anderna är världens längsta bergskedja ovan vatten, cirka 7 000 km. Atacamaöknen i Chile är en av de torraste platserna på jorden – vissa väderstationer där har aldrig uppmätt något regn.'
+				},
+				oc: {
+					name: 'Oceanien',
+					icon: '🦘',
+					box: [110, 180, -48, 0],
+					animals: '🦘🐨🐊🦈🐢🐠',
+					kid: 'Oceanien är Australien, Nya Zeeland och tusentals öar i Stilla havet. Här hoppar kängurur och koalor sover i träden!',
+					facts: [
+						['🏳️', 'Länder', '14'],
+						['🏔️', 'Högsta berg', 'Puncak Jaya, 4 884 m'],
+						['🌊', 'Längsta flod', 'Murray, cirka 2 500 km'],
+						['👥', 'Invånare', 'cirka 45 miljoner'],
+						['📏', 'Största land', 'Australien']
+					],
+					more: 'Oceanien är den minsta världsdelen räknat i landyta, men öarna är utspridda över en enorm del av Stilla havet. Många djur, som näbbdjuret och kiwifågeln, finns ingen annanstans.'
+				},
+				an: {
+					name: 'Antarktis',
+					icon: '🐧',
+					box: [-180, 180, -90, -62],
+					animals: '🐧🦭🐋🐟',
+					kid: 'Antarktis är den kallaste platsen på jorden. Nästan allt är täckt av tjock is. Här bor pingviner och sälar – men inga människor bor här för alltid.',
+					facts: [
+						['🏳️', 'Länder', '0 – ingen äger Antarktis'],
+						['🏔️', 'Högsta berg', 'Vinsonmassivet, 4 892 m'],
+						['🥶', 'Kallast uppmätt', '−89,2 °C'],
+						['👥', 'Invånare', 'bara forskare, några tusen']
+					],
+					more: 'Isen är i snitt nästan 2 km tjock och innehåller ungefär 70 % av jordens sötvatten. Antarktis räknas som en öken eftersom det faller så lite snö. Enligt Antarktisfördraget från 1959 får kontinenten bara användas för fredlig forskning.'
+				}
+			};
+
+			// Kod och huvudstad per världsdel. Ryssland, Turkiet med flera ligger i två världsdelar.
+			const CAPITALS = {
+				eu: [
+					'SE Stockholm', 'NO Oslo', 'FI Helsingfors', 'DK Köpenhamn', 'IS Reykjavik', 'RU Moskva',
+					'GB London', 'IE Dublin', 'FR Paris', 'ES Madrid', 'PT Lissabon', 'IT Rom', 'DE Berlin',
+					'NL Amsterdam', 'BE Bryssel', 'LU Luxemburg', 'CH Bern', 'AT Wien', 'PL Warszawa',
+					'CZ Prag', 'SK Bratislava', 'HU Budapest', 'SI Ljubljana', 'HR Zagreb',
+					'BA Sarajevo', 'RS Belgrad', 'ME Podgorica', 'XK Pristina', 'MK Skopje', 'AL Tirana',
+					'GR Aten', 'BG Sofia', 'RO Bukarest', 'MD Chișinău', 'UA Kiev', 'BY Minsk',
+					'LT Vilnius', 'LV Riga', 'EE Tallinn', 'CY Nicosia'
+				],
+				af: [
+					'EG Kairo', 'LY Tripoli', 'TN Tunis', 'DZ Alger', 'MA Rabat', 'EH Laâyoune',
+					'MR Nouakchott', 'ML Bamako', 'NE Niamey', 'TD N’Djamena', 'SD Khartoum', 'SS Juba',
+					'ER Asmara', 'DJ Djibouti', 'ET Addis Abeba', 'SO Mogadishu', 'KE Nairobi',
+					'UG Kampala', 'RW Kigali', 'BI Gitega', 'TZ Dodoma', 'SN Dakar', 'GM Banjul',
+					'GW Bissau', 'GN Conakry', 'SL Freetown', 'LR Monrovia', 'CI Yamoussoukro',
+					'BF Ouagadougou', 'GH Accra', 'TG Lomé', 'BJ Porto-Novo', 'NG Abuja',
+					'CM Yaoundé', 'CF Bangui', 'GQ Malabo', 'GA Libreville', 'CG Brazzaville',
+					'CD Kinshasa', 'AO Luanda', 'ZM Lusaka', 'MW Lilongwe', 'MZ Maputo', 'ZW Harare',
+					'BW Gaborone', 'NA Windhoek', 'ZA Pretoria', 'LS Maseru', 'SZ Mbabane',
+					'MG Antananarivo'
+				],
+				as: [
+					'CN Peking', 'IN New Delhi', 'JP Tokyo', 'KR Seoul', 'KP Pyongyang', 'MN Ulaanbaatar',
+					'KZ Astana', 'UZ Tasjkent', 'TM Asjchabad', 'KG Bisjkek', 'TJ Dusjanbe',
+					'AF Kabul', 'PK Islamabad', 'NP Katmandu', 'BT Thimphu', 'BD Dhaka',
+					'LK Sri Jayawardenepura Kotte', 'MM Naypyidaw', 'TH Bangkok', 'LA Vientiane',
+					'KH Phnom Penh', 'VN Hanoi', 'MY Kuala Lumpur', 'BN Bandar Seri Begawan',
+					'ID Jakarta', 'TL Dili', 'PH Manila', 'TW Taipei', 'TR Ankara', 'GE Tbilisi',
+					'AM Jerevan', 'AZ Baku', 'IR Teheran', 'IQ Bagdad', 'SY Damaskus', 'LB Beirut',
+					'IL Jerusalem (omstridd)', 'PS Ramallah (regeringssäte)', 'JO Amman',
+					'SA Riyadh', 'YE Sanaa', 'OM Muskat', 'AE Abu Dhabi', 'QA Doha', 'KW Kuwait City'
+				],
+				na: [
+					'US Washington D.C.', 'CA Ottawa', 'MX Mexico City', 'GL Nuuk', 'GT Guatemala City',
+					'BZ Belmopan', 'SV San Salvador', 'HN Tegucigalpa', 'NI Managua', 'CR San José',
+					'PA Panama City', 'CU Havanna', 'JM Kingston', 'HT Port-au-Prince',
+					'DO Santo Domingo', 'PR San Juan', 'BS Nassau', 'TT Port of Spain'
+				],
+				sa: [
+					'BR Brasília', 'AR Buenos Aires', 'CL Santiago', 'PE Lima', 'CO Bogotá', 'VE Caracas',
+					'EC Quito', 'BO Sucre', 'PY Asunción', 'UY Montevideo', 'GY Georgetown',
+					'SR Paramaribo', 'FK Stanley'
+				],
+				oc: [
+					'AU Canberra', 'NZ Wellington', 'PG Port Moresby', 'FJ Suva', 'SB Honiara',
+					'VU Port Vila', 'NC Nouméa'
+				],
+				an: ['AQ', 'TF']
+			};
+
+			const NAME_FIX = { PS: 'Palestina', MM: 'Myanmar' };
+
+			// Rolig fakta som ett barn förstår. Länder utan egen fakta får en enkel mening.
+			const FACTS = {
+				SE: 'Här bor vi! Sverige har nästan 100 000 sjöar och massor av älgar. 🫎',
+				NO: 'Norge har långa, djupa havsvikar som heter fjordar. Där kan man se valar! 🐋',
+				FI: 'I Finland finns nästan 190 000 sjöar. Och bastun kommer härifrån! 🧖',
+				DK: 'Legot uppfanns i Danmark! 🧱',
+				IS: 'Island har vulkaner, varma källor och gejsrar som sprutar hett vatten högt upp i luften! 🌋',
+				GL: 'Grönland är världens största ö – men nästan hela ön är täckt av is! 🧊',
+				RU: 'Ryssland är världens största land. När det är kväll på ena sidan är det morgon på den andra – landet har 11 tidszoner!',
+				CN: 'I Kina bor jättepandan, och här finns Kinesiska muren. 🐼',
+				IN: 'I Indien bor fler människor än i något annat land – över 1,4 miljarder! 🐘',
+				JP: 'Japan består av fler än 14 000 öar. Här kör supersnabba tåg! 🚄',
+				US: 'USA har 50 delstater. Här finns Grand Canyon, Hollywood och Frihetsgudinnan. 🗽',
+				CA: 'Kanada har världens längsta kust och fler sjöar än något annat land. 🍁',
+				MX: 'I Mexiko byggde mayafolket pyramider för länge sedan. Och tacos kommer härifrån! 🌮',
+				BR: 'Brasilien är störst i Sydamerika. Det mesta av Amazonas regnskog finns här! 🦜',
+				AR: 'I Argentina finns både jättehöga berg och isiga glaciärer. Och här dansar man tango! 💃',
+				CL: 'Chile är jättelångt och smalt – över 4 000 km långt men i snitt bara 18 mil brett.',
+				PE: 'I Peru finns Machu Picchu, en gammal inkastad högt uppe bland bergen. 🦙',
+				EG: 'I Egypten finns pyramiderna och floden Nilen. Faraonerna levde här för tusentals år sedan. 🐫',
+				KE: 'I Kenya kan man åka på safari och se lejon, elefanter och giraffer. 🦒',
+				TZ: 'Här finns Kilimanjaro, Afrikas högsta berg – med snö på toppen fast det är varmt runt omkring! 🏔️',
+				ZA: 'Sydafrika har tre huvudstäder! Och pingviner som bor på stranden. 🐧',
+				MG: 'På Madagaskar bor lemurer – djur som inte finns någon annanstans i världen! 🐒',
+				AU: 'I Australien bor kängurur och koalor. Det är både ett land och nästan en hel världsdel! 🦘',
+				NZ: 'I Nya Zeeland finns det fler får än människor! 🐑',
+				GB: 'Här bor kungen, och man kör bil på vänster sida av vägen. ☂️',
+				FR: 'Eiffeltornet står i Paris. Fransmän äter långa bröd som heter baguetter! 🥖',
+				DE: 'Tyskland har tusentals slott och borgar – och väldigt många sorters korv! 🏰',
+				IT: 'Italien ser ut som en stövel på kartan! Pizzan kommer härifrån. 🍕',
+				ES: 'I Spanien är det varmt och soligt. Där äter många middag sent – klockan tio på kvällen! ☀️',
+				GR: 'Grekland har tusentals öar. De gamla grekerna hittade på de olympiska spelen! 🏛️',
+				NL: 'En stor del av Nederländerna ligger under havsytan. Här finns fler cyklar än människor! 🚲',
+				CH: 'Schweiz är känt för höga Alpberg, choklad och klockor. 🍫',
+				TR: 'Turkiet ligger i både Europa och Asien. Staden Istanbul ligger på båda sidor! 🌉',
+				MN: 'I Mongoliet finns det fler hästar än människor. Många bor i runda tält som heter jurtor. 🐎',
+				NP: 'Mount Everest ligger på gränsen mellan Nepal och Kina. Nepals flagga är den enda som inte är fyrkantig!',
+				SA: 'Saudiarabien är mest öken, och det finns inga floder som rinner året runt! 🐪',
+				ID: 'Indonesien består av över 17 000 öar och har massor av vulkaner. 🌋',
+				TH: 'Thailand kallas leendets land. Här finns elefanter och gyllene tempel. 🐘',
+				CD: 'Kongofloden är världens djupaste flod – på sina ställen över 200 meter djup! Här bor gorillor. 🦍',
+				ET: 'I Etiopien började man dricka kaffe. Deras kalender har 13 månader! ☕',
+				MA: 'I Marocko finns både Saharas sanddyner och snöiga berg. 🐪',
+				NG: 'Nigeria är landet i Afrika där flest människor bor. 🎶',
+				PH: 'Filippinerna består av över 7 000 öar. 🏝️',
+				CU: 'På Kuba kör många fortfarande färgglada gamla bilar från 1950-talet. 🚗',
+				JM: 'På Jamaica föddes Usain Bolt, världens snabbaste löpare. ⚡',
+				IE: 'Irland kallas den gröna ön. Där finns inga vilda ormar! ☘️',
+				UA: 'Ukraina är det största landet som ligger helt i Europa. Här växer massor av solrosor. 🌻',
+				PL: 'I Polen finns en urgammal skog där visenter, Europas största djur, bor. 🦬',
+				AT: 'Den berömda kompositören Mozart föddes i Österrike. 🎻',
+				PT: 'Portugiserna var stora sjöfarare som seglade jorden runt för länge sedan. ⛵',
+				KZ: 'Kazakstan är världens största land som inte har någon kust mot havet. 🐎',
+				BO: 'Bolivia har världens största saltöken. När det regnar blir den en jättelik spegel! 🪞',
+				VE: 'Här finns världens högsta vattenfall, Angelfallet. 💦',
+				EC: 'Ecuador har fått sitt namn efter ekvatorn, som går rakt genom landet. 🐢',
+				CO: 'Colombia har fler fågelarter än något annat land i världen. 🦜',
+				PG: 'På Papua Nya Guinea talas över 800 olika språk! 🗣️',
+				KR: 'I Sydkorea finns några av världens snabbaste internetuppkopplingar – och massor av kimchi. 🥬',
+				AQ: 'Antarktis är inget land – ingen äger det. Här bor bara forskare och pingviner. 🐧'
+			};
+
+			const OCEANS = {
+				pacific: {
+					name: 'Stilla havet',
+					icon: '🐋',
+					label: [-140, 5],
+					kid: 'Världens största och djupaste hav. Det är större än allt land på jorden tillsammans!',
+					facts: [
+						['📐', 'Yta', 'cirka 165 miljoner km²'],
+						['⬇️', 'Djupast', 'Marianergraven, nästan 11 000 m']
+					],
+					more: 'Trots namnet är Stilla havet inte särskilt stilla. Runt kanterna finns den så kallade eldringen, med hundratals vulkaner och många jordbävningar.'
+				},
+				atlantic: {
+					name: 'Atlanten',
+					icon: '🚢',
+					label: [-38, 22],
+					kid: 'Det näst största havet. Det ligger mellan Europa, Afrika och Amerika. Titanic sjönk här!',
+					facts: [
+						['📐', 'Yta', 'cirka 106 miljoner km²'],
+						['⬇️', 'Djupast', 'Puerto Rico-graven, cirka 8 400 m']
+					],
+					more: 'Golfströmmen för varmt vatten hela vägen från Mexikanska golfen till Norden – därför är det mycket mildare i Sverige än i Kanada på samma breddgrad. Atlanten blir några centimeter bredare varje år.'
+				},
+				indian: {
+					name: 'Indiska oceanen',
+					icon: '🐠',
+					label: [77, -22],
+					kid: 'Det varmaste havet! Här finns korallrev och massor av färgglada fiskar.',
+					facts: [
+						['📐', 'Yta', 'cirka 70 miljoner km²'],
+						['⬇️', 'Djupast', 'Javagraven, cirka 7 200 m']
+					],
+					more: 'Monsunvindarna här byter riktning med årstiderna och har styrt sjöfarten i tusentals år. Valhajen, världens största fisk, simmar här.'
+				},
+				arctic: {
+					name: 'Norra ishavet',
+					icon: '🐻‍❄️',
+					label: [32, 77],
+					kid: 'Det minsta och kallaste havet, högst upp på jorden. Mycket av havet är täckt av is. Här jagar isbjörnar sälar!',
+					facts: [['📐', 'Yta', 'cirka 14 miljoner km²']],
+					more: 'Havsisen krymper: på sommaren täcker den en mycket mindre yta än på 1980-talet. Här lever narvalen, valen med en lång spiralformad tand.'
+				},
+				southern: {
+					name: 'Södra ishavet',
+					icon: '🧊',
+					label: [60, -58],
+					kid: 'Havet som går runt hela Antarktis. Här simmar pingviner, sälar och jättestora blåvalar!',
+					facts: [['📐', 'Yta', 'cirka 21 miljoner km²']],
+					more: 'Strömmen runt Antarktis är världens kraftigaste havsström. Den går runt hela jorden utan att stoppas av något land.'
+				},
+				med: {
+					name: 'Medelhavet',
+					icon: '⛱️',
+					parent: 'atlantic',
+					kid: 'Ett varmt hav mellan Europa och Afrika dit många åker på semester. Vattnet är salt och klart!',
+					facts: [['📐', 'Yta', 'cirka 2,5 miljoner km²']],
+					more: 'Medelhavet hänger ihop med Atlanten genom Gibraltarsundet, som bara är 14 km brett. Romarna kallade det Mare Nostrum – "vårt hav".'
+				},
+				baltic: {
+					name: 'Östersjön',
+					icon: '⛵',
+					parent: 'atlantic',
+					kid: 'Havet vid Sveriges kust! Vattnet är bara lite salt, så både havsfiskar och sjöfiskar kan bo här.',
+					facts: [['📐', 'Yta', 'cirka 380 000 km²']],
+					more: 'Östersjön bildades efter senaste istiden. Vattnet byts ut långsamt – det tar omkring 30 år. Skeppsmasken trivs inte i det bräckta vattnet, och därför har regalskeppet Vasa bevarats så bra.'
+				}
+			};
+
+			// Spännande platser: [longitud, latitud]
+			const PLACES = [
+				{
+					icon: '🌀', name: 'Bermudatriangeln', at: [-70, 26],
+					q: 'Var försvinner båtar på mystiska sätt?',
+					kid: 'Ett område i havet där det sägs att båtar och flygplan försvunnit på mystiska sätt! Vågar du segla hit? ⛵',
+					more: 'Legenden tog fart efter att fem amerikanska bombplan, Flight 19, försvann här 1945. Men det försvinner inte fler fartyg här än i andra hårt trafikerade hav – oväder, Golfströmmen och mänskliga misstag förklarar det mesta.'
+				},
+				{
+					icon: '🦕', name: 'Loch Ness', at: [-4.45, 57.3],
+					q: 'Var bor sjöodjuret Nessie?',
+					kid: 'En djup sjö i Skottland där det sägs bo ett sjöodjur som heter Nessie. Många har letat – ingen har hittat henne!',
+					more: 'Det mest kända fotot av Nessie, från 1934, visade sig 60 år senare vara en bluff: en leksaksubåt med ett modellhuvud. Sjön är upp till 230 meter djup och rymmer mer vatten än alla sjöar i England och Wales tillsammans.'
+				},
+				{
+					icon: '🎅', name: 'Nordpolen', at: [0, 86],
+					q: 'Var ligger Nordpolen?',
+					kid: 'Allra högst upp på jorden! Här finns inget land – bara is som flyter på havet. Isbjörnar och, enligt sagorna, tomten bor i närheten. 🐻‍❄️',
+					more: 'Under isen är havet över 4 000 meter djupt. På Nordpolen pekar alla håll åt söder, och solen går bara upp och ner en gång per år. 2007 satte en rysk miniubåt en flagga på havsbotten rakt under polen.'
+				},
+				{
+					icon: '❄️', name: 'Sydpolen', at: [0, -84],
+					q: 'Var ligger Sydpolen?',
+					kid: 'Längst ner på jorden, mitt på Antarktis. Isen här är flera kilometer tjock – tjockare än de högsta bergen i Sverige är höga!',
+					more: 'Norrmannen Roald Amundsen kom först, den 14 december 1911. Britten Robert Falcon Scott kom fram fem veckor senare och omkom på vägen hem. I dag finns en forskningsstation precis vid polen, på is som är cirka 2 700 meter tjock.'
+				},
+				{
+					icon: '🏔️', name: 'Mount Everest', at: [86.93, 27.99],
+					q: 'Var är världens högsta berg?',
+					kid: 'Världens högsta berg! Toppen är nästan lika högt upp som flygplanen flyger. Vissa tror att snömannen Yeti bor här.',
+					more: '8 849 meter över havet. Edmund Hillary och Tenzing Norgay var först på toppen 1953. Berget växer fortfarande några millimeter per år eftersom Indien trycker in i resten av Asien.'
+				},
+				{
+					icon: '🔺', name: 'Pyramiderna i Giza', at: [31.13, 29.98],
+					q: 'Var finns de stora pyramiderna?',
+					kid: 'Jättestora pyramider som byggdes åt egyptiska faraoner för över 4 500 år sedan – utan kranar eller maskiner!',
+					more: 'Den stora Cheopspyramiden var från början 146 meter hög och var världens högsta byggnad i nästan 4 000 år. Den består av ungefär 2,3 miljoner stenblock och är det enda av antikens sju underverk som finns kvar.'
+				},
+				{
+					icon: '🌊', name: 'Marianergraven', at: [142.2, 11.35],
+					q: 'Var är havet som allra djupast?',
+					kid: 'Det djupaste stället i hela havet! Om man sänkte ner Mount Everest här skulle toppen inte ens nå upp till ytan.',
+					more: 'Challengerdjupet är nästan 11 000 meter djupt, och trycket där är över 1 000 gånger högre än vid ytan. Jacques Piccard och Don Walsh tog sig ner 1960, och filmregissören James Cameron dök ensam 2012.'
+				},
+				{
+					icon: '🗿', name: 'Påskön', at: [-109.35, -27.1],
+					q: 'Var finns de stora stenhuvudena?',
+					kid: 'En liten ö mitt i Stilla havet full av jättelika stenhuvuden. Hur flyttade man dem? Kanske fick man dem att "gå"!',
+					more: 'Det finns nästan 1 000 statyer, moai, som rapanuifolket högg ut för 500–800 år sedan. Forskare har visat att man kan "gå" med en staty genom att gunga den framåt med rep. Påskön är en av världens mest avlägsna bebodda öar.'
+				},
+				{
+					icon: '👽', name: 'Area 51', at: [-115.8, 37.24],
+					q: 'Var tror vissa att ufon gömmer sig?',
+					kid: 'En hemlig militärbas i öknen i USA. Vissa tror att det finns rymdvarelser och ufon där! 🛸',
+					more: 'Basen i Nevada var så hemlig att CIA officiellt erkände att den fanns först 2013. Många ufo-observationer på 1950- och 60-talen var troligen hemliga spionplan, som U-2, som flög högre än alla andra plan på den tiden.'
+				},
+				{
+					icon: '🐉', name: 'Kinesiska muren', at: [116.57, 40.43],
+					q: 'Var finns den jättelånga muren?',
+					kid: 'En mur som är så lång att det skulle ta månader att gå längs hela! Den byggdes för att skydda Kina.',
+					more: 'Alla delar tillsammans är cirka 21 000 km. Att den syns från månen är en myt – den är för smal. De mest kända delarna byggdes under Mingdynastin för omkring 500 år sedan.'
+				},
+				{
+					icon: '🐢', name: 'Galápagosöarna', at: [-90.5, -0.6],
+					q: 'Var bor jättesköldpaddorna?',
+					kid: 'Öar där jättesköldpaddor kan bli över 100 år gamla. Här finns också ödlor som simmar i havet!',
+					more: 'Charles Darwin besökte öarna 1835, och djuren här hjälpte honom att utveckla evolutionsteorin. Öarna tillhör Ecuador och ligger nästan precis på ekvatorn.'
+				},
+				{
+					icon: '🐠', name: 'Stora barriärrevet', at: [147, -18],
+					q: 'Var bor Nemo?',
+					kid: 'Världens största korallrev, fullt av färgglada fiskar och sköldpaddor – här bor Nemo! Det syns till och med från rymden.',
+					more: 'Revet är över 2 300 km långt och består av nästan 3 000 enskilda rev. Det är det största som byggts av levande varelser, men varmare hav gör att korallerna bleks.'
+				},
+				{
+					icon: '🦙', name: 'Machu Picchu', at: [-72.55, -13.16],
+					q: 'Var ligger inkornas stad i bergen?',
+					kid: 'En gammal stad byggd högt uppe i bergen av inkafolket. Lamor går och betar bland ruinerna!',
+					more: 'Staden byggdes på 1400-talet, 2 430 meter över havet. Spanjorerna hittade den aldrig, så den är välbevarad. Upptäcktsresanden Hiram Bingham gjorde den känd för omvärlden 1911.'
+				},
+				{
+					icon: '🧛', name: 'Draculas slott', at: [25.37, 45.52],
+					q: 'Var bor vampyren Dracula?',
+					kid: 'Ett spöklikt slott i Transsylvanien i Rumänien. Här ska vampyren Dracula ha bott – buu! 🦇',
+					more: 'Bran-slottet kallas Draculas slott, men författaren Bram Stoker var aldrig där. Romanen Dracula från 1897 inspirerades delvis av fursten Vlad Pålspetsaren, som levde på 1400-talet.'
+				},
+				{
+					icon: '🚢', name: 'Titanic', at: [-49.95, 41.73],
+					q: 'Var sjönk Titanic?',
+					kid: 'Här på havets botten ligger det stora fartyget Titanic, som sjönk efter att ha krockat med ett isberg.',
+					more: 'Titanic sjönk natten mot den 15 april 1912, på sin allra första resa. Över 1 500 människor omkom. Vraket ligger på 3 800 meters djup och hittades först 1985.'
+				},
+				{
+					icon: '🐍', name: 'Amazonas regnskog', at: [-62, -4],
+					q: 'Var är världens största regnskog?',
+					kid: 'Världens största regnskog! Här bor apor, papegojor, jaguarer och jättelånga ormar.',
+					more: 'Regnskogen är mer än tolv gånger så stor som Sverige. Ungefär var tionde känd art på jorden lever här, och Amazonfloden för med sig mer vatten än någon annan flod.'
+				},
+				{
+					icon: '🐪', name: 'Sahara', at: [10, 23],
+					q: 'Var är världens största varma öken?',
+					kid: 'Världens största varma öken – nästan lika stor som hela USA. Vissa sanddyner är högre än skyskrapor!',
+					more: 'För 6 000–10 000 år sedan var Sahara grönt, med sjöar, giraffer och flodhästar – det syns på gamla grottmålningar. De högsta sanddynerna är över 180 meter.'
+				},
+				{
+					icon: '🌌', name: 'Norrskenet i Abisko', at: [18.8, 68.35],
+					q: 'Var kan man se norrsken i Sverige?',
+					kid: 'Här i norra Sverige kan man se norrsken – gröna ljus som dansar på himlen på vintern!',
+					more: 'Norrsken uppstår när partiklar från solen krockar med luften 100–300 km upp i atmosfären. Abisko har ofta klar himmel. I Jukkasjärvi i närheten byggs ett hotell av is varje vinter.'
+				},
+				{
+					icon: '🪨', name: 'Uluru', at: [131.04, -25.34],
+					q: 'Var finns den stora röda klippan?',
+					kid: 'En jättestor röd klippa mitt i Australiens öken. Den byter färg när solen går ner!',
+					more: 'Uluru är 348 meter hög och fortsätter långt ner under marken. Den är helig för anangufolket, och sedan 2019 är det förbjudet att klättra på den.'
+				},
+				{
+					icon: '🦓', name: 'Serengeti', at: [34.8, -2.3],
+					q: 'Var vandrar miljoner gnuer och zebror?',
+					kid: 'En stor slätt i Afrika där miljoner gnuer och zebror vandrar runt i en jättelång ring varje år. Lejonen följer efter! 🦁',
+					more: 'Den stora migrationen omfattar cirka 1,5 miljoner gnuer och hundratusentals zebror och gaseller, som vandrar mellan Tanzania och Kenya efter regnet och det färska gräset.'
+				},
+				{
+					icon: '🌋', name: 'Yellowstone', at: [-110.6, 44.4],
+					q: 'Var finns supervulkanen?',
+					kid: 'Under den här nationalparken finns en supervulkan! Gejsrar sprutar kokhett vatten högt upp i luften.',
+					more: 'Yellowstone blev världens första nationalpark 1872. Gejsern Old Faithful får utbrott ungefär var 90:e minut. Supervulkanen har haft tre jättelika utbrott de senaste 2,1 miljoner åren.'
+				},
+				{
+					icon: '💥', name: 'Tunguska', at: [101.9, 60.9],
+					q: 'Var small det så att 80 miljoner träd föll?',
+					kid: 'En morgon 1908 small det så hårt i Sibirien att träden föll omkull i en jättestor cirkel. Vad var det? Kanske en bit av en komet!',
+					more: 'Explosionen fällde omkring 80 miljoner träd över 2 000 km². Den orsakades troligen av en meteorit eller komet som exploderade i luften några kilometer upp – därför finns ingen krater.'
+				},
+				{
+					icon: '🗼', name: 'Eiffeltornet', at: [2.29, 48.86],
+					q: 'Var står Eiffeltornet?',
+					kid: 'Ett jättehögt järntorn i Paris. På sommaren blir det några centimeter högre när värmen får järnet att växa!',
+					more: 'Tornet byggdes till världsutställningen 1889 och skulle egentligen rivas efter 20 år. Det är 330 meter högt och målas om ungefär vart sjunde år med cirka 60 ton färg.'
+				},
+				{
+					icon: '🌄', name: 'Stonehenge', at: [-1.83, 51.18],
+					q: 'Var står den gamla stenringen?',
+					kid: 'En ring av jättestenar som byggdes för 5 000 år sedan. Ingen vet säkert varför!',
+					more: 'Stenarna står så att solen går upp i linje med dem vid midsommar. Några av de så kallade blåstenarna fraktades över 20 mil från Wales.'
+				},
+				{
+					icon: '🐒', name: 'Nazcalinjerna', at: [-75.1, -14.7],
+					q: 'Var finns de jättestora teckningarna i öknen?',
+					kid: 'Jättestora teckningar i öknen – en apa, en kolibri och en spindel. Man ser dem bara ordentligt från luften!',
+					more: 'Linjerna gjordes av nazcafolket för omkring 2 000 år sedan genom att flytta undan mörka stenar. Varför vet ingen säkert – kanske för ceremonier kopplade till vatten.'
+				},
+				{
+					icon: '🌈', name: 'Angelfallet', at: [-62.53, 5.97],
+					q: 'Var är världens högsta vattenfall?',
+					kid: 'Världens högsta vattenfall! Vattnet faller så långt att det blir dimma innan det når marken.',
+					more: 'Fallet är 979 meter högt, varav 807 meter i ett enda fritt fall. Det är uppkallat efter piloten Jimmie Angel, som flög över det 1933.'
+				},
+				{
+					icon: '🗻', name: 'Fuji', at: [138.73, 35.36],
+					q: 'Var ligger Japans högsta berg?',
+					kid: 'Japans högsta berg är en vulkan med snö på toppen. Det är så vackert att det finns på massor av tavlor!',
+					more: 'Fuji är 3 776 meter hög. Senaste utbrottet var 1707. Varje sommar klättrar hundratusentals människor upp till toppen.'
+				},
+				{
+					icon: '🕌', name: 'Taj Mahal', at: [78.04, 27.17],
+					q: 'Var står det vackra vita palatset?',
+					kid: 'En vit marmorbyggnad som en kejsare byggde till minne av sin älskade fru.',
+					more: 'Taj Mahal byggdes 1632–1653 av stormogulen Shah Jahan för Mumtaz Mahal. Marmorn skiftar färg från rosa på morgonen till vit mitt på dagen och gyllene i månsken.'
+				},
+				{
+					icon: '💦', name: 'Niagarafallen', at: [-79.07, 43.08],
+					q: 'Var ligger de brusande vattenfallen?',
+					kid: 'Brusande vattenfall på gränsen mellan USA och Kanada. Folk har till och med åkt ner för fallen i tunnor!',
+					more: 'Varje sekund forsar flera tusen kubikmeter vatten över fallen. Den första som överlevde färden i en tunna var 63-åriga läraren Annie Edson Taylor år 1901.'
+				}
+			];
+
+			const PRAISE = ['Rätt! 🎉', 'Snyggt! 🌟', 'Superbra! 🚀', 'Du kan det här! 🏆', 'Toppen! 🥳'];
+
+			// Välkända länder som passar barnens frågor
+			const KID_COUNTRIES = ['SE', 'NO', 'FI', 'DK', 'IS', 'GL', 'US', 'CA', 'MX', 'BR', 'AR', 'AU', 'CN', 'IN', 'JP', 'RU', 'EG', 'ZA', 'FR', 'IT', 'ES', 'GB', 'DE', 'MG', 'NZ'];
+
+			// ---------- Projektion (Natural Earth 1, samma som kartdatan) ----------
+
+			function project(lon, lat) {
+				const l = (lon * Math.PI) / 180;
+				const p = (lat * Math.PI) / 180;
+				const p2 = p * p;
+				const p4 = p2 * p2;
+				const x = l * (0.8707 - 0.131979 * p2 + p4 * (-0.013791 + p4 * (0.003971 * p2 - 0.001529 * p4)));
+				const y = p * (1.007226 + p2 * (0.015085 + p4 * (-0.044475 + 0.028874 * p2 - 0.005916 * p4)));
+				return [MAP.tx + MAP.k * x, MAP.ty - MAP.k * y];
+			}
+
+			function invert(X, Y) {
+				const x = (X - MAP.tx) / MAP.k;
+				const y = (MAP.ty - Y) / MAP.k;
+				let p = y;
+				for (let i = 0; i < 25; i++) {
+					const p2 = p * p;
+					const p4 = p2 * p2;
+					const delta =
+						(p * (1.007226 + p2 * (0.015085 + p4 * (-0.044475 + 0.028874 * p2 - 0.005916 * p4))) - y) /
+						(1.007226 + p2 * (0.015085 * 3 + p4 * (-0.044475 * 7 + 0.028874 * 9 * p2 - 0.005916 * 11 * p4)));
+					p -= delta;
+					if (Math.abs(delta) < 1e-6) break;
+				}
+				const p2 = p * p;
+				const l = x / (0.8707 + p2 * (-0.131979 + p2 * (-0.013791 + p2 * p2 * p2 * (0.003971 - 0.001529 * p2))));
+				const lon = (l * 180) / Math.PI;
+				const lat = (p * 180) / Math.PI;
+				return Math.abs(lon) > 180 || Math.abs(lat) > 90 ? null : [lon, lat];
+			}
+
+			// Grovt: vilket hav ligger en punkt i? Land fångas redan av länderna.
+			function oceanAt(lon, lat) {
+				if (lat > 66) return 'arctic';
+				if (lat < -60) return 'southern';
+				if (lat > 53 && lat < 66 && lon > 9 && lon < 31) return 'baltic';
+				if (lat > 30 && lat < 46 && lon > -6 && lon < 37) return 'med';
+				if (lat <= 30 && lon >= 20 && (lon < 100 || (lon < 147 && lat < -12))) return 'indian';
+				const west = lat < 8 ? -70 : lat < 15 ? -84 : -100;
+				if (lon > west && lon < 20) return 'atlantic';
+				if (lat > 30 && lon >= 20 && lon < 100) return null; // Svarta havet, Kaspiska havet m.fl.
+				return 'pacific';
+			}
+
+			// Omslutande ruta i kartkoordinater för ett område i grader
+			function boxFromLonLat([w, e, s, n]) {
+				const pts = [];
+				for (let i = 0; i <= 12; i++) {
+					const lon = w + ((e - w) * i) / 12;
+					const lat = s + ((n - s) * i) / 12;
+					pts.push(project(lon, s), project(lon, n), project(w, lat), project(e, lat));
+				}
+				const xs = pts.map((p) => p[0]);
+				const ys = pts.map((p) => p[1]);
+				return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
+			}
+
+			// ---------- Data ----------
+
+			const INFO = {};
+			for (const [cont, list] of Object.entries(CAPITALS)) {
+				for (const s of list) {
+					const [code, ...rest] = s.split(' ');
+					INFO[code] = { cont, cap: rest.join(' ') };
+				}
+			}
+
+			// Länder som korsar datumgränsen får en egen zoomruta
+			const BOX_FIX = { RU: [520, 13, 900, 127], FJ: [955, 300, 994, 325] };
+
+			const COUNTRIES = {};
+			for (const c of MAP.countries) {
+				const info = INFO[c.id];
+				COUNTRIES[c.id] = {
+					id: c.id,
+					name: NAME_FIX[c.id] || c.n,
+					cont: info.cont,
+					cap: info.cap,
+					box: BOX_FIX[c.id] || c.b
+				};
+			}
+
+			// ---------- Uppläsning ----------
+
+			const canSpeak = 'speechSynthesis' in window;
+			let voice = null;
+
+			function findVoice() {
+				const voices = speechSynthesis.getVoices().filter((v) => /^sv/i.test(v.lang));
+				voice = voices.find((v) => v.localService) || voices[0] || null;
+			}
+
+			if (canSpeak) {
+				findVoice();
+				speechSynthesis.addEventListener?.('voiceschanged', findVoice);
+			}
+
+			// Emojis tas bort, annars läser rösten upp "lejonansikte" mitt i meningen
+			function say(text, auto = true) {
+				if (!canSpeak || (auto && !state.sound)) return;
+				speechSynthesis.cancel();
+				const clean = text.replace(/\p{Extended_Pictographic}|\p{Regional_Indicator}|\u200d|\ufe0f/gu, '');
+				const u = new SpeechSynthesisUtterance(clean);
+				u.lang = 'sv-SE';
+				if (voice) u.voice = voice;
+				u.rate = 0.9;
+				speechSynthesis.speak(u);
+			}
+
+			// ---------- Tillstånd ----------
+
+			const savedFound = (() => {
+				try {
+					return JSON.parse(load('varlden-hittat', '[]'));
+				} catch {
+					return [];
+				}
+			})();
+
+			const state = {
+				mode: 'utforska',
+				level: load('varlden-niva', 'barn'),
+				sound: load('varlden-ljud', 'pa') !== 'av',
+				found: new Set(savedFound.filter((n) => PLACES[n])),
+				selected: null,
+				card: null,
+				quiz: null,
+				score: 0,
+				recent: []
+			};
+
+			// ---------- Rita kartan ----------
+
+			const NS = 'http://www.w3.org/2000/svg';
+			const svg = $('map');
+
+			function svgEl(tag, attrs, parent) {
+				const e = document.createElementNS(NS, tag);
+				for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+				parent.appendChild(e);
+				return e;
+			}
+
+			svgEl('path', { d: MAP.sphere, class: 'sphere' }, $('base'));
+			svgEl('path', { d: MAP.grat, class: 'grat' }, $('base'));
+
+			const landEls = {};
+			for (const c of MAP.countries) {
+				landEls[c.id] = svgEl('path', { d: c.d, class: `land c-${COUNTRIES[c.id].cont}`, 'data-country': c.id }, $('lands'));
+			}
+
+			// Markörer och havsnamn ritas i skärmpixlar och skalas om vid zoom
+			const scaled = [];
+
+			for (const [key, o] of Object.entries(OCEANS)) {
+				if (!o.label) continue;
+				const [x, y] = project(...o.label);
+				const g = svgEl('g', { class: 'ocean-label', 'data-ocean': key }, $('oceans'));
+				const t = svgEl('text', { 'text-anchor': 'middle', 'dominant-baseline': 'central' }, g);
+				t.textContent = o.name;
+				o.el = g;
+				scaled.push({ g, x, y, kind: 'label' });
+			}
+
+			PLACES.forEach((p, i) => {
+				const [x, y] = project(...p.at);
+				const g = svgEl('g', { class: 'marker', 'data-place': i }, $('markers'));
+				const pin = svgEl('g', { class: 'pin' }, g);
+				svgEl('circle', { r: 15 }, pin);
+				const t = svgEl('text', { 'text-anchor': 'middle', 'dominant-baseline': 'central', y: 1 }, pin);
+				t.textContent = p.icon;
+				p.el = g;
+				scaled.push({ g, x, y, kind: 'marker' });
+			});
+
+			function renderFound() {
+				PLACES.forEach((p, i) => p.el.classList.toggle('found', state.found.has(i)));
+			}
+
+			// ---------- Zoom och panorering ----------
+
+			let vb = { x: 0, y: 0, w: MAP.w, h: MAP.h };
+			let anim = null;
+
+			const aspect = () => svg.clientWidth / svg.clientHeight || MAP.w / MAP.h;
+			const ppu = () => svg.clientWidth / vb.w; // skärmpixlar per kartenhet
+
+			function fullView() {
+				const a = aspect();
+				const w = a > MAP.w / MAP.h ? MAP.h * a : MAP.w;
+				const h = w / a;
+				return { x: (MAP.w - w) / 2, y: (MAP.h - h) / 2, w, h };
+			}
+
+			// Startvyn: hela världen, men på smala skärmar lite inzoomat så att länderna inte blir pyttesmå
+			function homeView() {
+				const a = aspect();
+				const full = fullView();
+				if (a >= 1.6) return full;
+				const w = Math.min(full.w, MAP.h * a * 1.3);
+				const h = w / a;
+				return { x: 520 - w / 2, y: 255 - h / 2, w, h };
+			}
+
+			function clampView(v) {
+				const a = aspect();
+				const w = clamp(v.w, MAP.w / 18, fullView().w);
+				const h = w / a;
+				const cx = v.x + v.w / 2;
+				const cy = v.y + v.h / 2;
+				let x = cx - w / 2;
+				let y = cy - h / 2;
+				x = clamp(x, Math.min(0, MAP.w - w), Math.max(0, MAP.w - w));
+				y = clamp(y, Math.min(0, MAP.h - h), Math.max(0, MAP.h - h));
+				return { x, y, w, h };
+			}
+
+			function applyView() {
+				svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+				const k = ppu();
+				if (!k) return; // kartan har ingen storlek än
+				// Markörerna är lagom stora oavsett zoom, men lite mindre när hela världen syns på en liten skärm
+				const markerPx = clamp(40 * k, 18, 32);
+				const labelPx = clamp(20 * k, 10, 16);
+				for (const s of scaled) {
+					const f = s.kind === 'marker' ? markerPx / 30 / k : labelPx / 14 / k;
+					s.g.setAttribute('transform', `translate(${s.x} ${s.y}) scale(${f})`);
+				}
+			}
+
+			function setView(v) {
+				vb = clampView(v);
+				applyView();
+			}
+
+			function animateTo(target, ms = 600) {
+				cancelAnimationFrame(anim);
+				const from = { ...vb };
+				const to = clampView(target);
+				const t0 = performance.now();
+				const step = (now) => {
+					const t = Math.min(1, (now - t0) / ms);
+					const e = t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
+					vb = {
+						x: from.x + (to.x - from.x) * e,
+						y: from.y + (to.y - from.y) * e,
+						w: from.w + (to.w - from.w) * e,
+						h: from.h + (to.h - from.h) * e
+					};
+					applyView();
+					if (t < 1) anim = requestAnimationFrame(step);
+				};
+				anim = requestAnimationFrame(step);
+			}
+
+			function viewForBox([x0, y0, x1, y1], pad = 0.3, minW = MAP.w / 9) {
+				const a = aspect();
+				const bw = (x1 - x0) * (1 + pad * 2);
+				const bh = (y1 - y0) * (1 + pad * 2);
+				const w = Math.max(bw, bh * a, minW);
+				const h = w / a;
+				return { x: (x0 + x1) / 2 - w / 2, y: (y0 + y1) / 2 - h / 2, w, h };
+			}
+
+			function zoomToPoint(x, y, w = MAP.w / 5) {
+				animateTo(viewForBox([x, y, x, y], 0, w));
+			}
+
+			function zoomAt(factor, px, py, animate = false) {
+				const k = ppu();
+				const ux = vb.x + px / k;
+				const uy = vb.y + py / k;
+				const w = clamp(vb.w * factor, MAP.w / 18, fullView().w);
+				const k2 = svg.clientWidth / w;
+				const target = { x: ux - px / k2, y: uy - py / k2, w, h: w / aspect() };
+				if (animate) animateTo(target, 300);
+				else setView(target);
+			}
+
+			const pointers = new Map();
+			let gesture = null;
+			let dragged = false;
+
+			function localPos(e) {
+				const r = svg.getBoundingClientRect();
+				return { x: e.clientX - r.left, y: e.clientY - r.top };
+			}
+
+			function beginGesture() {
+				gesture = { vb: { ...vb }, k: ppu(), pts: [...pointers.values()].map((p) => ({ ...p })) };
+			}
+
+			svg.addEventListener('pointerdown', (e) => {
+				if (e.button > 0) return;
+				cancelAnimationFrame(anim);
+				if (pointers.size === 0) dragged = false;
+				pointers.set(e.pointerId, localPos(e));
+				beginGesture();
+			});
+
+			window.addEventListener('pointermove', (e) => {
+				if (!pointers.has(e.pointerId)) return;
+				pointers.set(e.pointerId, localPos(e));
+				const cur = [...pointers.values()];
+				const g = gesture;
+				if (cur.length === 1) {
+					const dx = cur[0].x - g.pts[0].x;
+					const dy = cur[0].y - g.pts[0].y;
+					if (Math.hypot(dx, dy) > 6) dragged = true;
+					if (dragged) setView({ ...g.vb, x: g.vb.x - dx / g.k, y: g.vb.y - dy / g.k });
+				} else if (cur.length >= 2 && g.pts.length >= 2) {
+					dragged = true;
+					const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y) || 1;
+					const mid = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+					const m0 = mid(g.pts[0], g.pts[1]);
+					const m1 = mid(cur[0], cur[1]);
+					const w = clamp((g.vb.w * dist(g.pts[0], g.pts[1])) / dist(cur[0], cur[1]), MAP.w / 18, fullView().w);
+					const k2 = svg.clientWidth / w;
+					const ux = g.vb.x + m0.x / g.k;
+					const uy = g.vb.y + m0.y / g.k;
+					setView({ x: ux - m1.x / k2, y: uy - m1.y / k2, w, h: w / aspect() });
+				}
+			});
+
+			function endPointer(e) {
+				if (!pointers.has(e.pointerId)) return;
+				pointers.delete(e.pointerId);
+				if (pointers.size > 0) return beginGesture();
+				gesture = null;
+				if (!dragged && e.type === 'pointerup') handleTap(e.clientX, e.clientY);
+			}
+
+			window.addEventListener('pointerup', endPointer);
+			window.addEventListener('pointercancel', endPointer);
+
+			svg.addEventListener(
+				'wheel',
+				(e) => {
+					e.preventDefault();
+					const p = localPos(e);
+					zoomAt(Math.exp(e.deltaY * (e.ctrlKey ? 0.01 : 0.0015)), p.x, p.y);
+				},
+				{ passive: false }
+			);
+
+			$('zoomIn').addEventListener('click', () => zoomAt(1 / 1.7, svg.clientWidth / 2, svg.clientHeight / 2, true));
+			$('zoomOut').addEventListener('click', () => zoomAt(1.7, svg.clientWidth / 2, svg.clientHeight / 2, true));
+			$('zoomHome').addEventListener('click', () => animateTo(homeView()));
+			$('bigMap').addEventListener('click', () => {
+				$('mapWrap').classList.toggle('big');
+				$('mapWrap').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+			});
+
+			// Behåll mitten och zoomnivån när kartans storlek ändras
+			let lastHomeW = 0;
+			new ResizeObserver(() => {
+				const wasFull = Math.abs(vb.w - lastHomeW) < 1;
+				lastHomeW = homeView().w;
+				setView(wasFull ? homeView() : { ...vb, h: vb.w / aspect() });
+			}).observe(svg);
+
+			// ---------- Vad trycktes det på? ----------
+
+			function hitAt(cx, cy) {
+				const el = document.elementFromPoint(cx, cy);
+				if (!el || !svg.contains(el)) return null;
+				const marker = el.closest('.marker');
+				if (marker) return { kind: 'place', i: +marker.dataset.place };
+				const label = el.closest('.ocean-label');
+				if (label) return { kind: 'ocean', key: label.dataset.ocean };
+				const land = el.closest('.land');
+				if (land) return { kind: 'country', id: land.dataset.country };
+				const p = localPos({ clientX: cx, clientY: cy });
+				const k = ppu();
+				const ll = invert(vb.x + p.x / k, vb.y + p.y / k);
+				const key = ll && oceanAt(...ll);
+				return key ? { kind: 'ocean', key } : null;
+			}
+
+			function handleTap(cx, cy) {
+				const hit = hitAt(cx, cy);
+				if (!hit) return;
+				if (state.mode === 'hitta') return answer(hit);
+				if (hit.kind === 'country') showCountry(hit.id);
+				else if (hit.kind === 'place') showPlace(hit.i);
+				else showOcean(hit.key);
+			}
+
+			// ---------- Infokort ----------
+
+			function clearMarks() {
+				for (const e of svg.querySelectorAll('.sel, .dim, .right, .wrong, .reveal')) {
+					e.classList.remove('sel', 'dim', 'right', 'wrong', 'reveal');
+				}
+			}
+
+			function selectCountry(id) {
+				clearMarks();
+				const el = landEls[id];
+				el.classList.add('sel');
+				el.parentNode.appendChild(el); // överst så att den tjocka kanten syns
+			}
+
+			function renderCard(c) {
+				state.card = c;
+				const card = $('card');
+				const facts = c.facts?.length
+					? `<dl class="facts">${c.facts.map(([e, l, v]) => `<div><dt>${e} ${l}</dt><dd>${v}</dd></div>`).join('')}</dl>`
+					: '';
+				const more = c.more
+					? `<details class="more"${state.level === 'vuxen' ? ' open' : ''}><summary>Mer fakta</summary><p>${c.more}</p></details>`
+					: '';
+				card.innerHTML = `
+					<div class="card-head">
+						<div class="card-icon">${c.icon}</div>
+						<div><h2>${c.title}</h2>${c.sub ? `<p class="sub">${c.sub}</p>` : ''}</div>
+						<button class="say" aria-label="Läs upp">🔊</button>
+					</div>
+					${c.kid ? `<p class="kid">${c.kid}</p>` : ''}
+					${facts}${more}${c.extra || ''}`;
+				card.querySelector('.say').addEventListener('click', () => say(c.speech, false));
+				// Starta animationen på nytt för varje nytt kort
+				card.classList.remove('card');
+				void card.offsetWidth;
+				card.classList.add('card');
+				if (c.onRender) c.onRender(card);
+			}
+
+			function showCountry(id, { zoom = false, speak = true } = {}) {
+				const c = COUNTRIES[id];
+				if (id === 'AQ') return showContinent('an', { zoom });
+				const cont = CONTINENTS[c.cont];
+				selectCountry(id);
+				if (zoom) animateTo(viewForBox(c.box));
+				const fact = FACTS[id] || `${c.name} ligger i ${cont.name}.`;
+				const facts = [];
+				if (c.cap) facts.push(['🏛️', 'Huvudstad', c.cap]);
+				facts.push([cont.icon, 'Världsdel', cont.name]);
+				renderCard({
+					icon: flag(id),
+					title: c.name,
+					sub: `${cont.icon} ${cont.name}`,
+					kid: fact,
+					facts,
+					speech: `${c.name}. ${c.cap ? `Huvudstaden heter ${c.cap.replace(/\s*\(.*\)/, '')}. ` : ''}${fact}`,
+					extra: `<div class="card-actions"><button data-cont="${c.cont}">${cont.icon} Läs om ${cont.name}</button></div>`,
+					onRender: (card) =>
+						card.querySelector('[data-cont]').addEventListener('click', () => showContinent(c.cont, { zoom: true }))
+				});
+				if (speak && state.level === 'barn') say(`${c.name}. ${fact}`);
+			}
+
+			function showContinent(key, { zoom = false } = {}) {
+				const cont = CONTINENTS[key];
+				clearMarks();
+				for (const [id, c] of Object.entries(COUNTRIES)) {
+					if (c.cont !== key) landEls[id].classList.add('dim');
+				}
+				if (zoom) animateTo(viewForBox(boxFromLonLat(cont.box), 0.05));
+				const list = Object.values(COUNTRIES)
+					.filter((c) => c.cont === key && c.id !== 'AQ')
+					.sort((a, b) => a.name.localeCompare(b.name, 'sv'));
+				const flags = list.length
+					? `<div class="flags">${list
+							.map((c) => `<button data-country="${c.id}"><span>${flag(c.id)}</span>${c.name}</button>`)
+							.join('')}</div>`
+					: '';
+				renderCard({
+					icon: cont.icon,
+					title: cont.name,
+					sub: cont.animals,
+					kid: cont.kid,
+					facts: cont.facts,
+					more: cont.more,
+					speech: `${cont.name}. ${cont.kid}`,
+					extra: flags,
+					onRender: (card) => {
+						for (const b of card.querySelectorAll('.flags button')) {
+							b.addEventListener('click', () => showCountry(b.dataset.country, { zoom: true }));
+						}
+					}
+				});
+				say(`${cont.name}. ${state.level === 'barn' ? cont.kid : ''}`);
+			}
+
+			function showOcean(key) {
+				const o = OCEANS[key];
+				clearMarks();
+				renderCard({
+					icon: o.icon,
+					title: o.name,
+					sub: o.parent ? `🌊 Ett innanhav till ${OCEANS[o.parent].name}` : '🌊 Världshav',
+					kid: o.kid,
+					facts: o.facts,
+					more: o.more,
+					speech: `${o.name}. ${o.kid}`
+				});
+				say(`${o.name}. ${state.level === 'barn' ? o.kid : ''}`);
+			}
+
+			function showPlace(i, { zoom = false } = {}) {
+				const p = PLACES[i];
+				clearMarks();
+				const isNew = !state.found.has(i);
+				if (isNew) {
+					state.found.add(i);
+					save('varlden-hittat', JSON.stringify([...state.found]));
+					renderFound();
+					renderAlbum(i);
+					confetti(state.found.size === PLACES.length ? 120 : 30);
+				}
+				if (zoom) zoomToPoint(...project(...p.at));
+				const status = isNew
+					? `✨ Ny upptäckt! Du har hittat ${state.found.size} av ${PLACES.length}.`
+					: '✨ Spännande plats';
+				renderCard({
+					icon: p.icon,
+					title: p.name,
+					sub: status,
+					kid: p.kid,
+					more: p.more,
+					speech: `${p.name}. ${p.kid}`
+				});
+				say(`${p.name}. ${state.level === 'barn' ? p.kid : ''}`);
+			}
+
+			function showWelcome() {
+				clearMarks();
+				renderCard({
+					icon: '👋',
+					title: 'Hej upptäckare!',
+					kid: 'Tryck på ett land för att se dess flagga, eller på havet. De små bilderna på kartan är spännande platser – kan du hitta alla?',
+					speech: 'Hej upptäckare! Tryck på ett land för att se dess flagga, eller på havet. De små bilderna på kartan är spännande platser. Kan du hitta alla?',
+					extra: `<div class="card-actions">
+						<button data-act="se">🇸🇪 Var bor vi?</button>
+						<button data-act="random">🎲 Slumpa ett land</button>
+					</div>`,
+					onRender: (card) => {
+						card.querySelector('[data-act="se"]').addEventListener('click', () => showCountry('SE', { zoom: true }));
+						card.querySelector('[data-act="random"]').addEventListener('click', () => {
+							const ids = Object.keys(COUNTRIES).filter((id) => COUNTRIES[id].cap);
+							showCountry(pick(ids), { zoom: true });
+						});
+					}
+				});
+			}
+
+			// ---------- Album ----------
+
+			function renderAlbum(newIndex) {
+				$('albumTitle').textContent = `✨ Spännande platser – ${state.found.size} av ${PLACES.length}`;
+				const grid = $('albumGrid');
+				grid.innerHTML = '';
+				PLACES.forEach((p, i) => {
+					if (state.found.has(i)) {
+						const b = document.createElement('button');
+						b.textContent = p.icon;
+						b.title = p.name;
+						b.setAttribute('aria-label', p.name);
+						if (i === newIndex) b.classList.add('new');
+						b.addEventListener('click', () => showPlace(i, { zoom: true }));
+						grid.appendChild(b);
+					} else {
+						const d = document.createElement('div');
+						d.className = 'locked';
+						d.textContent = '?';
+						grid.appendChild(d);
+					}
+				});
+				$('albumHint').textContent =
+					state.found.size === PLACES.length
+						? '🏆 Du har hittat alla! Du är en riktig upptäcktsresande.'
+						: 'Leta efter de små bilderna på kartan för att fylla albumet!';
+			}
+
+			// ---------- Världsdelsknappar ----------
+
+			for (const key of ['eu', 'af', 'as', 'na', 'sa', 'oc', 'an']) {
+				const c = CONTINENTS[key];
+				const b = document.createElement('button');
+				b.textContent = `${c.icon} ${c.name}`;
+				b.style.setProperty('--c', `var(--${key})`);
+				b.addEventListener('click', () => showContinent(key, { zoom: true }));
+				$('continentBar').appendChild(b);
+			}
+
+			// ---------- Hitta! (frågelek) ----------
+
+			function weighted(options) {
+				const total = options.reduce((s, [w]) => s + w, 0);
+				let r = Math.random() * total;
+				for (const [w, f] of options) {
+					if ((r -= w) < 0) return f();
+				}
+				return options[0][1]();
+			}
+
+			function countryQ(id, style) {
+				const c = COUNTRIES[id];
+				if (style === 'flag') {
+					return { type: 'country', id, key: id, icon: flag(id), text: 'Vilket land har den här flaggan? Tryck på det!', speech: 'Vilket land har den här flaggan?' };
+				}
+				if (style === 'capital') {
+					const cap = c.cap.replace(/\s*\(.*\)/, '');
+					return { type: 'country', id, key: id, icon: '🏛️', text: `I vilket land ligger huvudstaden <b>${cap}</b>?`, speech: `I vilket land ligger huvudstaden ${cap}?` };
+				}
+				return { type: 'country', id, key: id, icon: flag(id), text: `Var ligger <b>${c.name}</b>?`, speech: `Var ligger ${c.name}?` };
+			}
+
+			function placeQ() {
+				const i = Math.floor(Math.random() * PLACES.length);
+				const p = PLACES[i];
+				return { type: 'place', i, key: `p${i}`, icon: p.icon, text: p.q, speech: p.q };
+			}
+
+			function makeQuestion() {
+				const adultIds = Object.keys(COUNTRIES).filter((id) => COUNTRIES[id].cap);
+				const kid = () =>
+					weighted([
+						[3, () => {
+							const key = pick(Object.keys(CONTINENTS));
+							const c = CONTINENTS[key];
+							return { type: 'continent', cont: key, key, icon: c.icon, text: `Tryck på <b>${c.name}</b>!`, speech: `Tryck på ${c.name}!` };
+						}],
+						[3, () => countryQ(pick(KID_COUNTRIES))],
+						[3, placeQ],
+						[1, () => {
+							const key = pick(['pacific', 'atlantic', 'indian', 'arctic', 'southern']);
+							const o = OCEANS[key];
+							return { type: 'ocean', ocean: key, key, icon: o.icon, text: `Tryck på <b>${o.name}</b>!`, speech: `Tryck på ${o.name}!` };
+						}]
+					]);
+				const adult = () =>
+					weighted([
+						[4, () => countryQ(pick(adultIds))],
+						[3, () => countryQ(pick(adultIds), 'flag')],
+						[2, () => countryQ(pick(adultIds), 'capital')],
+						[1, placeQ]
+					]);
+				let q;
+				for (let i = 0; i < 20; i++) {
+					q = state.level === 'barn' ? kid() : adult();
+					if (!state.recent.includes(q.key)) break;
+				}
+				state.recent = [...state.recent, q.key].slice(-10);
+				return q;
+			}
+
+			function newQuestion() {
+				const q = makeQuestion();
+				state.quiz = { ...q, tries: 0, done: false };
+				clearMarks();
+				$('qIcon').textContent = q.icon;
+				$('qText').innerHTML = q.text;
+				setFeedback('');
+				$('nextQ').textContent = 'Hoppa över ➜';
+				$('nextQ').classList.remove('ready');
+				svg.classList.toggle('hide-markers', q.type !== 'place');
+				animateTo(homeView());
+				say(q.speech);
+			}
+
+			function setFeedback(text, kind = '') {
+				$('qFeedback').textContent = text;
+				$('qFeedback').className = kind;
+			}
+
+			function isCorrect(q, hit) {
+				if (q.type === 'country') return hit.kind === 'country' && hit.id === q.id;
+				if (q.type === 'continent') return hit.kind === 'country' && COUNTRIES[hit.id].cont === q.cont;
+				if (q.type === 'place') return hit.kind === 'place' && hit.i === q.i;
+				if (q.type === 'ocean') return hit.kind === 'ocean' && (hit.key === q.ocean || OCEANS[hit.key].parent === q.ocean);
+				return false;
+			}
+
+			function markTarget(q, cls) {
+				if (q.type === 'country') {
+					landEls[q.id].classList.add(cls);
+					landEls[q.id].parentNode.appendChild(landEls[q.id]);
+				} else if (q.type === 'continent') {
+					for (const [id, c] of Object.entries(COUNTRIES)) if (c.cont === q.cont) landEls[id].classList.add(cls);
+				} else if (q.type === 'place') {
+					PLACES[q.i].el.classList.add(cls);
+				} else {
+					OCEANS[q.ocean].el.classList.add(cls);
+				}
+			}
+
+			function zoomToTarget(q) {
+				if (q.type === 'country') animateTo(viewForBox(COUNTRIES[q.id].box, 0.6, MAP.w / 5));
+				else if (q.type === 'continent') animateTo(viewForBox(boxFromLonLat(CONTINENTS[q.cont].box), 0.05));
+				else if (q.type === 'place') zoomToPoint(...project(...PLACES[q.i].at), MAP.w / 3);
+				else zoomToPoint(...project(...OCEANS[q.ocean].label), MAP.w / 2);
+			}
+
+			function nameOf(hit) {
+				if (hit.kind === 'country') return `${flag(hit.id)} ${COUNTRIES[hit.id].name}`;
+				if (hit.kind === 'place') return `${PLACES[hit.i].icon} ${PLACES[hit.i].name}`;
+				return `${OCEANS[hit.key].icon} ${OCEANS[hit.key].name}`;
+			}
+
+			function finishQuestion() {
+				state.quiz.done = true;
+				$('nextQ').textContent = 'Nästa ➜';
+				$('nextQ').classList.add('ready');
+			}
+
+			function answer(hit) {
+				const q = state.quiz;
+				if (!q || q.done) {
+					// Efter rätt svar kan man fortsätta trycka för att läsa om platser
+					if (hit.kind === 'country') showCountry(hit.id, { speak: false });
+					return;
+				}
+				if (isCorrect(q, hit)) {
+					markTarget(q, 'right');
+					state.score++;
+					$('score').textContent = `⭐ ${state.score}`;
+					$('score').classList.remove('pop');
+					void $('score').offsetWidth;
+					$('score').classList.add('pop');
+					const praise = pick(PRAISE);
+					const answerName = q.type === 'continent' ? `${CONTINENTS[q.cont].icon} ${CONTINENTS[q.cont].name}` : nameOf(hit);
+					setFeedback(`${praise} Det där är ${answerName}.`, 'good');
+					say(`${praise} Det där är ${answerName}.`);
+					confetti(40);
+					finishQuestion();
+					// Visa fakta om svaret så att man lär sig något på köpet
+					if (q.type === 'country') showCountry(q.id, { speak: false });
+					return;
+				}
+				q.tries++;
+				if (hit.kind === 'country') {
+					const el = landEls[hit.id];
+					el.classList.add('wrong');
+					setTimeout(() => el.classList.remove('wrong'), 900);
+				}
+				if (q.tries >= 3) {
+					markTarget(q, 'reveal');
+					zoomToTarget(q);
+					setFeedback('Här är det! 👀 Titta där det blinkar.', 'bad');
+					say('Här är det! Titta där det blinkar.');
+					finishQuestion();
+					if (q.type === 'country') showCountry(q.id, { speak: false });
+					return;
+				}
+				const msg = `Det där är ${nameOf(hit)}. Försök igen!`;
+				setFeedback(msg, 'bad');
+				say(msg);
+			}
+
+			$('nextQ').addEventListener('click', newQuestion);
+
+			// ---------- Lägen, nivå och ljud ----------
+
+			const MODES = {
+				utforska: { icon: '🌍', text: 'Tryck på kartan och upptäck världen!' },
+				hitta: { icon: '🎯', text: 'Hitta rätt på kartan!' }
+			};
+
+			function setMode(mode) {
+				state.mode = mode;
+				document.body.dataset.mode = mode;
+				$('modeIcon').textContent = MODES[mode].icon;
+				$('modeText').textContent = MODES[mode].text;
+				for (const t of document.querySelectorAll('.tab')) t.classList.toggle('active', t.dataset.mode === mode);
+				const quiz = mode === 'hitta';
+				$('quizBar').hidden = !quiz;
+				$('continentBar').hidden = quiz;
+				$('album').hidden = quiz;
+				svg.classList.remove('hide-markers');
+				if (quiz) {
+					state.score = 0;
+					$('score').textContent = '⭐ 0';
+					renderCard({
+						icon: '🎯',
+						title: 'Hitta!',
+						kid: state.level === 'barn'
+							? 'Lyssna på frågan och tryck på rätt ställe på kartan. Du får försöka tre gånger!'
+							: 'Hitta länder, flaggor, huvudstäder och spännande platser. Zooma in för att träffa de små länderna.',
+						speech: 'Lyssna på frågan och tryck på rätt ställe på kartan.'
+					});
+					newQuestion();
+				} else {
+					state.quiz = null;
+					showWelcome();
+					animateTo(homeView());
+				}
+			}
+
+			for (const t of document.querySelectorAll('.tab')) {
+				t.addEventListener('click', () => setMode(t.dataset.mode));
+			}
+
+			function renderLevel() {
+				$('levelToggle').textContent = state.level === 'barn' ? '🧒 Barn' : '🧑 Vuxen';
+			}
+
+			$('levelToggle').addEventListener('click', () => {
+				state.level = state.level === 'barn' ? 'vuxen' : 'barn';
+				save('varlden-niva', state.level);
+				renderLevel();
+				if (state.mode === 'hitta') {
+					state.recent = [];
+					newQuestion();
+				} else if (state.card) {
+					// Vuxennivån visar "Mer fakta" utfällt
+					for (const d of $('card').querySelectorAll('details.more')) d.open = state.level === 'vuxen';
+				}
+			});
+
+			function renderSound() {
+				$('soundToggle').textContent = state.sound ? '🔊' : '🔇';
+			}
+
+			$('soundToggle').addEventListener('click', () => {
+				state.sound = !state.sound;
+				save('varlden-ljud', state.sound ? 'pa' : 'av');
+				if (!state.sound && canSpeak) speechSynthesis.cancel();
+				renderSound();
+			});
+
+			function confetti(count) {
+				if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+				const colors = ['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93', '#ff9f1c'];
+				for (let i = 0; i < count; i++) {
+					const c = document.createElement('span');
+					c.className = 'confetti';
+					c.style.left = `${Math.random() * 100}vw`;
+					c.style.background = pick(colors);
+					c.style.setProperty('--dx', `${(Math.random() - 0.5) * 200}px`);
+					c.style.setProperty('--rot', `${Math.random() * 1080}deg`);
+					c.style.animationDuration = `${1.4 + Math.random() * 1.4}s`;
+					c.style.animationDelay = `${Math.random() * 0.3}s`;
+					c.addEventListener('animationend', () => c.remove());
+					document.body.appendChild(c);
+				}
+			}
+
+			renderLevel();
+			renderSound();
+			renderFound();
+			renderAlbum(null);
+			setView(homeView());
+			setMode('utforska');
+		</script>
+	</body>
+</html>
