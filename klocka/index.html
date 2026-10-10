@@ -118,6 +118,7 @@
 			#skyText {
 				margin: 0;
 				font-size: 1.15rem;
+				text-wrap: pretty;
 			}
 
 			.tabs {
@@ -720,15 +721,30 @@
 				if (secondDeg !== null) secondHand.setAttribute('transform', `rotate(${secondDeg})`);
 			}
 
+			// Rör bara DOM:en när värdet faktiskt har ändrats
+			const lastValues = {};
+			function setIfChanged(id, prop, value) {
+				if (lastValues[id + prop] === value) return;
+				lastValues[id + prop] = value;
+				const target = id === 'body' ? document.body.dataset : $(id);
+				target[prop] = value;
+			}
+
 			function showTexts(h24, m, s) {
-				$('phrase').textContent = phrase(h24, m);
+				setIfChanged('phrase', 'textContent', phrase(h24, m));
 				const sec = s === null ? '' : `:<span class="s">${pad(s)}</span>`;
-				$('digitalTime').innerHTML =
-					`<span class="h">${pad(h24)}</span>:<span class="m">${pad(m)}</span>${sec}`;
-				const [sky, icon, text] = period(h24);
-				document.body.dataset.sky = sky;
-				$('skyIcon').textContent = icon;
-				$('skyText').textContent = text;
+				setIfChanged(
+					'digitalTime',
+					'innerHTML',
+					`<span class="h">${pad(h24)}</span>:<span class="m">${pad(m)}</span>${sec}`
+				);
+				showSky(...period(h24));
+			}
+
+			function showSky(sky, icon, text) {
+				setIfChanged('body', 'sky', sky);
+				setIfChanged('skyIcon', 'textContent', icon);
+				setIfChanged('skyText', 'textContent', text);
 			}
 
 			// ---------- Lägen ----------
@@ -773,9 +789,7 @@
 					state.total = nowMinutes();
 					renderDrag();
 				} else {
-					document.body.dataset.sky = 'lek';
-					$('skyIcon').textContent = '🎯';
-					$('skyText').textContent = 'Kan du läsa klockan?';
+					showSky('lek', '🎯', 'Kan du läsa klockan?');
 					newQuestion();
 				}
 			}
