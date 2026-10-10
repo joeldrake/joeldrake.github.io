@@ -909,11 +909,12 @@
 
 			// ---------- Gissa tiden ----------
 
+			// Varje nivå frågar bara om sin egen sorts tid
 			const LEVELS = {
 				hela: [0],
-				halv: [0, 30],
-				kvart: [0, 15, 30, 45],
-				fem: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+				halv: [30],
+				kvart: [15, 45],
+				fem: [5, 10, 20, 25, 35, 40, 50, 55]
 			};
 			const PRAISE = ['Rätt! 🎉', 'Snyggt! 🌟', 'Superbra! 🚀', 'Du kan klockan! 🏆', 'Toppen! 🥳'];
 			const HINTS = [
@@ -927,7 +928,8 @@
 				answer: null,
 				misses: 0,
 				locked: false,
-				last: ''
+				last: '',
+				timer: null
 			};
 
 			const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -941,6 +943,7 @@
 			}
 
 			function newQuestion() {
+				clearTimeout(quiz.timer);
 				document
 					.querySelectorAll('[data-level]')
 					.forEach((b) => b.classList.toggle('active', b.dataset.level === quiz.level));
@@ -989,7 +992,7 @@
 					const milestone = quiz.stars % 10 === 0;
 					$('feedback').textContent = milestone ? `Wow, ${quiz.stars} stjärnor! 🏆` : pick(PRAISE);
 					confetti(milestone ? 160 : 60);
-					setTimeout(newQuestion, milestone ? 2500 : 1600);
+					quiz.timer = setTimeout(newQuestion, milestone ? 2500 : 1600);
 				} else {
 					button.classList.add('wrong');
 					button.disabled = true;
