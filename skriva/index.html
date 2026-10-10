@@ -1,0 +1,1096 @@
+<!doctype html>
+<html lang="sv">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+		<title>Skriva</title>
+		<link rel="manifest" href="manifest.json" />
+		<link rel="icon" href="icon.svg" type="image/svg+xml" />
+		<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+		<meta name="theme-color" content="#ffc8dd" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="apple-mobile-web-app-title" content="Skriva" />
+		<!-- Rosa startskärm på iPhone (Safari använder inte manifestets background_color) -->
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/750x1334.png"
+			media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1242x2208.png"
+			media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1125x2436.png"
+			media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/828x1792.png"
+			media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1242x2688.png"
+			media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1170x2532.png"
+			media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1284x2778.png"
+			media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1179x2556.png"
+			media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1290x2796.png"
+			media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1206x2622.png"
+			media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1320x2868.png"
+			media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1260x2736.png"
+			media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap"
+			rel="stylesheet"
+		/>
+		<style>
+			:root {
+				--ink: #2b2d42;
+				--accent: #7b2cbf;
+				--rim: #ff9f1c;
+				--good: #2a9d8f;
+				--bad: #e63946;
+				--vowel: #ffe0ec;
+				--hint: #ffd166;
+			}
+
+			* {
+				box-sizing: border-box;
+			}
+
+			/* Stäng av dubbeltryck-zoom (snabba tryck på knappar), nypzoom fungerar fortfarande */
+			html {
+				touch-action: manipulation;
+			}
+
+			[hidden] {
+				display: none !important;
+			}
+
+			body {
+				margin: 0;
+				min-height: 100vh;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 1rem;
+				/* Håll innehållet fritt från notch och hemindikator i helskärmsläge */
+				padding: calc(1rem + env(safe-area-inset-top, 0px))
+					calc(1rem + env(safe-area-inset-right, 0px)) calc(2rem + env(safe-area-inset-bottom, 0px))
+					calc(1rem + env(safe-area-inset-left, 0px));
+				font-family:
+					'Fredoka',
+					system-ui,
+					-apple-system,
+					'Segoe UI',
+					Roboto,
+					sans-serif;
+				color: var(--ink);
+				/* Rosa grundfärg så att det aldrig blinkar vitt innan bakgrunden ritats */
+				background-color: #ffc8dd;
+				background-image: linear-gradient(#ffc8dd, #fff1c1);
+				background-attachment: fixed;
+				overflow-x: hidden;
+			}
+
+			body[data-mode='bokstav'] {
+				background-image: linear-gradient(#ffc8dd, #fff1c1);
+			}
+			body[data-mode='skriv'] {
+				background-image: linear-gradient(#74c0fc, #e7f5ff);
+			}
+			body[data-mode='lyssna'] {
+				background-image: linear-gradient(#cdb4db, #f3e8ff);
+			}
+			body[data-mode='las'] {
+				background-image: linear-gradient(#b9fbc0, #fdffb6);
+			}
+
+			header {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+				width: 100%;
+				max-width: 36rem;
+			}
+
+			.mode-icon {
+				font-size: 3rem;
+				line-height: 1;
+				animation: bob 3s ease-in-out infinite;
+			}
+
+			h1 {
+				margin: 0;
+				font-size: clamp(1.8rem, 6vw, 2.6rem);
+				font-weight: 700;
+			}
+
+			#modeText {
+				margin: 0;
+				font-size: 1.15rem;
+				text-wrap: pretty;
+			}
+
+			#soundToggle {
+				margin-left: auto;
+				flex: none;
+				font-size: 1.5rem;
+				padding: 0.3rem 0.6rem;
+			}
+
+			.tabs {
+				display: flex;
+				justify-content: center;
+				gap: clamp(0.3rem, 1.5vw, 0.5rem);
+				max-width: 100%;
+			}
+
+			button {
+				font: inherit;
+				cursor: pointer;
+				border-radius: 999px;
+				border: 3px solid var(--ink);
+				background: #fff;
+				color: var(--ink);
+				padding: 0.45rem 1rem;
+				font-size: 1rem;
+				font-weight: 600;
+				transition:
+					transform 0.1s,
+					background 0.2s;
+			}
+
+			button:active {
+				transform: scale(0.95);
+			}
+
+			/* Flikarna krymper med skärmen i stället för att radbryta */
+			.tab {
+				font-size: clamp(0.75rem, 3.6vw, 1.1rem);
+				padding: 0.45rem clamp(0.5rem, 2.5vw, 1rem);
+				white-space: nowrap;
+				flex: 0 1 auto;
+				min-width: 0;
+			}
+
+			.tab.active,
+			.levels button.active {
+				background: var(--ink);
+				color: #fff;
+			}
+
+			.panel {
+				width: 100%;
+				max-width: 36rem;
+				background: rgba(255, 255, 255, 0.92);
+				color: var(--ink);
+				border-radius: 1.5rem;
+				padding: 1rem 1.25rem;
+				box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+				text-align: center;
+			}
+
+			@media (max-width: 480px) {
+				.panel {
+					padding-inline: 0.75rem;
+				}
+			}
+
+			.levels {
+				display: flex;
+				justify-content: center;
+				gap: clamp(0.2rem, 1vw, 0.4rem);
+			}
+
+			.levels button {
+				font-size: clamp(0.7rem, 3.2vw, 0.95rem);
+				padding: 0.3rem clamp(0.5rem, 2vw, 0.9rem);
+				border-width: 2px;
+				white-space: nowrap;
+				min-width: 0;
+			}
+
+			.stage {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 0.75rem;
+				margin-top: 0.75rem;
+			}
+
+			#picture {
+				font-size: clamp(4rem, 18vw, 6.5rem);
+				line-height: 1.1;
+				user-select: none;
+				-webkit-user-select: none;
+			}
+
+			#picture.pop {
+				animation: pop 0.5s;
+			}
+
+			.tools {
+				display: flex;
+				flex-direction: column;
+				gap: 0.5rem;
+			}
+
+			.tools button {
+				font-size: 1.6rem;
+				padding: 0.3rem 0.65rem;
+			}
+
+			.say {
+				margin: 0.5rem 0;
+				font-size: clamp(1.15rem, 4.5vw, 1.5rem);
+			}
+
+			/* Ordet: en ruta per bokstav. Storleken anpassas efter ordets längd. */
+			#word {
+				display: flex;
+				justify-content: center;
+				gap: 0.15em;
+				margin: 0.25rem 0 0.5rem;
+				font-size: clamp(1.5rem, calc(78vw / var(--n, 4) / 1.2), 3.2rem);
+				font-weight: 700;
+				user-select: none;
+				-webkit-user-select: none;
+			}
+
+			.slot {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				width: 1.05em;
+				height: 1.3em;
+				border-bottom: 0.12em solid #ced4da;
+				line-height: 1;
+			}
+
+			.slot.current {
+				border-color: var(--accent);
+				animation: blink 1.2s ease-in-out infinite;
+			}
+
+			.slot.filled {
+				border-color: var(--good);
+				color: var(--accent);
+				animation: pop 0.35s;
+			}
+
+			.slot.ghost {
+				color: #adb5bd;
+			}
+
+			.slot.shake {
+				animation: shake 0.4s;
+			}
+
+			#word.read .slot {
+				border-bottom: none;
+				width: auto;
+				padding-inline: 0.04em;
+				color: var(--accent);
+			}
+
+			.choices {
+				display: flex;
+				justify-content: center;
+				gap: 0.75rem;
+				margin-top: 0.5rem;
+			}
+
+			.choices button {
+				font-size: clamp(2.6rem, 13vw, 4rem);
+				line-height: 1;
+				padding: 0.5rem 0.75rem;
+				border-radius: 1.25rem;
+			}
+
+			.choices button.right {
+				background: var(--good);
+				border-color: var(--good);
+			}
+
+			.choices button.wrong {
+				background: #ffe3e3;
+				border-color: var(--bad);
+				opacity: 0.5;
+				animation: shake 0.4s;
+			}
+
+			.feedback {
+				min-height: 1.6em;
+				margin: 0.5rem 0 0.25rem;
+				font-size: 1.25rem;
+				font-weight: 600;
+				text-wrap: balance;
+			}
+
+			.stars {
+				margin: 0;
+				font-size: 1.2rem;
+			}
+
+			.stars.pop {
+				animation: pop 0.5s;
+			}
+
+			/* ---------- Tangentbord ---------- */
+
+			.keyboard {
+				--gap: clamp(0.15rem, 0.8vw, 0.35rem);
+				display: grid;
+				gap: var(--gap);
+				margin-top: 0.75rem;
+			}
+
+			.kb-row {
+				display: flex;
+				justify-content: center;
+				gap: var(--gap);
+			}
+
+			/* Alla tangenter lika breda: elva får plats på den längsta raden */
+			.key {
+				flex: none;
+				width: min(3.2rem, calc((100% - 10 * var(--gap)) / 11));
+				height: clamp(2.6rem, 11vw, 3.4rem);
+				padding: 0;
+				border-width: 2px;
+				border-radius: 0.6rem;
+				font-size: clamp(1.1rem, 5vw, 1.6rem);
+				font-weight: 700;
+				box-shadow: 0 3px 0 var(--ink);
+			}
+
+			.key:active {
+				transform: translateY(2px);
+				box-shadow: 0 1px 0 var(--ink);
+			}
+
+			.key.vowel {
+				background: var(--vowel);
+			}
+
+			.key.hint {
+				background: var(--hint);
+				animation: glow 0.8s ease-in-out infinite;
+			}
+
+			.key.right {
+				background: var(--good);
+				border-color: var(--good);
+				color: #fff;
+			}
+
+			.key.wrong {
+				background: #ffe3e3;
+				border-color: var(--bad);
+				color: var(--bad);
+				animation: shake 0.4s;
+			}
+
+			.kb-legend {
+				margin: 0.5rem 0 0;
+				font-size: 0.9rem;
+				color: #6c757d;
+			}
+
+			.kb-legend i {
+				display: inline-block;
+				width: 0.9em;
+				height: 0.9em;
+				border: 2px solid var(--ink);
+				border-radius: 0.25rem;
+				background: var(--vowel);
+				vertical-align: -0.1em;
+			}
+
+			/* ---------- Samlingen ---------- */
+
+			.album h2 {
+				margin: 0 0 0.75rem;
+				font-size: 1.3rem;
+			}
+
+			.album-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(4.2rem, 1fr));
+				gap: 0.4rem;
+			}
+
+			.card {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 0.1rem;
+				padding: 0.35rem 0.2rem;
+				border-radius: 0.9rem;
+				border: 2px solid #e9ecef;
+				font-weight: 600;
+			}
+
+			.card span {
+				font-size: 1.9rem;
+				line-height: 1.1;
+			}
+
+			.card small {
+				font-size: 0.75rem;
+				letter-spacing: 0.03em;
+				min-height: 1.1em;
+			}
+
+			.card.locked {
+				background: #f1f3f5;
+				opacity: 0.8;
+				cursor: default;
+			}
+
+			.card.new {
+				border-color: var(--hint);
+				animation: pop 0.6s 2;
+			}
+
+			.confetti {
+				position: fixed;
+				top: -16px;
+				width: 10px;
+				height: 14px;
+				border-radius: 2px;
+				z-index: 10;
+				pointer-events: none;
+				animation: fall linear forwards;
+			}
+
+			@keyframes fall {
+				to {
+					transform: translate(var(--dx), 110vh) rotate(var(--rot));
+				}
+			}
+
+			@keyframes bob {
+				50% {
+					transform: translateY(-6px);
+				}
+			}
+
+			@keyframes blink {
+				50% {
+					border-color: #e5d4f5;
+				}
+			}
+
+			@keyframes glow {
+				50% {
+					transform: scale(1.12);
+				}
+			}
+
+			@keyframes shake {
+				20%,
+				60% {
+					transform: translateX(-8px);
+				}
+				40%,
+				80% {
+					transform: translateX(8px);
+				}
+			}
+
+			@keyframes pop {
+				50% {
+					transform: scale(1.4);
+				}
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				*,
+				*::before {
+					animation: none !important;
+				}
+			}
+		</style>
+	</head>
+	<body data-mode="bokstav">
+		<header>
+			<span id="modeIcon" class="mode-icon">🔤</span>
+			<div>
+				<h1>Skriva!</h1>
+				<p id="modeText"></p>
+			</div>
+			<button id="soundToggle" type="button" aria-label="Ljud av eller på">🔊</button>
+		</header>
+
+		<nav class="tabs">
+			<button class="tab" type="button" data-mode="bokstav">🔤 Bokstav</button>
+			<button class="tab" type="button" data-mode="skriv">✏️ Skriv</button>
+			<button class="tab" type="button" data-mode="lyssna">👂 Lyssna</button>
+			<button class="tab" type="button" data-mode="las">📖 Läs</button>
+		</nav>
+
+		<section class="panel">
+			<div class="levels">
+				<button type="button" data-level="latt">⭐ Korta ord</button>
+				<button type="button" data-level="mellan">⭐⭐ Längre ord</button>
+				<button type="button" data-level="svar">⭐⭐⭐ Kluriga ord</button>
+			</div>
+
+			<div class="stage">
+				<span id="picture" aria-live="polite"></span>
+				<div class="tools">
+					<button id="speak" type="button" aria-label="Lyssna på ordet">🔊</button>
+					<button id="hint" type="button" aria-label="Tips">💡</button>
+				</div>
+			</div>
+
+			<p id="question" class="say"></p>
+			<div id="word"></div>
+			<div id="choices" class="choices" hidden></div>
+			<p id="feedback" class="feedback"></p>
+			<p id="stars" class="stars"></p>
+
+			<div id="keyboard" class="keyboard"></div>
+			<p id="kbLegend" class="kb-legend"><i></i> Rosa knappar är vokaler</p>
+		</section>
+
+		<section class="panel album">
+			<h2 id="albumTitle"></h2>
+			<div id="albumGrid" class="album-grid"></div>
+		</section>
+
+		<script>
+			const $ = (id) => document.getElementById(id);
+
+			function load(key, fallback) {
+				try {
+					const v = localStorage.getItem(key);
+					return v === null ? fallback : v;
+				} catch {
+					return fallback;
+				}
+			}
+
+			function save(key, value) {
+				try {
+					localStorage.setItem(key, value);
+				} catch {}
+			}
+
+			const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+			const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
+			const capitalize = (s) => s[0] + s.slice(1).toLowerCase();
+
+			// ---------- Orden ----------
+
+			// Korta ord låter som de stavas. Kluriga ord har dubbelteckning,
+			// tysta bokstäver och ljud som skrivs med flera bokstäver.
+			const WORDS = {
+				latt: [
+					['KO', '🐄'],
+					['BI', '🐝'],
+					['IS', '🧊'],
+					['APA', '🐒'],
+					['BIL', '🚗'],
+					['BOK', '📖'],
+					['BÅT', '⛵'],
+					['ELD', '🔥'],
+					['FOT', '🦶'],
+					['HAJ', '🦈'],
+					['HUS', '🏠'],
+					['LÅS', '🔒'],
+					['MUS', '🐭'],
+					['ORM', '🐍'],
+					['OST', '🧀'],
+					['PIL', '🏹'],
+					['RÄV', '🦊'],
+					['ROS', '🌹'],
+					['SOL', '☀️'],
+					['TÅG', '🚂'],
+					['UFO', '🛸'],
+					['YXA', '🪓'],
+					['ÖGA', '👁️'],
+					['ÖRA', '👂']
+				],
+				mellan: [
+					['ANKA', '🦆'],
+					['BOLL', '⚽'],
+					['BRÖD', '🍞'],
+					['BUSS', '🚌'],
+					['FISK', '🐟'],
+					['GRIS', '🐷'],
+					['HAND', '✋'],
+					['HUND', '🐶'],
+					['HÄST', '🐴'],
+					['KAKA', '🍪'],
+					['KATT', '🐱'],
+					['MÅNE', '🌙'],
+					['MOLN', '☁️'],
+					['NÄSA', '👃'],
+					['SKO', '👟'],
+					['SNÖ', '❄️'],
+					['TAND', '🦷'],
+					['TRÄD', '🌳'],
+					['ÄGG', '🥚'],
+					['BANAN', '🍌'],
+					['DRAKE', '🐉'],
+					['GODIS', '🍬'],
+					['GRODA', '🐸'],
+					['KANIN', '🐰'],
+					['PANDA', '🐼'],
+					['RAKET', '🚀'],
+					['ROBOT', '🤖'],
+					['TIGER', '🐯'],
+					['TOMAT', '🍅'],
+					['ZEBRA', '🦓']
+				],
+				svar: [
+					['ÄPPLE', '🍎'],
+					['UGGLA', '🦉'],
+					['LEJON', '🦁'],
+					['TÅRTA', '🎂'],
+					['GLASS', '🍦'],
+					['BJÖRN', '🐻'],
+					['PIZZA', '🍕'],
+					['KRONA', '👑'],
+					['BLOMMA', '🌸'],
+					['FJÄRIL', '🦋'],
+					['SPÖKE', '👻'],
+					['HJÄRTA', '❤️'],
+					['SPINDEL', '🕷️'],
+					['PINGVIN', '🐧'],
+					['ELEFANT', '🐘'],
+					['GIRAFF', '🦒'],
+					['KYCKLING', '🐥'],
+					['KROKODIL', '🐊'],
+					['SNÖGUBBE', '☃️'],
+					['JORDGUBBE', '🍓']
+				]
+			};
+
+			// Ord där första bokstaven inte låter som den brukar (g i giraff låter j)
+			const TRICKY_START = new Set(['GIRAFF', 'ZEBRA', 'HJÄRTA', 'KYCKLING']);
+
+			const ALL_WORDS = Object.values(WORDS).flat();
+			const VOWELS = 'AEIOUYÅÄÖ';
+			const ROWS = ['QWERTYUIOPÅ', 'ASDFGHJKLÖÄ', 'ZXCVBNM'];
+			const LETTERS = ROWS.join('');
+
+			const MODES = {
+				bokstav: { icon: '🔤', title: 'Första bokstaven', text: 'Vilken bokstav börjar ordet på?' },
+				skriv: { icon: '✏️', title: 'Skriv ordet', text: 'Skriv ordet till bilden!' },
+				lyssna: { icon: '👂', title: 'Lyssna och skriv', text: 'Lyssna och skriv ordet!' },
+				las: { icon: '📖', title: 'Läs och välj', text: 'Läs ordet och hitta bilden!' }
+			};
+
+			const PRAISE = ['Rätt! 🎉', 'Snyggt! 🌟', 'Superbra! 🚀', 'Du kan det här! 🏆', 'Toppen! 🥳'];
+
+			// ---------- Uppläsning ----------
+
+			const canSpeak = 'speechSynthesis' in window;
+			let voice = null;
+
+			function findVoice() {
+				const voices = speechSynthesis.getVoices().filter((v) => /^sv/i.test(v.lang));
+				voice = voices.find((v) => v.localService) || voices[0] || null;
+			}
+
+			if (canSpeak) {
+				findVoice();
+				speechSynthesis.addEventListener?.('voiceschanged', findVoice);
+			}
+
+			// Gemener, annars kan rösten läsa "ORM" som en förkortning: O-R-M
+			function say(text, auto = true) {
+				if (!canSpeak || (auto && !game.sound)) return;
+				speechSynthesis.cancel();
+				const u = new SpeechSynthesisUtterance(text.toLowerCase());
+				u.lang = 'sv-SE';
+				if (voice) u.voice = voice;
+				u.rate = 0.85;
+				speechSynthesis.speak(u);
+			}
+
+			// ---------- Tillstånd ----------
+
+			const savedCollection = (() => {
+				try {
+					return JSON.parse(load('skriva-samling', '[]'));
+				} catch {
+					return [];
+				}
+			})();
+
+			const game = {
+				mode: MODES[load('skriva-mode', '')] ? load('skriva-mode', '') : 'bokstav',
+				level: WORDS[load('skriva-level', '')] ? load('skriva-level', '') : 'latt',
+				stars: Number(load('skriva-stars', 0)) || 0,
+				sound: load('skriva-ljud', 'pa') === 'pa',
+				collected: new Set(savedCollection),
+				word: '',
+				emoji: '',
+				pos: 0,
+				misses: 0,
+				locked: false,
+				recent: [],
+				timer: null
+			};
+
+			if (!canSpeak) {
+				// Utan uppläsning går det inte att lyssna, så det läget göms
+				document.querySelector('[data-mode="lyssna"]').hidden = true;
+				$('speak').hidden = true;
+				$('soundToggle').hidden = true;
+				if (game.mode === 'lyssna') game.mode = 'skriv';
+			}
+
+			// ---------- Tangentbordet ----------
+
+			const keys = {};
+			for (const row of ROWS) {
+				const r = document.createElement('div');
+				r.className = 'kb-row';
+				for (const letter of row) {
+					const b = document.createElement('button');
+					b.type = 'button';
+					b.className = 'key' + (VOWELS.includes(letter) ? ' vowel' : '');
+					b.textContent = letter;
+					b.addEventListener('click', () => press(letter));
+					keys[letter] = b;
+					r.appendChild(b);
+				}
+				$('keyboard').appendChild(r);
+			}
+
+			document.addEventListener('keydown', (e) => {
+				if (e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+				if (game.mode === 'las') {
+					const i = Number(e.key) - 1;
+					const options = $('choices').children;
+					if (options[i]) options[i].click();
+					return;
+				}
+				const letter = e.key.toUpperCase();
+				if (letter.length === 1 && LETTERS.includes(letter)) {
+					e.preventDefault();
+					press(letter);
+				}
+			});
+
+			function flashKey(letter, cls) {
+				const k = keys[letter];
+				k.classList.remove('right', 'wrong');
+				void k.offsetWidth;
+				k.classList.add(cls);
+				setTimeout(() => k.classList.remove(cls), 450);
+			}
+
+			function clearHints() {
+				for (const k of Object.values(keys)) k.classList.remove('hint');
+			}
+
+			// ---------- Frågor ----------
+
+			function newQuestion() {
+				clearTimeout(game.timer);
+				clearHints();
+				document
+					.querySelectorAll('[data-level]')
+					.forEach((b) => b.classList.toggle('active', b.dataset.level === game.level));
+
+				let pool = WORDS[game.level];
+				if (game.mode === 'bokstav') pool = pool.filter(([w]) => !TRICKY_START.has(w));
+				const fresh = pool.filter(([w]) => !game.recent.includes(w));
+				const [word, emoji] = pick(fresh.length ? fresh : pool);
+				game.recent = [word, ...game.recent].slice(0, 5);
+
+				game.word = word;
+				game.emoji = emoji;
+				game.pos = 0;
+				game.misses = 0;
+				game.locked = false;
+
+				const mode = game.mode;
+				$('picture').textContent = mode === 'lyssna' ? '❓' : mode === 'las' ? '🤔' : emoji;
+				$('question').textContent = MODES[mode].text;
+				$('feedback').textContent = '';
+				$('hint').hidden = mode === 'las';
+				$('speak').hidden = !canSpeak || mode === 'las';
+				$('keyboard').hidden = mode === 'las';
+				$('kbLegend').hidden = mode === 'las';
+				$('choices').hidden = mode !== 'las';
+
+				renderWord();
+				if (mode === 'las') renderChoices();
+				renderStars();
+
+				if (mode === 'bokstav' || mode === 'lyssna') say(word);
+			}
+
+			function renderWord() {
+				const w = $('word');
+				w.replaceChildren();
+				w.style.setProperty('--n', game.word.length);
+				w.classList.toggle('read', game.mode === 'las');
+				[...game.word].forEach((letter, i) => {
+					const s = document.createElement('span');
+					s.className = 'slot';
+					if (game.mode === 'las') {
+						s.textContent = letter;
+					} else if (i < game.pos) {
+						s.textContent = letter;
+						s.classList.add('filled');
+					} else if (i === game.pos) {
+						s.classList.add('current');
+					} else if (game.mode === 'bokstav') {
+						// Resten av ordet syns svagt – bara första bokstaven saknas
+						s.textContent = letter;
+						s.classList.add('ghost');
+					}
+					w.appendChild(s);
+				});
+			}
+
+			// Ett felsvar börjar gärna på samma bokstav, så att man måste läsa hela ordet
+			function renderChoices() {
+				const others = WORDS[game.level].filter(([w]) => w !== game.word);
+				const sameStart = others.filter(([w]) => w[0] === game.word[0]);
+				const options = [[game.word, game.emoji]];
+				options.push(pick(sameStart.length ? sameStart : others));
+				while (options.length < 3) {
+					const o = pick(others);
+					if (!options.includes(o)) options.push(o);
+				}
+
+				const c = $('choices');
+				c.replaceChildren();
+				for (const [word, emoji] of shuffle(options)) {
+					const b = document.createElement('button');
+					b.type = 'button';
+					b.textContent = emoji;
+					b.setAttribute('aria-label', word);
+					b.addEventListener('click', () => choose(b, word));
+					c.appendChild(b);
+				}
+			}
+
+			// ---------- Svar ----------
+
+			function press(letter) {
+				if (game.locked || game.mode === 'las') return;
+				const target = game.word[game.pos];
+
+				if (letter === target) {
+					flashKey(letter, 'right');
+					clearHints();
+					game.pos++;
+					game.misses = 0;
+					const done = game.mode === 'bokstav' ? game.pos === 1 : game.pos === game.word.length;
+					if (done) {
+						if (game.mode === 'bokstav') game.pos = game.word.length;
+						renderWord();
+						win();
+					} else {
+						say(letter);
+						renderWord();
+						$('feedback').textContent = '';
+					}
+					return;
+				}
+
+				say(letter);
+				flashKey(letter, 'wrong');
+				const slot = $('word').children[game.pos];
+				slot.classList.remove('shake');
+				void slot.offsetWidth;
+				slot.classList.add('shake');
+				game.misses++;
+
+				if (game.misses >= 2) {
+					keys[target].classList.add('hint');
+					$('feedback').textContent = 'Titta, en knapp lyser! ✨';
+				} else if (game.mode === 'bokstav') {
+					$('feedback').textContent = 'Lyssna igen 🔊 Hur låter ordet i början?';
+				} else {
+					$('feedback').textContent = 'Nästan! Vilket ljud kommer nu? 🤔';
+				}
+			}
+
+			function choose(button, word) {
+				if (game.locked || button.disabled) return;
+				if (word === game.word) {
+					button.classList.add('right');
+					$('picture').textContent = game.emoji;
+					win();
+				} else {
+					button.classList.add('wrong');
+					button.disabled = true;
+					$('feedback').textContent = 'Försök igen! Ljuda bokstav för bokstav 🐢';
+				}
+			}
+
+			function win() {
+				game.locked = true;
+				clearHints();
+				say(game.word);
+
+				const pic = $('picture');
+				pic.textContent = game.emoji;
+				pic.classList.remove('pop');
+				void pic.offsetWidth;
+				pic.classList.add('pop');
+
+				game.stars++;
+				save('skriva-stars', game.stars);
+				renderStars();
+				$('stars').classList.remove('pop');
+				void $('stars').offsetWidth;
+				$('stars').classList.add('pop');
+
+				const isNew = !game.collected.has(game.word);
+				if (isNew) {
+					game.collected.add(game.word);
+					save('skriva-samling', JSON.stringify([...game.collected]));
+				}
+				renderAlbum(isNew ? game.word : null);
+
+				const milestone = game.stars % 10 === 0;
+				$('feedback').textContent = milestone
+					? `Wow, ${game.stars} stjärnor! 🏆`
+					: isNew
+						? `${capitalize(game.word)}! Ny i samlingen 🎒`
+						: pick(PRAISE);
+				confetti(milestone ? 160 : 60);
+				game.timer = setTimeout(newQuestion, milestone ? 2800 : 2000);
+			}
+
+			function renderStars() {
+				$('stars').textContent = `⭐ ${game.stars} ${game.stars === 1 ? 'stjärna' : 'stjärnor'}`;
+			}
+
+			// ---------- Samlingen ----------
+
+			function renderAlbum(newWord) {
+				$('albumTitle').textContent = `🎒 Min samling ${game.collected.size} / ${ALL_WORDS.length}`;
+				const grid = $('albumGrid');
+				grid.replaceChildren();
+				for (const [word, emoji] of ALL_WORDS) {
+					const has = game.collected.has(word);
+					const b = document.createElement('button');
+					b.type = 'button';
+					b.className = 'card' + (has ? '' : ' locked') + (word === newWord ? ' new' : '');
+					b.innerHTML = `<span>${has ? emoji : '❔'}</span><small>${has ? word : ''}</small>`;
+					b.setAttribute('aria-label', has ? word : 'Inte hittad än');
+					if (has) b.addEventListener('click', () => say(word, false));
+					else b.disabled = true;
+					grid.appendChild(b);
+				}
+			}
+
+			// ---------- Knappar ----------
+
+			function setMode(mode) {
+				game.mode = mode;
+				save('skriva-mode', mode);
+				document.body.dataset.mode = mode;
+				document
+					.querySelectorAll('.tab')
+					.forEach((t) => t.classList.toggle('active', t.dataset.mode === mode));
+				$('modeIcon').textContent = MODES[mode].icon;
+				$('modeText').textContent = MODES[mode].title;
+				game.recent = [];
+				newQuestion();
+			}
+
+			document
+				.querySelectorAll('.tab')
+				.forEach((t) => t.addEventListener('click', () => setMode(t.dataset.mode)));
+
+			document.querySelectorAll('[data-level]').forEach((b) =>
+				b.addEventListener('click', () => {
+					game.level = b.dataset.level;
+					save('skriva-level', game.level);
+					game.recent = [];
+					newQuestion();
+				})
+			);
+
+			$('speak').addEventListener('click', () => say(game.word, false));
+
+			$('hint').addEventListener('click', () => {
+				if (game.locked) return;
+				keys[game.word[game.pos]].classList.add('hint');
+			});
+
+			function renderSound() {
+				$('soundToggle').textContent = game.sound ? '🔊' : '🔇';
+			}
+
+			$('soundToggle').addEventListener('click', () => {
+				game.sound = !game.sound;
+				save('skriva-ljud', game.sound ? 'pa' : 'av');
+				if (!game.sound && canSpeak) speechSynthesis.cancel();
+				renderSound();
+			});
+
+			function confetti(count) {
+				if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+				const colors = ['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93', '#ff9f1c'];
+				for (let i = 0; i < count; i++) {
+					const c = document.createElement('span');
+					c.className = 'confetti';
+					c.style.left = `${Math.random() * 100}vw`;
+					c.style.background = pick(colors);
+					c.style.setProperty('--dx', `${(Math.random() - 0.5) * 200}px`);
+					c.style.setProperty('--rot', `${Math.random() * 1080}deg`);
+					c.style.animationDuration = `${1.4 + Math.random() * 1.4}s`;
+					c.style.animationDelay = `${Math.random() * 0.3}s`;
+					c.addEventListener('animationend', () => c.remove());
+					document.body.appendChild(c);
+				}
+			}
+
+			renderSound();
+			renderAlbum(null);
+			setMode(game.mode);
+		</script>
+	</body>
+</html>
