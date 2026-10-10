@@ -239,12 +239,26 @@
 				gap: clamp(0.2rem, 1vw, 0.4rem);
 			}
 
+			/* Stjärnorna på egen rad ovanför texten, så att texten får plats på smala skärmar */
 			.levels button {
-				font-size: clamp(0.7rem, 3.2vw, 0.95rem);
-				padding: 0.3rem clamp(0.5rem, 2vw, 0.9rem);
-				border-width: 2px;
-				white-space: nowrap;
+				flex: 1 1 0;
+				max-width: 9rem;
 				min-width: 0;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 0.1rem;
+				padding: 0.35rem 0.25rem;
+				border-width: 2px;
+				border-radius: 1rem;
+				font-size: clamp(0.85rem, 3.8vw, 1rem);
+				line-height: 1.15;
+				white-space: nowrap;
+			}
+
+			.levels .lvl-stars {
+				font-size: 0.95em;
+				letter-spacing: -0.05em;
 			}
 
 			.stage {
@@ -569,9 +583,9 @@
 
 		<section class="panel">
 			<div class="levels">
-				<button type="button" data-level="latt">⭐ Korta ord</button>
-				<button type="button" data-level="mellan">⭐⭐ Längre ord</button>
-				<button type="button" data-level="svar">⭐⭐⭐ Kluriga ord</button>
+				<button type="button" data-level="latt"><span class="lvl-stars">⭐</span>Korta ord</button>
+				<button type="button" data-level="mellan"><span class="lvl-stars">⭐⭐</span>Längre ord</button>
+				<button type="button" data-level="svar"><span class="lvl-stars">⭐⭐⭐</span>Kluriga ord</button>
 			</div>
 
 			<div class="stage">
