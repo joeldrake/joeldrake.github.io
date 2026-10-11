@@ -286,6 +286,25 @@
 				font-size: clamp(1.4rem, 5vw, 1.9rem);
 			}
 
+			/* Texten och högtalarknappen på samma rad */
+			.ask {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 0.5rem;
+				margin: 0.25rem 0 0.75rem;
+			}
+
+			.ask .say {
+				margin: 0;
+			}
+
+			.ask button {
+				flex: none;
+				font-size: 1.3rem;
+				padding: 0.2rem 0.5rem;
+			}
+
 			.say strong {
 				color: var(--hour);
 			}
@@ -569,7 +588,10 @@
 		</svg>
 
 		<section id="timePanel" class="panel">
-			<p class="say">Klockan är <strong id="phrase"></strong></p>
+			<div class="ask">
+				<p class="say">Klockan är <strong id="phrase"></strong></p>
+				<button id="speakTime" class="speak" type="button" aria-label="Lyssna på tiden">🔊</button>
+			</div>
 
 			<div id="dragControls" class="row" hidden>
 				<button type="button" data-step="-5">−5 min</button>
@@ -593,7 +615,10 @@
 				<button type="button" data-level="kvart">Kvartar</button>
 				<button type="button" data-level="fem">5 minuter</button>
 			</div>
-			<p class="say">Vad är klockan?</p>
+			<div class="ask">
+				<p class="say">Vad är klockan?</p>
+				<button id="speakQuiz" class="speak" type="button" aria-label="Lyssna på svaren">🔊</button>
+			</div>
 			<div id="answers" class="answers"></div>
 			<p id="feedback" class="feedback"></p>
 			<p id="stars" class="stars"></p>
@@ -794,6 +819,33 @@
 				return ['natt', '🌙', 'Det är natt 😴'];
 			}
 
+			// ---------- Uppläsning ----------
+
+			const canSpeak = 'speechSynthesis' in window;
+			let voice = null;
+
+			function findVoice() {
+				const voices = speechSynthesis.getVoices().filter((v) => /^sv/i.test(v.lang));
+				voice = voices.find((v) => v.localService) || voices[0] || null;
+			}
+
+			if (canSpeak) {
+				findVoice();
+				speechSynthesis.addEventListener?.('voiceschanged', findVoice);
+			} else {
+				document.querySelectorAll('.speak').forEach((b) => (b.hidden = true));
+			}
+
+			function say(text) {
+				if (!canSpeak) return;
+				speechSynthesis.cancel();
+				const u = new SpeechSynthesisUtterance(text);
+				u.lang = 'sv-SE';
+				if (voice) u.voice = voice;
+				u.rate = 0.85;
+				speechSynthesis.speak(u);
+			}
+
 			// ---------- Visning ----------
 
 			const hourHand = $('hourHand');
@@ -972,6 +1024,8 @@
 
 			// ---------- Knappar under klockan ----------
 
+			$('speakTime').addEventListener('click', () => say(`Klockan är ${$('phrase').textContent}`));
+
 			$('toggleDigital').addEventListener('click', (e) => {
 				const d = $('digitalTime');
 				d.hidden = !d.hidden;
@@ -1015,6 +1069,7 @@
 				misses: 0,
 				locked: false,
 				last: '',
+				options: [],
 				timer: null
 			};
 
@@ -1053,7 +1108,8 @@
 
 				const answers = $('answers');
 				answers.replaceChildren();
-				for (const text of [...options].sort(() => Math.random() - 0.5)) {
+				quiz.options = [...options].sort(() => Math.random() - 0.5);
+				for (const text of quiz.options) {
 					const b = document.createElement('button');
 					b.type = 'button';
 					b.textContent = capitalize(text);
@@ -1094,6 +1150,13 @@
 					newQuestion();
 				})
 			);
+
+			// Läser upp svarsalternativen (för den som inte kan läsa än), eller rätt svar när det är klart
+			$('speakQuiz').addEventListener('click', () => {
+				if (quiz.locked) return say(`Klockan är ${quiz.answer}`);
+				const [a, b, c] = quiz.options;
+				say(`Är klockan ${a}, ${b}, eller ${c}?`);
+			});
 
 			function confetti(count) {
 				if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
