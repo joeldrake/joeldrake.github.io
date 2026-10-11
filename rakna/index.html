@@ -1,0 +1,1203 @@
+<!doctype html>
+<html lang="sv">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+		<title>Räkna</title>
+		<link rel="manifest" href="manifest.json" />
+		<link rel="icon" href="icon.svg" type="image/svg+xml" />
+		<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+		<meta name="theme-color" content="#b9fbc0" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="apple-mobile-web-app-title" content="Räkna" />
+		<!-- Grön startskärm på iPhone (Safari använder inte manifestets background_color) -->
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/750x1334.png"
+			media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1242x2208.png"
+			media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1125x2436.png"
+			media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/828x1792.png"
+			media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1242x2688.png"
+			media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1170x2532.png"
+			media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1284x2778.png"
+			media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1179x2556.png"
+			media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1290x2796.png"
+			media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1206x2622.png"
+			media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1320x2868.png"
+			media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1260x2736.png"
+			media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap"
+			rel="stylesheet"
+		/>
+		<style>
+			:root {
+				--ink: #2b2d42;
+				--accent: #7b2cbf;
+				--rim: #ff9f1c;
+				--good: #2a9d8f;
+				--bad: #e63946;
+				--hint: #ffd166;
+			}
+
+			* {
+				box-sizing: border-box;
+			}
+
+			/* Stäng av dubbeltryck-zoom (snabba tryck på knappar), nypzoom fungerar fortfarande */
+			html {
+				touch-action: manipulation;
+			}
+
+			[hidden] {
+				display: none !important;
+			}
+
+			body {
+				margin: 0;
+				min-height: 100vh;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 1rem;
+				/* Håll innehållet fritt från notch och hemindikator i helskärmsläge */
+				padding: calc(1rem + env(safe-area-inset-top, 0px))
+					calc(1rem + env(safe-area-inset-right, 0px)) calc(2rem + env(safe-area-inset-bottom, 0px))
+					calc(1rem + env(safe-area-inset-left, 0px));
+				font-family:
+					'Fredoka',
+					system-ui,
+					-apple-system,
+					'Segoe UI',
+					Roboto,
+					sans-serif;
+				color: var(--ink);
+				/* Grön grundfärg så att det aldrig blinkar vitt innan bakgrunden ritats */
+				background-color: #b9fbc0;
+				background-image: linear-gradient(#b9fbc0, #fdffb6);
+				background-attachment: fixed;
+				overflow-x: hidden;
+			}
+
+			body[data-mode='plus'] {
+				background-image: linear-gradient(#b9fbc0, #fdffb6);
+			}
+			body[data-mode='minus'] {
+				background-image: linear-gradient(#ffc8a2, #fff1c1);
+			}
+			body[data-mode='saknas'] {
+				background-image: linear-gradient(#cdb4db, #f3e8ff);
+			}
+			body[data-mode='kompis'] {
+				background-image: linear-gradient(#74c0fc, #e7f5ff);
+			}
+
+			header {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+				width: 100%;
+				max-width: 36rem;
+			}
+
+			.mode-icon {
+				font-size: 3rem;
+				line-height: 1;
+				animation: bob 3s ease-in-out infinite;
+			}
+
+			h1 {
+				margin: 0;
+				font-size: clamp(1.8rem, 6vw, 2.6rem);
+				font-weight: 700;
+			}
+
+			#modeText {
+				margin: 0;
+				font-size: 1.15rem;
+				text-wrap: pretty;
+			}
+
+			#soundToggle {
+				margin-left: auto;
+				flex: none;
+				font-size: 1.5rem;
+				padding: 0.3rem 0.6rem;
+			}
+
+			.tabs {
+				display: flex;
+				justify-content: center;
+				gap: clamp(0.3rem, 1.5vw, 0.5rem);
+				max-width: 100%;
+			}
+
+			button {
+				font: inherit;
+				cursor: pointer;
+				border-radius: 999px;
+				border: 3px solid var(--ink);
+				background: #fff;
+				color: var(--ink);
+				padding: 0.45rem 1rem;
+				font-size: 1rem;
+				font-weight: 600;
+				transition:
+					transform 0.1s,
+					background 0.2s;
+			}
+
+			button:active {
+				transform: scale(0.95);
+			}
+
+			/* Flikarna krymper med skärmen i stället för att radbryta */
+			.tab {
+				font-size: clamp(0.75rem, 3.6vw, 1.1rem);
+				padding: 0.45rem clamp(0.5rem, 2.5vw, 1rem);
+				white-space: nowrap;
+				flex: 0 1 auto;
+				min-width: 0;
+			}
+
+			.tab.active,
+			.levels button.active {
+				background: var(--ink);
+				color: #fff;
+			}
+
+			.panel {
+				width: 100%;
+				max-width: 36rem;
+				background: rgba(255, 255, 255, 0.92);
+				color: var(--ink);
+				border-radius: 1.5rem;
+				padding: 1rem 1.25rem;
+				box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+				text-align: center;
+			}
+
+			@media (max-width: 480px) {
+				.panel {
+					padding-inline: 0.75rem;
+				}
+			}
+
+			.levels {
+				display: flex;
+				justify-content: center;
+				gap: clamp(0.2rem, 1vw, 0.4rem);
+			}
+
+			/* Stjärnorna på egen rad ovanför texten, så att texten får plats på smala skärmar */
+			.levels button {
+				flex: 1 1 0;
+				max-width: 9rem;
+				min-width: 0;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 0.1rem;
+				padding: 0.35rem 0.25rem;
+				border-width: 2px;
+				border-radius: 1rem;
+				font-size: clamp(0.85rem, 3.8vw, 1rem);
+				line-height: 1.15;
+				white-space: nowrap;
+			}
+
+			.levels .lvl-stars {
+				font-size: 0.95em;
+				letter-spacing: -0.05em;
+			}
+
+			.ask {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 0.5rem;
+				margin: 0.75rem 0 0.25rem;
+			}
+
+			.say {
+				margin: 0;
+				font-size: clamp(1.15rem, 4.5vw, 1.5rem);
+			}
+
+			.ask button {
+				flex: none;
+				font-size: 1.3rem;
+				padding: 0.2rem 0.5rem;
+			}
+
+			/* ---------- Bilderna ---------- */
+
+			#scene {
+				display: flex;
+				min-height: 5rem;
+				margin-top: 0.5rem;
+				flex-wrap: wrap;
+				align-items: center;
+				justify-content: center;
+				gap: 0.4rem 0.5rem;
+				/* Färre saker ger större bilder */
+				--size: clamp(1.5rem, calc(32vw / var(--cols, 5)), 3.2rem);
+				user-select: none;
+				-webkit-user-select: none;
+			}
+
+			#scene.pop {
+				animation: pop 0.5s;
+			}
+
+			#scene.hide-pics .group,
+			#scene.hide-pics .sign {
+				display: none;
+			}
+
+			.peek {
+				font-size: 4rem;
+				line-height: 1;
+			}
+
+			/* En grupp ritas som en tiorute-rad: fem i bredd */
+			.group {
+				display: grid;
+				grid-template-columns: repeat(var(--cols, 5), var(--size));
+				gap: 0.2rem;
+				padding: 0.35rem;
+				border-radius: 1rem;
+				background: rgba(43, 45, 66, 0.06);
+			}
+
+			.sign {
+				font-size: calc(var(--size) * 1.1);
+				font-weight: 700;
+				color: var(--accent);
+			}
+
+			.item {
+				position: relative;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				width: var(--size);
+				height: var(--size);
+				font-size: calc(var(--size) * 0.8);
+				line-height: 1;
+				cursor: pointer;
+				transition:
+					opacity 0.5s,
+					transform 0.5s,
+					filter 0.5s;
+			}
+
+			/* Tomma platser: det som fattas */
+			.item.empty {
+				border: 0.15rem dashed #adb5bd;
+				border-radius: 50%;
+				font-size: calc(var(--size) * 0.5);
+				color: #adb5bd;
+			}
+
+			/* Det som tas bort i minus flyger iväg en bit och bleknar */
+			.item.gone {
+				opacity: 0.25;
+				filter: grayscale(1);
+				transform: translateY(-0.4rem) rotate(-12deg);
+			}
+
+			.item.gone::after {
+				content: '✖';
+				position: absolute;
+				font-size: calc(var(--size) * 0.7);
+				color: var(--bad);
+			}
+
+			/* Siffran som visas när man räknar en sak */
+			.item[data-n]::before {
+				content: attr(data-n);
+				position: absolute;
+				top: -0.3em;
+				right: -0.3em;
+				z-index: 1;
+				min-width: 1.4em;
+				height: 1.4em;
+				padding-inline: 0.2em;
+				border-radius: 999px;
+				background: var(--accent);
+				color: #fff;
+				font-size: max(0.75rem, calc(var(--size) * 0.32));
+				font-weight: 700;
+				line-height: 1.4em;
+				animation: pop 0.3s;
+			}
+
+			/* ---------- Talet ---------- */
+
+			#equation {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				gap: 0.3em;
+				margin: 0.5rem 0 0.25rem;
+				font-size: clamp(2.2rem, 11vw, 3.4rem);
+				font-weight: 700;
+				line-height: 1;
+				user-select: none;
+				-webkit-user-select: none;
+			}
+
+			#equation .op {
+				color: var(--accent);
+			}
+
+			.box {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				min-width: 1.3em;
+				height: 1.3em;
+				padding-inline: 0.15em;
+				border: 0.08em solid var(--accent);
+				border-radius: 0.25em;
+				background: #fff;
+				animation: blink 1.2s ease-in-out infinite;
+			}
+
+			.box.filled {
+				border-color: var(--good);
+				color: var(--good);
+				animation: pop 0.35s;
+			}
+
+			.box.shake {
+				animation: shake 0.4s;
+			}
+
+			.feedback {
+				min-height: 1.6em;
+				margin: 0.5rem 0 0.25rem;
+				font-size: 1.25rem;
+				font-weight: 600;
+				text-wrap: balance;
+			}
+
+			.stars {
+				margin: 0;
+				font-size: 1.2rem;
+			}
+
+			.stars.pop {
+				animation: pop 0.5s;
+			}
+
+			/* ---------- Sifferknappar ---------- */
+
+			/* Knapparna står i tallinjens ordning. Vid 20 hamnar 11 under 1, 12 under 2 osv. */
+			.numpad {
+				--gap: clamp(0.2rem, 0.9vw, 0.4rem);
+				display: grid;
+				grid-template-columns: repeat(var(--cols, 6), minmax(0, 4rem));
+				justify-content: center;
+				gap: clamp(0.3rem, 1.3vw, 0.6rem) var(--gap);
+				margin-top: 0.75rem;
+				/* Knapparna ska inte gå att markera eller ge kopiera-meny vid långtryck */
+				user-select: none;
+				-webkit-user-select: none;
+				-webkit-touch-callout: none;
+				-webkit-tap-highlight-color: transparent;
+			}
+
+			@media (max-width: 480px) {
+				.numpad.wide {
+					--gap: 0.15rem;
+					margin-inline: -0.5rem;
+				}
+			}
+
+			.key {
+				height: clamp(3.4rem, 15vw, 4rem);
+				padding: 0;
+				border-width: 2px;
+				border-radius: 0.6rem;
+				font-size: clamp(1.3rem, 6vw, 1.9rem);
+				font-weight: 700;
+				box-shadow: 0 3px 0 var(--ink);
+			}
+
+			.key.skip {
+				grid-column-start: 2;
+			}
+
+			.key:active {
+				transform: translateY(2px);
+				box-shadow: 0 1px 0 var(--ink);
+			}
+
+			.key.hint {
+				background: var(--hint);
+				animation: glow 0.8s ease-in-out infinite;
+			}
+
+			.key.right {
+				background: var(--good);
+				border-color: var(--good);
+				color: #fff;
+			}
+
+			.key.wrong {
+				background: #ffe3e3;
+				border-color: var(--bad);
+				color: var(--bad);
+				opacity: 0.5;
+				animation: shake 0.4s;
+			}
+
+			/* ---------- Samlingen ---------- */
+
+			.album h2 {
+				margin: 0 0 0.75rem;
+				font-size: 1.3rem;
+			}
+
+			.album-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(4.2rem, 1fr));
+				gap: 0.4rem;
+			}
+
+			.card {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 0.1rem;
+				padding: 0.35rem 0.2rem;
+				border-radius: 0.9rem;
+				border: 2px solid #e9ecef;
+				font-weight: 600;
+			}
+
+			.card span {
+				font-size: 1.9rem;
+				line-height: 1.1;
+			}
+
+			.card small {
+				font-size: 0.75rem;
+				letter-spacing: 0.03em;
+				min-height: 1.1em;
+			}
+
+			.card.locked {
+				background: #f1f3f5;
+				opacity: 0.8;
+				cursor: default;
+			}
+
+			.card.new {
+				border-color: var(--hint);
+				animation: pop 0.6s 2;
+			}
+
+			.confetti {
+				position: fixed;
+				top: -16px;
+				width: 10px;
+				height: 14px;
+				border-radius: 2px;
+				z-index: 10;
+				pointer-events: none;
+				animation: fall linear forwards;
+			}
+
+			@keyframes fall {
+				to {
+					transform: translate(var(--dx), 110vh) rotate(var(--rot));
+				}
+			}
+
+			@keyframes bob {
+				50% {
+					transform: translateY(-6px);
+				}
+			}
+
+			@keyframes blink {
+				50% {
+					border-color: #e5d4f5;
+				}
+			}
+
+			@keyframes glow {
+				50% {
+					transform: scale(1.12);
+				}
+			}
+
+			@keyframes shake {
+				20%,
+				60% {
+					transform: translateX(-8px);
+				}
+				40%,
+				80% {
+					transform: translateX(8px);
+				}
+			}
+
+			@keyframes pop {
+				50% {
+					transform: scale(1.4);
+				}
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				*,
+				*::before {
+					animation: none !important;
+				}
+			}
+		</style>
+	</head>
+	<body data-mode="plus">
+		<header>
+			<span id="modeIcon" class="mode-icon">➕</span>
+			<div>
+				<h1>Räkna!</h1>
+				<p id="modeText"></p>
+			</div>
+			<button id="soundToggle" type="button" aria-label="Ljud av eller på">🔊</button>
+		</header>
+
+		<nav class="tabs">
+			<button class="tab" type="button" data-mode="plus">➕ Plus</button>
+			<button class="tab" type="button" data-mode="minus">➖ Minus</button>
+			<button class="tab" type="button" data-mode="saknas">🔍 Fattas</button>
+			<button class="tab" type="button" data-mode="kompis">🤝 Kompisar</button>
+		</nav>
+
+		<section class="panel">
+			<div class="levels">
+				<button type="button" data-level="latt"><span class="lvl-stars">⭐</span>Upp till 5</button>
+				<button type="button" data-level="mellan"><span class="lvl-stars">⭐⭐</span>Upp till 10</button>
+				<button type="button" data-level="svar"><span class="lvl-stars">⭐⭐⭐</span>Upp till 20</button>
+			</div>
+
+			<div class="ask">
+				<p id="question" class="say"></p>
+				<button id="speak" type="button" aria-label="Lyssna på talet">🔊</button>
+				<button id="hint" type="button" aria-label="Tips">💡</button>
+			</div>
+
+			<div id="scene" aria-live="polite"></div>
+
+			<div id="equation" aria-live="polite"></div>
+			<p id="feedback" class="feedback"></p>
+			<p id="stars" class="stars"></p>
+
+			<div id="numpad" class="numpad"></div>
+		</section>
+
+		<section class="panel album">
+			<h2 id="albumTitle"></h2>
+			<div id="albumGrid" class="album-grid"></div>
+		</section>
+
+		<script>
+			const $ = (id) => document.getElementById(id);
+
+			function load(key, fallback) {
+				try {
+					const v = localStorage.getItem(key);
+					return v === null ? fallback : v;
+				} catch {
+					return fallback;
+				}
+			}
+
+			function save(key, value) {
+				try {
+					localStorage.setItem(key, value);
+				} catch {}
+			}
+
+			const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+			const rand = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
+			const capitalize = (s) => s[0].toUpperCase() + s.slice(1);
+
+			// ---------- Sakerna man räknar ----------
+
+			// Varje tal visas med en sak. Rätt svar lägger saken i samlingen.
+			const THINGS = [
+				['äpple', '🍎'],
+				['banan', '🍌'],
+				['jordgubbe', '🍓'],
+				['päron', '🍐'],
+				['citron', '🍋'],
+				['körsbär', '🍒'],
+				['morot', '🥕'],
+				['kaka', '🍪'],
+				['muffin', '🧁'],
+				['glass', '🍦'],
+				['godis', '🍬'],
+				['ägg', '🥚'],
+				['ballong', '🎈'],
+				['boll', '⚽'],
+				['stjärna', '⭐'],
+				['hjärta', '❤️'],
+				['blomma', '🌸'],
+				['löv', '🍀'],
+				['svamp', '🍄'],
+				['snöflinga', '❄️'],
+				['bil', '🚗'],
+				['raket', '🚀'],
+				['anka', '🦆'],
+				['fisk', '🐟'],
+				['nyckelpiga', '🐞'],
+				['bi', '🐝'],
+				['fjäril', '🦋'],
+				['groda', '🐸'],
+				['kyckling', '🐥'],
+				['nalle', '🧸'],
+				['diamant', '💎'],
+				['krona', '👑']
+			];
+
+			const MAX = { latt: 5, mellan: 10, svar: 20 };
+
+			const MODES = {
+				plus: { icon: '➕', title: 'Lägg ihop', text: 'Hur många blir det?' },
+				minus: { icon: '➖', title: 'Ta bort', text: 'Hur många är kvar?' },
+				saknas: { icon: '🔍', title: 'Vad fattas?', text: 'Hur många fattas?' },
+				kompis: { icon: '🤝', title: 'Kompistal', text: '' }
+			};
+
+			const PRAISE = ['Rätt! 🎉', 'Snyggt! 🌟', 'Superbra! 🚀', 'Du kan det här! 🏆', 'Toppen! 🥳'];
+
+			// ---------- Uppläsning ----------
+
+			const canSpeak = 'speechSynthesis' in window;
+			let voice = null;
+
+			function findVoice() {
+				const voices = speechSynthesis.getVoices().filter((v) => /^sv/i.test(v.lang));
+				voice = voices.find((v) => v.localService) || voices[0] || null;
+			}
+
+			if (canSpeak) {
+				findVoice();
+				speechSynthesis.addEventListener?.('voiceschanged', findVoice);
+			}
+
+			function say(text, auto = true) {
+				if (!canSpeak || (auto && !game.sound)) return;
+				speechSynthesis.cancel();
+				const u = new SpeechSynthesisUtterance(text);
+				u.lang = 'sv-SE';
+				if (voice) u.voice = voice;
+				u.rate = 0.85;
+				speechSynthesis.speak(u);
+			}
+
+			// ---------- Tillstånd ----------
+
+			const savedCollection = (() => {
+				try {
+					return JSON.parse(load('rakna-samling', '[]'));
+				} catch {
+					return [];
+				}
+			})();
+
+			const game = {
+				mode: MODES[load('rakna-mode', '')] ? load('rakna-mode', '') : 'plus',
+				level: MAX[load('rakna-level', '')] ? load('rakna-level', '') : 'latt',
+				stars: Number(load('rakna-stars', 0)) || 0,
+				sound: load('rakna-ljud', 'pa') === 'pa',
+				collected: new Set(savedCollection),
+				task: null,
+				thing: null,
+				misses: 0,
+				counted: 0,
+				locked: false,
+				typed: '',
+				recent: [],
+				timer: null,
+				typeTimer: null,
+				countTimer: null,
+				goneTimer: null
+			};
+
+			if (!canSpeak) {
+				$('speak').hidden = true;
+				$('soundToggle').hidden = true;
+			}
+
+			// ---------- Uppgifter ----------
+
+			// a ○ b = c, där svaret är det tal som står i rutan (box)
+			function makeTask(mode, max) {
+				if (mode === 'plus') {
+					// På högsta nivån blir det oftast över tio, annars är det för likt nivå två
+					const c = max === 20 && Math.random() < 0.75 ? rand(11, 20) : rand(2, max);
+					const a = rand(1, c - 1);
+					return { a, op: '+', b: c - a, c, box: 'c' };
+				}
+				if (mode === 'minus') {
+					const a = max === 20 && Math.random() < 0.75 ? rand(11, 20) : rand(2, max);
+					// Noll kvar ibland, men inte för ofta
+					const b = Math.random() < 0.1 ? a : rand(1, a - 1);
+					return { a, op: '−', b, c: a - b, box: 'c' };
+				}
+				if (mode === 'saknas') {
+					const c = rand(2, max);
+					const a = rand(1, c - 1);
+					return { a, op: '+', b: c - a, c, box: 'b' };
+				}
+				// Kompistal: hur många fattas upp till 5, 10 eller 20?
+				const a = rand(1, max - 1);
+				return { a, op: '+', b: max - a, c: max, box: 'b' };
+			}
+
+			const answerOf = (t) => t[t.box];
+
+			// ---------- Sifferknappar ----------
+
+			const keys = [];
+
+			function renderNumpad() {
+				const max = MAX[game.level];
+				const pad = $('numpad');
+				pad.replaceChildren();
+				keys.length = 0;
+				// Fem: en rad 0–5. Tio: 0–5 och 6–10. Tjugo: 0–10 och 11–20.
+				const cols = max === 20 ? 11 : 6;
+				pad.style.setProperty('--cols', cols);
+				pad.classList.toggle('wide', cols > 6);
+				for (let n = 0; n <= max; n++) {
+					const b = document.createElement('button');
+					b.type = 'button';
+					b.className = 'key';
+					if (n === cols) b.classList.add('skip');
+					b.textContent = n;
+					b.addEventListener('click', () => answer(n));
+					keys[n] = b;
+					pad.appendChild(b);
+				}
+			}
+
+			// Tvåsiffriga tal: vänta en stund på nästa siffra om det kan bli ett större tal
+			document.addEventListener('keydown', (e) => {
+				if (e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+				if (!/^[0-9]$/.test(e.key)) return;
+				e.preventDefault();
+				clearTimeout(game.typeTimer);
+				const max = MAX[game.level];
+				const typed = game.typed + e.key;
+				const n = Number(typed);
+				if (n > max) {
+					game.typed = '';
+					return;
+				}
+				if (n * 10 <= max && n !== 0) {
+					game.typed = typed;
+					game.typeTimer = setTimeout(() => {
+						game.typed = '';
+						answer(n);
+					}, 900);
+				} else {
+					game.typed = '';
+					answer(n);
+				}
+			});
+
+			function clearHints() {
+				for (const k of keys) k.classList.remove('hint');
+			}
+
+			// ---------- Frågor ----------
+
+			function newQuestion() {
+				clearTimeout(game.timer);
+				clearTimeout(game.countTimer);
+				clearTimeout(game.goneTimer);
+				document
+					.querySelectorAll('[data-level]')
+					.forEach((b) => b.classList.toggle('active', b.dataset.level === game.level));
+
+				const max = MAX[game.level];
+				let task;
+				for (let i = 0; i < 20; i++) {
+					task = makeTask(game.mode, max);
+					if (!game.recent.includes(taskKey(task))) break;
+				}
+				game.recent = [taskKey(task), ...game.recent].slice(0, 6);
+
+				// Försök visa en sak som inte finns i samlingen än
+				const missing = THINGS.filter(([name]) => !game.collected.has(name));
+				game.thing = pick(missing.length && Math.random() < 0.7 ? missing : THINGS);
+				game.task = task;
+				game.misses = 0;
+				game.counted = 0;
+				game.locked = false;
+				game.typed = '';
+
+				const kompis = game.mode === 'kompis';
+				$('question').textContent = kompis ? `Hur många fattas till ${max}?` : MODES[game.mode].text;
+				$('feedback').textContent = '';
+
+				renderNumpad();
+				renderScene();
+				renderEquation(false);
+				renderStars();
+				say(spoken(task, false));
+			}
+
+			const taskKey = (t) => `${t.a}${t.op}${t.b}${t.box}`;
+
+			// "3 plus 2", "5 minus 1", "3 plus hur många blir 5"
+			function spoken(t, solved) {
+				const word = t.op === '+' ? 'plus' : 'minus';
+				if (t.box === 'c') return solved ? `${t.a} ${word} ${t.b} är ${t.c}` : `${t.a} ${word} ${t.b}`;
+				return solved
+					? `${t.a} plus ${t.b} är ${t.c}`
+					: `${t.a} plus hur många blir ${t.c}?`;
+			}
+
+			// Bilder visas alltid på de två lägre nivåerna. Vid tjugo får man först försöka själv.
+			function renderScene() {
+				const { a, b, c, box } = game.task;
+				const emoji = game.thing[1];
+				const scene = $('scene');
+				scene.replaceChildren();
+				scene.classList.toggle('hide-pics', game.level === 'svar');
+				scene.style.setProperty('--cols', Math.min(5, Math.max(a, b, c)));
+
+				const peek = document.createElement('span');
+				peek.className = 'peek';
+				peek.textContent = '🤔';
+				peek.hidden = game.level !== 'svar';
+				scene.appendChild(peek);
+
+				const group = (count, cls = '') => {
+					const g = document.createElement('div');
+					g.className = 'group';
+					for (let i = 0; i < count; i++) {
+						const it = document.createElement('span');
+						it.className = 'item' + (cls ? ' ' + cls : '');
+						it.textContent = cls === 'empty' ? '?' : emoji;
+						it.addEventListener('click', () => countItem(it));
+						g.appendChild(it);
+					}
+					scene.appendChild(g);
+					return g;
+				};
+
+				const sign = (text) => {
+					const s = document.createElement('span');
+					s.className = 'sign';
+					s.textContent = text;
+					scene.appendChild(s);
+				};
+
+				if (game.mode === 'plus') {
+					group(a);
+					sign('+');
+					group(b);
+				} else if (game.mode === 'minus') {
+					// Alla syns först, sedan försvinner de som tas bort
+					const g = group(a);
+					const items = [...g.children].slice(a - b);
+					game.goneTimer = setTimeout(() => items.forEach((it) => it.classList.add('gone')), 700);
+				} else {
+					// Fattas och kompistal: fyllda platser och tomma platser i samma rad
+					const g = group(a);
+					for (let i = 0; i < c - a; i++) {
+						const it = document.createElement('span');
+						it.className = 'item empty';
+						it.textContent = '?';
+						it.addEventListener('click', () => countItem(it));
+						g.appendChild(it);
+					}
+				}
+			}
+
+			function showPictures() {
+				const scene = $('scene');
+				if (!scene.classList.contains('hide-pics')) return false;
+				scene.classList.remove('hide-pics');
+				scene.querySelector('.peek').hidden = true;
+				return true;
+			}
+
+			// De saker man ska räkna för att hitta svaret
+			function targets() {
+				const all = [...$('scene').querySelectorAll('.item')];
+				if (game.mode === 'plus') return all;
+				if (game.mode === 'minus') return all.slice(0, game.task.a - game.task.b);
+				return all.filter((it) => it.classList.contains('empty'));
+			}
+
+			function renderEquation(solved) {
+				const t = game.task;
+				const eq = $('equation');
+				eq.replaceChildren();
+				const part = (text, cls) => {
+					const s = document.createElement('span');
+					if (cls) s.className = cls;
+					s.textContent = text;
+					eq.appendChild(s);
+					return s;
+				};
+				const value = (k) => (k === t.box ? part(solved ? t[k] : '', 'box' + (solved ? ' filled' : '')) : part(t[k]));
+				value('a');
+				part(t.op, 'op');
+				value('b');
+				part('=', 'op');
+				value('c');
+			}
+
+			// ---------- Räkna saker ----------
+
+			// Tryck på en sak så får den en siffra och siffran läses upp
+			function countItem(it) {
+				if (it.dataset.n || it.classList.contains('gone')) return;
+				game.counted++;
+				it.dataset.n = game.counted;
+				say(String(game.counted));
+			}
+
+			function resetCount() {
+				game.counted = 0;
+				$('scene')
+					.querySelectorAll('[data-n]')
+					.forEach((it) => delete it.dataset.n);
+			}
+
+			// Tipset räknar högt, en sak i taget
+			function countAloud() {
+				clearTimeout(game.countTimer);
+				resetCount();
+				const list = targets();
+				let i = 0;
+				const step = () => {
+					if (i >= list.length || game.locked) return;
+					countItem(list[i++]);
+					game.countTimer = setTimeout(step, 750);
+				};
+				step();
+			}
+
+			// ---------- Svar ----------
+
+			function answer(n) {
+				if (game.locked || !keys[n] || keys[n].disabled) return;
+				const right = answerOf(game.task);
+
+				if (n === right) {
+					keys[n].classList.add('right');
+					win();
+					return;
+				}
+
+				say(String(n));
+				keys[n].classList.add('wrong');
+				keys[n].disabled = true;
+				const box = $('equation').querySelector('.box');
+				box.classList.remove('shake');
+				void box.offsetWidth;
+				box.classList.add('shake');
+				game.misses++;
+
+				if (game.misses >= 2) {
+					keys[right].classList.add('hint');
+					$('feedback').textContent = 'Titta, en knapp lyser! ✨';
+				} else if (showPictures()) {
+					$('feedback').textContent = 'Nästan! Räkna bilderna 👆';
+				} else {
+					$('feedback').textContent = 'Nästan! Tryck på bilderna och räkna 👆';
+				}
+			}
+
+			function win() {
+				game.locked = true;
+				clearTimeout(game.countTimer);
+				clearTimeout(game.typeTimer);
+				clearHints();
+				showPictures();
+				renderEquation(true);
+				say(spoken(game.task, true));
+
+				const scene = $('scene');
+				scene.classList.remove('pop');
+				void scene.offsetWidth;
+				scene.classList.add('pop');
+
+				game.stars++;
+				save('rakna-stars', game.stars);
+				renderStars();
+				$('stars').classList.remove('pop');
+				void $('stars').offsetWidth;
+				$('stars').classList.add('pop');
+
+				const [name, emoji] = game.thing;
+				const isNew = !game.collected.has(name);
+				if (isNew) {
+					game.collected.add(name);
+					save('rakna-samling', JSON.stringify([...game.collected]));
+				}
+				renderAlbum(isNew ? name : null);
+
+				const milestone = game.stars % 10 === 0;
+				$('feedback').textContent = milestone
+					? `Wow, ${game.stars} stjärnor! 🏆`
+					: isNew
+						? `${capitalize(name)} ${emoji} Ny i samlingen 🎒`
+						: pick(PRAISE);
+				confetti(milestone ? 160 : 60);
+				game.timer = setTimeout(newQuestion, milestone ? 3200 : 2600);
+			}
+
+			function renderStars() {
+				$('stars').textContent = `⭐ ${game.stars} ${game.stars === 1 ? 'stjärna' : 'stjärnor'}`;
+			}
+
+			// ---------- Samlingen ----------
+
+			function renderAlbum(newName) {
+				$('albumTitle').textContent = `🎒 Min samling ${game.collected.size} / ${THINGS.length}`;
+				const grid = $('albumGrid');
+				grid.replaceChildren();
+				for (const [name, emoji] of THINGS) {
+					const has = game.collected.has(name);
+					const b = document.createElement('button');
+					b.type = 'button';
+					b.className = 'card' + (has ? '' : ' locked') + (name === newName ? ' new' : '');
+					b.innerHTML = `<span>${has ? emoji : '❔'}</span><small>${has ? name : ''}</small>`;
+					b.setAttribute('aria-label', has ? name : 'Inte hittad än');
+					if (has) b.addEventListener('click', () => say(name, false));
+					else b.disabled = true;
+					grid.appendChild(b);
+				}
+			}
+
+			// ---------- Knappar ----------
+
+			function setMode(mode) {
+				game.mode = mode;
+				save('rakna-mode', mode);
+				document.body.dataset.mode = mode;
+				document
+					.querySelectorAll('.tab')
+					.forEach((t) => t.classList.toggle('active', t.dataset.mode === mode));
+				$('modeIcon').textContent = MODES[mode].icon;
+				$('modeText').textContent = MODES[mode].title;
+				game.recent = [];
+				newQuestion();
+			}
+
+			document
+				.querySelectorAll('.tab')
+				.forEach((t) => t.addEventListener('click', () => setMode(t.dataset.mode)));
+
+			document.querySelectorAll('[data-level]').forEach((b) =>
+				b.addEventListener('click', () => {
+					game.level = b.dataset.level;
+					save('rakna-level', game.level);
+					game.recent = [];
+					newQuestion();
+				})
+			);
+
+			$('speak').addEventListener('click', () => say(spoken(game.task, game.locked), false));
+
+			// Första trycket visar bilderna om de är gömda, sedan räknar tipset högt
+			$('hint').addEventListener('click', () => {
+				if (game.locked) return;
+				if (!showPictures()) countAloud();
+			});
+
+			function renderSound() {
+				$('soundToggle').textContent = game.sound ? '🔊' : '🔇';
+			}
+
+			$('soundToggle').addEventListener('click', () => {
+				game.sound = !game.sound;
+				save('rakna-ljud', game.sound ? 'pa' : 'av');
+				if (!game.sound && canSpeak) speechSynthesis.cancel();
+				renderSound();
+			});
+
+			function confetti(count) {
+				if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+				const colors = ['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93', '#ff9f1c'];
+				for (let i = 0; i < count; i++) {
+					const c = document.createElement('span');
+					c.className = 'confetti';
+					c.style.left = `${Math.random() * 100}vw`;
+					c.style.background = pick(colors);
+					c.style.setProperty('--dx', `${(Math.random() - 0.5) * 200}px`);
+					c.style.setProperty('--rot', `${Math.random() * 1080}deg`);
+					c.style.animationDuration = `${1.4 + Math.random() * 1.4}s`;
+					c.style.animationDelay = `${Math.random() * 0.3}s`;
+					c.addEventListener('animationend', () => c.remove());
+					document.body.appendChild(c);
+				}
+			}
+
+			renderSound();
+			renderAlbum(null);
+			setMode(game.mode);
+		</script>
+	</body>
+</html>
