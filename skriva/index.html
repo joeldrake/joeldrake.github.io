@@ -86,7 +86,6 @@
 				--rim: #ff9f1c;
 				--good: #2a9d8f;
 				--bad: #e63946;
-				--vowel: #ffe0ec;
 				--hint: #ffd166;
 			}
 
@@ -390,10 +389,24 @@
 			/* ---------- Tangentbord ---------- */
 
 			.keyboard {
-				--gap: clamp(0.15rem, 0.8vw, 0.35rem);
+				--gap: clamp(0.2rem, 0.9vw, 0.4rem);
 				display: grid;
-				gap: var(--gap);
+				gap: clamp(0.3rem, 1.3vw, 0.6rem);
 				margin-top: 0.75rem;
+				/* Tangenterna ska inte gå att markera eller ge kopiera-meny vid långtryck */
+				user-select: none;
+				-webkit-user-select: none;
+				-webkit-touch-callout: none;
+				-webkit-tap-highlight-color: transparent;
+			}
+
+			/* På mobil går tangentbordet nästan ut till panelens kant och tangenterna
+			   sitter ihop i sidled, så att de blir så breda som möjligt */
+			@media (max-width: 480px) {
+				.keyboard {
+					--gap: 0px;
+					margin-inline: -0.5rem;
+				}
 			}
 
 			.kb-row {
@@ -405,12 +418,12 @@
 			/* Alla tangenter lika breda: elva får plats på den längsta raden */
 			.key {
 				flex: none;
-				width: min(3.2rem, calc((100% - 10 * var(--gap)) / 11));
-				height: clamp(2.6rem, 11vw, 3.4rem);
+				width: min(3.4rem, calc((100% - 10 * var(--gap)) / 11));
+				height: clamp(3.4rem, 15vw, 4rem);
 				padding: 0;
 				border-width: 2px;
 				border-radius: 0.6rem;
-				font-size: clamp(1.1rem, 5vw, 1.6rem);
+				font-size: clamp(1.3rem, 6vw, 1.8rem);
 				font-weight: 700;
 				box-shadow: 0 3px 0 var(--ink);
 			}
@@ -418,10 +431,6 @@
 			.key:active {
 				transform: translateY(2px);
 				box-shadow: 0 1px 0 var(--ink);
-			}
-
-			.key.vowel {
-				background: var(--vowel);
 			}
 
 			.key.hint {
@@ -440,22 +449,6 @@
 				border-color: var(--bad);
 				color: var(--bad);
 				animation: shake 0.4s;
-			}
-
-			.kb-legend {
-				margin: 0.5rem 0 0;
-				font-size: 0.9rem;
-				color: #6c757d;
-			}
-
-			.kb-legend i {
-				display: inline-block;
-				width: 0.9em;
-				height: 0.9em;
-				border: 2px solid var(--ink);
-				border-radius: 0.25rem;
-				background: var(--vowel);
-				vertical-align: -0.1em;
 			}
 
 			/* ---------- Samlingen ---------- */
@@ -603,7 +596,6 @@
 			<p id="stars" class="stars"></p>
 
 			<div id="keyboard" class="keyboard"></div>
-			<p id="kbLegend" class="kb-legend"><i></i> Rosa knappar är vokaler</p>
 		</section>
 
 		<section class="panel album">
@@ -724,7 +716,6 @@
 			const TRICKY_START = new Set(['GIRAFF', 'ZEBRA', 'HJÄRTA', 'KYCKLING']);
 
 			const ALL_WORDS = Object.values(WORDS).flat();
-			const VOWELS = 'AEIOUYÅÄÖ';
 			const ROWS = ['QWERTYUIOPÅ', 'ASDFGHJKLÖÄ', 'ZXCVBNM'];
 			const LETTERS = ROWS.join('');
 
@@ -805,7 +796,7 @@
 				for (const letter of row) {
 					const b = document.createElement('button');
 					b.type = 'button';
-					b.className = 'key' + (VOWELS.includes(letter) ? ' vowel' : '');
+					b.className = 'key';
 					b.textContent = letter;
 					b.addEventListener('click', () => press(letter));
 					keys[letter] = b;
@@ -869,7 +860,6 @@
 				$('hint').hidden = mode === 'las';
 				$('speak').hidden = !canSpeak || mode === 'las';
 				$('keyboard').hidden = mode === 'las';
-				$('kbLegend').hidden = mode === 'las';
 				$('choices').hidden = mode !== 'las';
 
 				renderWord();
