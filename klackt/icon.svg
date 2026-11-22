@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+	<rect width="512" height="512" fill="#49366f" />
+	<g transform="translate(256 416) scale(1.25)"><defs><clipPath id="eggShape"><path d="M0-260C70-260 112-160 112-102C112-38 65 0 0 0C-65 0-112-38-112-102C-112-160-70-260 0-260Z"/></clipPath></defs>
+					<path d="M0-260C70-260 112-160 112-102C112-38 65 0 0 0C-65 0-112-38-112-102C-112-160-70-260 0-260Z" fill="#fff6df"/>
+					<g clip-path="url(#eggShape)">
+						<path d="M70-230C125-110 100-20-20 10H130V-230Z" fill="#ead8c0"/>
+						<ellipse cx="-20" cy="-206" rx="27" ry="22" fill="#a77bd0" />
+						<ellipse cx="62" cy="-160" rx="23" ry="31" fill="#f5a25d" />
+						<ellipse cx="-78" cy="-125" rx="25" ry="34" fill="#f5a25d" />
+						<ellipse cx="2" cy="-100" rx="33" ry="29" fill="#a77bd0" />
+						<ellipse cx="94" cy="-70" rx="22" ry="28" fill="#a77bd0" />
+						<ellipse cx="-48" cy="-28" rx="30" ry="23" fill="#a77bd0" />
+						<ellipse cx="42" cy="-18" rx="22" ry="20" fill="#f5a25d" />
+						</g>
+					<ellipse cx="-52" cy="-186" rx="10" ry="24" fill="#ffffff" transform="rotate(25 -52 -186)"/>
+					<path d="M0-260C70-260 112-160 112-102C112-38 65 0 0 0C-65 0-112-38-112-102C-112-160-70-260 0-260Z" fill="none" stroke="#382b50" stroke-width="5"/></g>
+</svg>

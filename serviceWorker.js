@@ -25,8 +25,11 @@ self.addEventListener("activate", (event) => {
     caches
       .keys()
       .then((cacheNames) => {
+        // Caches are shared by the whole origin, leave those of other apps alone
         return cacheNames.filter(
-          (cacheName) => !currentCaches.includes(cacheName)
+          (cacheName) =>
+            cacheName.startsWith("custom-cache-") &&
+            !currentCaches.includes(cacheName)
         );
       })
       .then((cachesToDelete) => {

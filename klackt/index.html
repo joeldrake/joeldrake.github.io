@@ -1,0 +1,2066 @@
+<!doctype html>
+<html lang="sv">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+		<title>Kläckt!</title>
+		<link rel="manifest" href="manifest.json" />
+		<link rel="icon" href="icon.svg" type="image/svg+xml" />
+		<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+		<meta name="theme-color" content="#49366f" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="apple-mobile-web-app-title" content="Kläckt!" />
+		<!-- Lila startskärm på iPhone (Safari använder inte manifestets background_color) -->
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/750x1334.png"
+			media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1242x2208.png"
+			media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1125x2436.png"
+			media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/828x1792.png"
+			media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1242x2688.png"
+			media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1170x2532.png"
+			media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1284x2778.png"
+			media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1179x2556.png"
+			media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1290x2796.png"
+			media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1206x2622.png"
+			media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1320x2868.png"
+			media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<link
+			rel="apple-touch-startup-image"
+			href="splash/1260x2736.png"
+			media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+		/>
+		<style>
+			/* Ligger lokalt så att det fungerar offline. Licens: font/OFL.txt */
+			@font-face {
+				font-family: 'Fredoka';
+				src: url('font/fredoka.woff2') format('woff2');
+				font-weight: 400 700;
+				font-display: swap;
+			}
+
+			:root {
+				--ink: #382b50;
+				--card: #fffaf0;
+				--text: var(--ink);
+				--sky: #58b8f8;
+				--horizon: #b8ecff;
+				--hill: #86d95c;
+				--ground: #e0a458;
+				--grass: #38a848;
+				--border: 3px solid var(--ink);
+			}
+
+			* {
+				box-sizing: border-box;
+				-webkit-tap-highlight-color: transparent;
+			}
+
+			[hidden] {
+				display: none !important;
+			}
+
+			html,
+			body {
+				margin: 0;
+				overflow: hidden;
+				overscroll-behavior: none;
+				background: #49366f;
+				touch-action: manipulation;
+			}
+
+			body {
+				font-family:
+					'Fredoka',
+					system-ui,
+					-apple-system,
+					sans-serif;
+				font-size: 22px;
+				line-height: 1.2;
+				font-weight: 600;
+				/* Versaler som i Skriva. Texten i koden har gemener så att skärmläsare inte bokstaverar */
+				text-transform: uppercase;
+				color: var(--ink);
+				-webkit-user-select: none;
+				user-select: none;
+				-webkit-touch-callout: none;
+			}
+
+			body[data-sky='morning'] {
+				--sky: #f7b7bd;
+				--horizon: #ffedc7;
+				--hill: #9bd468;
+				--ground: #d89c60;
+			}
+
+			body[data-sky='evening'] {
+				--sky: #8c6bb1;
+				--horizon: #ffbd91;
+				--hill: #789c60;
+				--ground: #a86c58;
+				--grass: #487c50;
+			}
+
+			body[data-sky='night'] {
+				--text: #fffaf0;
+				--sky: #211c48;
+				--horizon: #51477f;
+				--hill: #34506a;
+				--ground: #493858;
+				--grass: #28705f;
+			}
+
+			button,
+			input {
+				font: inherit;
+				text-transform: inherit;
+				color: inherit;
+			}
+
+			button {
+				border: 0;
+				cursor: pointer;
+				touch-action: manipulation;
+			}
+
+			:focus-visible {
+				outline: 3px solid #ffd166;
+				outline-offset: 3px;
+			}
+
+			#app {
+				position: relative;
+				height: 100vh;
+				height: 100dvh;
+				display: flex;
+				flex-direction: column;
+				overflow: hidden;
+				background: linear-gradient(var(--sky), var(--horizon) 80%);
+				padding: calc(0.75rem + env(safe-area-inset-top, 0px))
+					calc(0.75rem + env(safe-area-inset-right, 0px))
+					calc(0.75rem + env(safe-area-inset-bottom, 0px))
+					calc(0.75rem + env(safe-area-inset-left, 0px));
+			}
+
+			/* iOS räknar dvh för kort i helskärm med genomskinlig statusrad */
+			@media (display-mode: standalone), (display-mode: fullscreen) {
+				#app {
+					height: 100vh;
+				}
+			}
+
+			header,
+			footer {
+				position: relative;
+				z-index: 2;
+				width: 100%;
+				max-width: 520px;
+				margin: 0 auto;
+				flex: none;
+			}
+
+			.title {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				color: var(--text);
+			}
+
+			.title div {
+				flex: 1;
+				min-width: 0;
+			}
+
+			h1 {
+				margin: 0;
+				font-size: 2.1rem;
+				font-weight: 700;
+				line-height: 1.2;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			#age {
+				margin: 0;
+			}
+
+			.round {
+				width: 46px;
+				height: 46px;
+				flex: none;
+				padding: 0;
+				border: var(--border);
+				border-radius: 50%;
+				background: var(--card);
+				color: var(--ink);
+				font-size: 1.3rem;
+			}
+
+			.meters {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 0.5rem;
+				margin-top: 0.6rem;
+			}
+
+			.meter {
+				padding: 0.4rem 0.6rem 0.55rem;
+				border: var(--border);
+				border-radius: 18px;
+				background: var(--card);
+				font-weight: 600;
+				font-size: 1.2rem;
+			}
+
+			.track {
+				height: 12px;
+				margin-top: 0.3rem;
+				overflow: hidden;
+				border-radius: 6px;
+				background: #e8dfe9;
+			}
+
+			.track i {
+				display: block;
+				height: 100%;
+				width: 0;
+				border-radius: inherit;
+				background: #48c868;
+				transition: width 0.5s;
+			}
+
+			.track i.low {
+				background: #f85858;
+			}
+
+			#bubble {
+				position: relative;
+				z-index: 2;
+				flex: none;
+				align-self: center;
+				max-width: min(100%, 440px);
+				min-height: 2.6rem;
+				margin-top: 0.7rem;
+				padding: 0.4rem 1rem;
+				font-size: 2rem;
+				overflow-wrap: anywhere;
+				border: var(--border);
+				border-radius: 18px;
+				box-shadow: inset 0 0 0 3px #a77bd0;
+				background: var(--card);
+				text-align: center;
+				font-weight: 600;
+			}
+
+			main {
+				position: relative;
+				flex: 1;
+				min-height: 0;
+				width: 100%;
+				max-width: 600px;
+				margin: 0 auto;
+			}
+
+			#scene {
+				position: absolute;
+				inset: 0;
+				width: 100%;
+				height: 100%;
+				overflow: visible;
+			}
+
+			.scenery {
+				pointer-events: none;
+			}
+
+			#pet {
+				cursor: pointer;
+				outline: none;
+			}
+
+			#pet:focus-visible .hit {
+				stroke: #ffd166;
+				stroke-width: 4;
+			}
+
+			#mover {
+				transition: transform 1.8s ease-in-out;
+			}
+
+			.bathing #pet,
+			.bathing #scene {
+				touch-action: none;
+			}
+
+			.stars,
+			.moon {
+				opacity: 0;
+				transition: opacity 1s;
+			}
+
+			[data-sky='night'] .stars,
+			[data-sky='night'] .moon {
+				opacity: 1;
+			}
+
+			[data-sky='night'] .sun,
+			[data-sky='night'] .clouds {
+				opacity: 0;
+			}
+
+			/* ---------- Animationer ---------- */
+
+			.breathe {
+				animation: breathe 2.4s ease-in-out infinite;
+			}
+
+			.asleep .breathe {
+				animation-duration: 4.5s;
+			}
+
+			.hop {
+				animation: hop 0.5s ease-out;
+			}
+
+			.wobble {
+				animation: wobble 0.45s ease-in-out;
+			}
+
+			.idle-egg {
+				animation: wobble 1.6s ease-in-out infinite;
+			}
+
+			.eyes {
+				transform-box: fill-box;
+				transform-origin: center;
+				animation: blink 4s infinite;
+			}
+
+			.wing {
+				transform-origin: 0 -120px;
+				animation: flap 2s ease-in-out infinite;
+			}
+
+			.chew {
+				transform-box: fill-box;
+				transform-origin: center;
+				animation: chew 0.3s ease-in-out infinite;
+			}
+
+			.shell-top {
+				animation: lid 1.3s ease-in forwards;
+			}
+
+			.shell-bottom {
+				animation: fade 0.7s 1.7s forwards;
+			}
+
+			.born {
+				animation: born 1.4s ease-out both;
+			}
+
+			.cocoon {
+				animation: cocoon 3.2s ease-in-out both;
+			}
+
+			.particle {
+				pointer-events: none;
+				animation: rise 1.4s ease-out forwards;
+			}
+
+			.zzz text {
+				animation: zzz 3s ease-in-out infinite;
+			}
+
+			.zzz text:nth-child(2) {
+				animation-delay: 0.7s;
+			}
+
+			.zzz text:nth-child(3) {
+				animation-delay: 1.4s;
+			}
+
+			@keyframes breathe {
+				50% {
+					transform: scale(1.025, 0.97);
+				}
+			}
+
+			@keyframes hop {
+				45% {
+					transform: translateY(-30px);
+				}
+			}
+
+			@keyframes wobble {
+				0%,
+				50%,
+				100% {
+					transform: rotate(0);
+				}
+				12%,
+				37% {
+					transform: rotate(-7deg);
+				}
+				25% {
+					transform: rotate(7deg);
+				}
+			}
+
+			@keyframes blink {
+				0%,
+				94%,
+				100% {
+					transform: scaleY(1);
+				}
+				97% {
+					transform: scaleY(0.1);
+				}
+			}
+
+			@keyframes flap {
+				50% {
+					transform: scaleX(0.92);
+				}
+			}
+
+			@keyframes chew {
+				50% {
+					transform: scaleY(0.3);
+				}
+			}
+
+			@keyframes lid {
+				to {
+					transform: translate(150px, -230px) rotate(100deg);
+					opacity: 0;
+				}
+			}
+
+			@keyframes fade {
+				to {
+					opacity: 0;
+				}
+			}
+
+			@keyframes born {
+				from {
+					transform: translateY(-5px) scale(0.6);
+				}
+				55% {
+					transform: translateY(-85px);
+				}
+			}
+
+			@keyframes cocoon {
+				0% {
+					transform: scale(0.2);
+					opacity: 0;
+				}
+				18% {
+					transform: none;
+					opacity: 1;
+				}
+				35%,
+				55%,
+				75% {
+					transform: rotate(-7deg);
+				}
+				45%,
+				65% {
+					transform: rotate(7deg);
+				}
+				88% {
+					transform: scale(1.1);
+					opacity: 1;
+				}
+				100% {
+					transform: scale(1.5);
+					opacity: 0;
+				}
+			}
+
+			@keyframes rise {
+				to {
+					transform: translate(var(--dx), var(--dy));
+					opacity: 0;
+				}
+			}
+
+			@keyframes zzz {
+				0%,
+				100% {
+					opacity: 0.1;
+				}
+				50% {
+					opacity: 1;
+				}
+			}
+
+			/* ---------- Lek ---------- */
+
+			#game {
+				position: absolute;
+				inset: 0;
+				z-index: 1;
+			}
+
+			.firefly {
+				position: absolute;
+				width: 64px;
+				height: 64px;
+				margin: -32px;
+				padding: 0;
+				background: radial-gradient(
+					circle,
+					#fff 0 12%,
+					#ffe066 22% 32%,
+					#ffe06655 48%,
+					#ffe06600 70%
+				);
+				border-radius: 50%;
+				transition:
+					left 1.3s ease-in-out,
+					top 1.3s ease-in-out;
+			}
+
+			/* ---------- Knappar ---------- */
+
+			#growth {
+				margin-bottom: 0.6rem;
+				padding: 0.4rem 0.8rem 0.6rem;
+				border: var(--border);
+				border-radius: 18px;
+				background: var(--card);
+				font-size: 1.2rem;
+				font-weight: 600;
+			}
+
+			#growthBar {
+				background: #a77bd0;
+			}
+
+			.actions {
+				display: grid;
+				grid-template-columns: repeat(4, 1fr);
+				gap: 0.5rem;
+			}
+
+			.action {
+				position: relative;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 0.15rem;
+				padding: 0.55rem 0;
+				border: var(--border);
+				border-radius: 22px;
+				background: var(--card);
+				color: var(--ink);
+				font-weight: 600;
+				box-shadow: inset 0 -5px 0 var(--shade);
+			}
+
+			#feedBtn {
+				background: #ff9c94;
+				--shade: #d85c68;
+			}
+
+			#bathBtn {
+				background: #88d8f8;
+				--shade: #4898d0;
+			}
+
+			#playBtn {
+				background: #ffe070;
+				--shade: #d8a030;
+			}
+
+			#sleepBtn {
+				background: #c8a8f0;
+				--shade: #8860c0;
+			}
+
+			.action span {
+				font-size: 1.9rem;
+				line-height: 1.2;
+			}
+
+			.action:active {
+				transform: translateY(3px);
+			}
+
+			.action:disabled {
+				opacity: 0.55;
+				cursor: default;
+			}
+
+			.action.wanted::after {
+				content: '';
+				position: absolute;
+				top: 7px;
+				right: 8px;
+				width: 13px;
+				height: 13px;
+				border-radius: 50%;
+				background: #f05d6c;
+			}
+
+			/* ---------- Dialoger ---------- */
+
+			dialog {
+				width: min(92vw, 400px);
+				max-height: 88vh;
+				max-height: 88dvh;
+				overflow: auto;
+				padding: 1.3rem;
+				border: 5px solid var(--ink);
+				border-radius: 28px;
+				box-shadow: inset 0 0 0 4px #a77bd0;
+				background: var(--card);
+				color: var(--ink);
+			}
+
+			dialog::backdrop {
+				background: #211c4888;
+			}
+
+			dialog h2 {
+				margin: 0 0 0.6rem;
+			}
+
+			dialog li {
+				margin-bottom: 0.4rem;
+			}
+
+			dialog ul {
+				padding: 0;
+				list-style: none;
+				font-size: 1.5rem;
+			}
+
+			dialog input {
+				width: 100%;
+				padding: 0.7rem;
+				border: 3px solid var(--ink);
+				border-radius: 18px;
+				background: #fff;
+				font-size: 1.4rem;
+				-webkit-user-select: text;
+				user-select: text;
+			}
+
+			.primary,
+			.secondary {
+				width: 100%;
+				margin-top: 0.8rem;
+				padding: 0.75rem;
+				border: 3px solid var(--ink);
+				border-radius: 18px;
+				background: #704c9f;
+				color: #fff;
+				font-weight: 700;
+			}
+
+			.secondary {
+				background: #eee5f3;
+				color: var(--ink);
+			}
+
+			.primary:disabled {
+				opacity: 0.35;
+				cursor: default;
+			}
+
+			/* Omstarten ska inte locka till tryck */
+			.discreet {
+				display: block;
+				min-height: 44px;
+				margin: 0.4rem auto 0;
+				padding: 0 1rem;
+				background: none;
+				font-size: 0.9rem;
+				opacity: 0.65;
+			}
+
+			#resetForm label {
+				display: block;
+				margin-bottom: 0.6rem;
+			}
+
+			.discreet:disabled {
+				cursor: default;
+				opacity: 0.3;
+			}
+
+			.foods {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 0.5rem;
+			}
+
+			.foods button {
+				padding: 0.6rem 0;
+				border: 3px solid var(--ink);
+				border-radius: 18px;
+				background: #f1e8f5;
+				font-size: 1.3rem;
+			}
+
+			.foods span {
+				display: block;
+				font-size: 2.3rem;
+			}
+
+			@media (max-height: 520px) and (orientation: landscape) {
+				#app {
+					display: grid;
+					grid-template-columns: 1fr 1fr;
+					grid-template-rows: auto auto 1fr;
+					column-gap: 1rem;
+				}
+
+				main {
+					grid-column: 2;
+					grid-row: 1 / 4;
+				}
+
+				footer {
+					align-self: end;
+				}
+
+				#growth {
+					margin-bottom: 0.4rem;
+				}
+			}
+
+			/* Låga skärmar: hela hjälprutan ska få plats */
+			@media (max-height: 600px) {
+				dialog {
+					padding: 0.9rem 1.1rem;
+				}
+
+				dialog ul {
+					margin-block: 0.4rem;
+					font-size: 1.3rem;
+				}
+
+				dialog li {
+					margin-bottom: 0.15rem;
+				}
+
+				.primary,
+				.secondary {
+					margin-top: 0.5rem;
+					padding: 0.5rem;
+				}
+			}
+
+			/* De minsta telefonerna: orden ska aldrig brytas */
+			@media (max-width: 359px) {
+				.meters,
+				.actions {
+					gap: 0.35rem;
+				}
+
+				.meter {
+					padding-inline: 0.35rem;
+					font-size: 1rem;
+					white-space: nowrap;
+				}
+
+				.action {
+					font-size: 1.15rem;
+				}
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				.breathe,
+				.idle-egg,
+				.eyes,
+				.wing,
+				.zzz text {
+					animation: none;
+				}
+
+				#mover {
+					transition: none;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app">
+			<header>
+				<div class="title">
+					<div>
+						<h1 id="petName">Ägg</h1>
+						<p id="age"></p>
+					</div>
+					<button class="round" id="soundBtn" type="button" aria-label="Ljud">🔊</button>
+					<button class="round" id="infoBtn" type="button" aria-label="Så funkar det">?</button>
+				</div>
+				<div class="meters" id="meters" hidden>
+					<div class="meter">
+						🍓 Mat
+						<div class="track"><i id="foodBar"></i></div>
+					</div>
+					<div class="meter">
+						🫧 Ren
+						<div class="track"><i id="cleanBar"></i></div>
+					</div>
+					<div class="meter">
+						💛 Glad
+						<div class="track"><i id="joyBar"></i></div>
+					</div>
+				</div>
+			</header>
+
+			<div id="bubble" role="status" aria-live="polite"></div>
+
+			<main id="stage">
+				<svg id="scene" viewBox="0 0 400 430" preserveAspectRatio="xMidYMid meet">
+					<g class="scenery">
+						<g class="stars" fill="#fff">
+							<circle cx="32" cy="40" r="4" />
+							<circle cx="90" cy="110" r="2.5" />
+							<circle cx="150" cy="26" r="2.5" />
+							<circle cx="216" cy="80" r="4" />
+							<circle cx="270" cy="14" r="2.5" />
+							<circle cx="376" cy="132" r="4" />
+							<circle cx="22" cy="190" r="2.5" />
+							<circle cx="330" cy="202" r="2.5" />
+						</g>
+						<circle class="sun" cx="336" cy="60" r="30" fill="#ffe070" />
+						<path class="moon" d="M340 26A34 34 0 1 0 370 82A30 30 0 0 1 340 26Z" fill="#fff1b8" />
+						<g class="clouds" fill="#fff">
+							<path
+								d="M36 120C14 120 14 90 38 92C40 64 78 60 86 84C106 74 122 92 114 102C132 106 128 120 112 120Z"
+							/>
+							<path
+								d="M244 162C226 162 228 140 246 142C250 122 278 122 282 138C300 134 308 162 290 162Z"
+							/>
+						</g>
+						<path id="hills" fill="var(--hill)" />
+						<path id="hillDots" fill="var(--grass)" opacity="0.35" />
+						<path d="M-2000 372H2400V1400H-2000Z" fill="var(--ground)" />
+						<path id="grass" fill="var(--grass)" />
+						<path id="soil" fill="#382b50" opacity="0.12" />
+					</g>
+					<g id="mover">
+						<g transform="translate(200 395)">
+							<g class="breathe"><g id="pet" tabindex="0" role="button"></g></g>
+						</g>
+					</g>
+					<g id="mess"></g>
+					<g id="effects"></g>
+				</svg>
+				<div id="game" hidden></div>
+			</main>
+
+			<footer id="controls" hidden>
+				<div id="growth">
+					<span id="growthText"></span>
+					<div class="track"><i id="growthBar"></i></div>
+				</div>
+				<nav class="actions">
+					<button class="action" id="feedBtn" type="button"><span>🍽️</span>Äta</button>
+					<button class="action" id="bathBtn" type="button"><span>🛁</span>Bada</button>
+					<button class="action" id="playBtn" type="button"><span>✨</span>Leka</button>
+					<button class="action" id="sleepBtn" type="button"><span>🌙</span>Sova</button>
+				</nav>
+			</footer>
+		</div>
+
+		<dialog id="foodDialog" aria-labelledby="foodTitle">
+			<h2 id="foodTitle">Välj mat</h2>
+			<div class="foods" id="foods"></div>
+			<form method="dialog"><button class="secondary">Nej</button></form>
+		</dialog>
+
+		<dialog id="nameDialog" aria-labelledby="nameTitle">
+			<h2 id="nameTitle">Namn?</h2>
+			<form id="nameForm" method="dialog">
+				<input
+					id="nameInput"
+					maxlength="12"
+					autocomplete="off"
+					aria-label="Namn"
+					placeholder="Pim"
+				/>
+				<button class="primary">Ok</button>
+			</form>
+		</dialog>
+
+		<dialog id="infoDialog" aria-labelledby="infoTitle">
+			<h2 id="infoTitle">Gör så</h2>
+			<ul>
+				<li>🍽️ Ge mat</li>
+				<li>🛁 Gno ren</li>
+				<li>✨ Ta ljus</li>
+				<li>💩 Ta bort</li>
+				<li>💛 Klappa</li>
+				<li>🌙 <span id="sleepInfo"></span></li>
+			</ul>
+			<button class="secondary" id="renameBtn" type="button">Byt namn</button>
+			<form method="dialog"><button class="primary">Ok</button></form>
+			<button class="discreet" id="resetBtn" type="button">Nytt ägg</button>
+		</dialog>
+
+		<dialog id="resetDialog" aria-labelledby="resetTitle">
+			<h2 id="resetTitle">Nytt ägg?</h2>
+			<form id="resetForm" method="dialog">
+				<label for="resetInput">Skriv OMSTART</label>
+				<input
+					id="resetInput"
+					autocomplete="off"
+					autocapitalize="characters"
+					autocorrect="off"
+					spellcheck="false"
+				/>
+				<button class="primary" id="resetConfirm" disabled>Ja</button>
+				<button class="secondary" id="resetCancel" type="button">Nej</button>
+			</form>
+		</dialog>
+
+		<script>
+			// ---------- Inställningar ----------
+
+			const MIN = 60 * 1000;
+			const HOUR = 60 * MIN;
+			const DAY = 24 * HOUR;
+
+			const STORAGE_KEY = 'klackt.state.v1';
+			const RESET_WORD = 'OMSTART'; // Står även i resetDialog
+			const TAPS_TO_HATCH = 12;
+			const AWAKE_FOR = 5 * MIN; // Så länge är den vaken efter att man väckt eller pysslat med den
+			const PET_POINT_EVERY = 3 * HOUR;
+			const POOP_AFTER_MEAL = 40 * MIN;
+
+			// days och care = vad som krävs I DEN FASEN för att växa till nästa
+			// sleep = [läggdags, vaknar], naps = tupplurar. Allt i timmar, 13.5 = 13.30
+			const STAGES = [
+				{
+					kind: 'Duni',
+					days: 2,
+					care: 12,
+					height: 125,
+					sleep: [19, 7],
+					naps: [
+						[9.5, 10.5],
+						[13.5, 15]
+					]
+				},
+				{
+					kind: 'Ludi',
+					days: 3,
+					care: 20,
+					height: 185,
+					sleep: [20, 7],
+					naps: [[13.5, 15]]
+				},
+				{
+					kind: 'Fladi',
+					days: 4,
+					care: 30,
+					height: 235,
+					sleep: [21, 7],
+					naps: [[14, 14.75]]
+				},
+				{
+					kind: 'Måni',
+					height: 285,
+					sleep: [22, 7],
+					naps: [[14, 14.5]]
+				}
+			];
+
+			// Klockslag för frukost, lunch och middag
+			const MEALS = [7, 11.5, 17];
+
+			// Korta ord som låter som de stavas
+			const FOODS = [
+				['🍓', 'Bär'],
+				['🧀', 'Ost'],
+				['🥕', 'Morot'],
+				['🥣', 'Gröt'],
+				['🍪', 'Kaka'],
+				['🍌', 'Banan']
+			];
+
+			const $ = (id) => document.getElementById(id);
+			const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+			const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+			// ---------- Sparat state ----------
+
+			const freshState = () => ({
+				taps: 0,
+				born: 0,
+				name: '',
+				stage: 0,
+				stageSince: 0,
+				care: 0,
+				totalCare: 0,
+				lastFed: 0,
+				clean: { value: 100, at: 0 },
+				joy: { value: 100, at: 0 },
+				lastPetPoint: 0,
+				awakeUntil: 0,
+				poops: [],
+				favorite: 0,
+				muted: false
+			});
+
+			function normalize(saved) {
+				const s = freshState();
+				if (!saved || typeof saved !== 'object') return s;
+				// Ta bara med fält som finns och har rätt typ
+				for (const [key, value] of Object.entries(s)) {
+					if (typeof saved[key] === typeof value && saved[key] !== null) s[key] = saved[key];
+				}
+				const now = Date.now();
+				s.stage = clamp(Math.floor(s.stage) || 0, 0, STAGES.length - 1);
+				s.favorite = clamp(Math.floor(s.favorite) || 0, 0, FOODS.length - 1);
+				s.poops = Array.isArray(s.poops) ? s.poops.filter(Number.isFinite).slice(-3) : [];
+				for (const key of ['clean', 'joy']) {
+					if (!Number.isFinite(s[key].value) || !Number.isFinite(s[key].at)) {
+						s[key] = { value: 100, at: now };
+					}
+					s[key].at = Math.min(s[key].at, now);
+				}
+				// Om klockan ställts bakåt ska inget fastna i framtiden
+				for (const key of ['born', 'stageSince', 'lastFed', 'lastPetPoint']) {
+					s[key] = Math.min(s[key], now);
+				}
+				s.awakeUntil = Math.min(s.awakeUntil, now + 2 * AWAKE_FOR);
+				return s;
+			}
+
+			function loadState() {
+				let raw = null;
+				try {
+					raw = localStorage.getItem(STORAGE_KEY);
+					return normalize(JSON.parse(raw));
+				} catch {
+					try {
+						if (raw) localStorage.setItem(`${STORAGE_KEY}.trasig`, raw);
+					} catch {}
+					return freshState();
+				}
+			}
+
+			let state = loadState();
+			let evolvingFrom = null; // Den gamla fasen visas tills kokongen spricker
+			let busy = null; // 'hatch' | 'eat' | 'bath' | 'game' | 'evolve'
+			let message = { text: '', until: 0 };
+
+			function save() {
+				try {
+					localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+				} catch {
+					tell('Sparas ej!', 8000);
+				}
+			}
+
+			// ---------- Tid och behov (räknas ut från klockan, även när appen varit stängd) ----------
+
+			function atHour(date, hour, dayOffset = 0) {
+				const d = new Date(date);
+				d.setDate(d.getDate() + dayOffset);
+				d.setHours(Math.floor(hour), Math.round((hour % 1) * 60), 0, 0);
+				return d.getTime();
+			}
+
+			function mealTimes(now) {
+				const all = [-1, 0, 1].flatMap((offset) =>
+					MEALS.map((hour) => ({ time: atHour(now, hour, offset) }))
+				);
+				const next = all.findIndex((meal) => meal.time > now);
+				return { current: all[next - 1], next: all[next] };
+			}
+
+			const isHungry = (now) => state.lastFed < mealTimes(now).current.time;
+
+			function fullness(now) {
+				const { current, next } = mealTimes(now);
+				if (isHungry(now)) return clamp(30 - ((now - current.time) / HOUR) * 10, 8, 30);
+				return 100 - 55 * clamp((now - state.lastFed) / (next.time - state.lastFed), 0, 1);
+			}
+
+			function level(key, now) {
+				const hoursToEmpty = key === 'clean' ? 20 : 14;
+				const { value, at } = state[key];
+				const left = value - (Math.max(0, now - at) / HOUR) * (100 / hoursToEmpty);
+				return clamp(left, 8, 100);
+			}
+
+			const visiblePoops = (now) => state.poops.filter((at) => at <= now);
+
+			function sleepPeriod(now) {
+				const d = new Date(now);
+				const hour = d.getHours() + d.getMinutes() / 60;
+				const { sleep, naps } = STAGES[state.stage];
+				if (hour >= sleep[0] || hour < sleep[1]) return 'night';
+				return naps.some(([from, to]) => hour >= from && hour < to) ? 'nap' : null;
+			}
+
+			const isAsleep = (now) =>
+				!!state.born && !busy && !!sleepPeriod(now) && now >= state.awakeUntil;
+
+			function growth(now) {
+				const { days, care } = STAGES[state.stage];
+				if (!days) return null;
+				const time = clamp((now - state.stageSince) / (days * DAY), 0, 1);
+				const love = clamp(state.care / care, 0, 1);
+				return {
+					progress: (time + love) / 2,
+					ready: time === 1 && love === 1
+				};
+			}
+
+			function ageText(now) {
+				const days = Math.floor(Math.max(0, now - state.born) / DAY);
+				if (!days) return 'ny';
+				return `${days} ${days === 1 ? 'dag' : 'dagar'}`;
+			}
+
+			function stayAwake() {
+				state.awakeUntil = Date.now() + AWAKE_FOR;
+			}
+
+			function addCare() {
+				state.care++;
+				state.totalCare++;
+			}
+
+			// ---------- Ljud ----------
+
+			let audio = null;
+
+			function sound(...notes) {
+				if (state.muted) return;
+				const Context = window.AudioContext || window.webkitAudioContext;
+				if (!Context) return;
+				audio ||= new Context();
+				audio.resume();
+				notes.forEach((frequency, i) => {
+					const start = audio.currentTime + i * 0.1;
+					const osc = audio.createOscillator();
+					const gain = audio.createGain();
+					osc.type = 'triangle';
+					osc.frequency.value = frequency;
+					gain.gain.setValueAtTime(0.16, start);
+					gain.gain.exponentialRampToValueAtTime(0.001, start + 0.17);
+					osc.connect(gain).connect(audio.destination);
+					osc.start(start);
+					osc.stop(start + 0.18);
+				});
+			}
+
+			// ---------- Landskap ----------
+
+			function drawLandscape() {
+				const oval = (x, y, rx, ry) =>
+					`M${x - rx} ${y}a${rx} ${ry} 0 1 0 ${2 * rx} 0a${rx} ${ry} 0 1 0 ${-2 * rx} 0z`;
+				const hillTop = (x) => 318 - Math.sin(x / 65) * 38 - Math.sin(x / 29) * 8;
+				const left = -1200;
+				const right = 1600;
+
+				let hills = `M${left} 376`;
+				let dots = '';
+				let soil = '';
+				for (let x = left; x <= right; x += 8) {
+					hills += `L${x} ${hillTop(x).toFixed(1)}`;
+					if (x % 48 === 0) dots += oval(x, hillTop(x) + 26, 4, 8);
+					if (x % 64 === 0) soil += oval(x, 412, 9, 4) + oval(x + 32, 452, 9, 4);
+				}
+
+				let grass = `M${left} 366H${right}V380`;
+				for (let x = right; x > left; x -= 24) grass += 'q-12 12-24 0';
+
+				$('hills').setAttribute('d', `${hills}L${right} 376Z`);
+				$('hillDots').setAttribute('d', dots);
+				$('grass').setAttribute('d', `${grass}Z`);
+				$('soil').setAttribute('d', soil);
+			}
+
+			// ---------- Figurer ----------
+
+			const INK = '#382b50';
+			const EGG =
+				'M0-260C70-260 112-160 112-102C112-38 65 0 0 0C-65 0-112-38-112-102C-112-160-70-260 0-260Z';
+			const CRACK = 'M-116-125L-88-143L-62-112L-34-144L-6-114L22-146L50-114L80-142L116-120';
+
+			const ellipse = (cx, cy, rx, ry, fill, extra = '') =>
+				`<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${fill}" ${extra}/>`;
+
+			const line = (d, color = INK, width = 5) =>
+				`<path d="${d}" fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+			const mirrored = (markup) => markup + `<g transform="scale(-1 1)">${markup}</g>`;
+
+			function eggShell() {
+				return `<defs><clipPath id="eggShape"><path d="${EGG}"/></clipPath></defs>
+					<path d="${EGG}" fill="#fff6df"/>
+					<g clip-path="url(#eggShape)">
+						<path d="M70-230C125-110 100-20-20 10H130V-230Z" fill="#ead8c0"/>
+						${ellipse(-20, -206, 27, 22, '#a77bd0')}
+						${ellipse(62, -160, 23, 31, '#f5a25d')}
+						${ellipse(-78, -125, 25, 34, '#f5a25d')}
+						${ellipse(2, -100, 33, 29, '#a77bd0')}
+						${ellipse(94, -70, 22, 28, '#a77bd0')}
+						${ellipse(-48, -28, 30, 23, '#a77bd0')}
+						${ellipse(42, -18, 22, 20, '#f5a25d')}
+						</g>
+					${ellipse(-52, -186, 10, 24, '#ffffff', 'transform="rotate(25 -52 -186)"')}
+					<path d="${EGG}" fill="none" stroke="${INK}" stroke-width="5"/>`;
+			}
+
+			function eggMarkup(taps) {
+				const points = CRACK.slice(1).split('L');
+				const shown = Math.ceil((taps / TAPS_TO_HATCH) * points.length);
+				const crack = shown > 1 ? line(`M${points.slice(0, shown).join('L')}`, INK, 4) : '';
+				return `<g class="${taps ? '' : 'idle-egg'}">
+					${eggShell()}
+					<g clip-path="url(#eggShape)">${crack}</g>
+				</g>`;
+			}
+
+			function hatchMarkup() {
+				const edge = CRACK.slice(1);
+				// Sprickan ritas på båda halvorna så att kanten får kontur
+				const half = (id, d) =>
+					`<defs><clipPath id="${id}"><path d="${d}"/></clipPath></defs>
+					<g clip-path="url(#${id})">
+						${eggShell()}
+						<g clip-path="url(#eggShape)">${line(CRACK, INK, 8)}</g>
+					</g>`;
+				const top = half(
+					'topHalf',
+					`M-130-280H130V-120L${edge.split('L').reverse().join('L')}L-130-125Z`
+				);
+				const bottom = half('bottomHalf', `M-130-125L${edge}L130-120V10H-130Z`);
+				return `<g class="born">${creature(0, 'happy')}</g>
+					<g class="shell-bottom">${bottom}</g>
+					<g class="shell-top">${top}</g>`;
+			}
+
+			function face(y, gap, size, mood) {
+				let eyes;
+				let mouth;
+				const eye = (x) =>
+					ellipse(x, y, size, size * 1.3, INK) +
+					ellipse(x + size * 0.3, y - size * 0.4, size * 0.35, size * 0.4, '#fff');
+				const closed = (x, bend) =>
+					line(`M${x - size} ${y}Q${x} ${y + bend} ${x + size} ${y}`, INK, 4);
+
+				if (mood === 'sleep') eyes = closed(-gap, size) + closed(gap, size);
+				else if (mood === 'happy') eyes = closed(-gap, -size * 1.5) + closed(gap, -size * 1.5);
+				else eyes = `<g class="eyes">${eye(-gap)}${eye(gap)}</g>`;
+
+				const m = y + size * 2;
+				if (mood === 'eat') {
+					mouth = ellipse(0, m + 4, size * 0.9, size, '#8d3f68', 'class="chew"');
+				} else if (mood === 'happy') {
+					mouth = `<path d="M${-size} ${m}Q0 ${m + size * 2} ${size} ${m}Z" fill="#8d3f68"/>`;
+				} else if (mood === 'sad') {
+					mouth = line(`M${-size} ${m + 7}Q0 ${m - 5} ${size} ${m + 7}`, INK, 4);
+				} else if (mood === 'sleep') {
+					mouth = ellipse(0, m + 3, 4, 5, INK);
+				} else {
+					mouth = line(`M${-size} ${m}Q0 ${m + size} ${size} ${m}`, INK, 4);
+				}
+
+				const cheek = ellipse(gap + size * 1.6, m - 2, size * 1.1, size * 0.7, '#f4777f');
+				return eyes + mouth + mirrored(cheek);
+			}
+
+			function creature(stage, mood) {
+				const outline = `stroke="${INK}" stroke-width="5" stroke-linejoin="round"`;
+
+				// Bebis: en dunboll med två små spröt
+				if (stage === 0) {
+					return (
+						mirrored(line('M14-94Q18-118 37-121') + ellipse(39, -121, 10, 7, '#f5a25d', outline)) +
+						mirrored(ellipse(27, -7, 17, 10, '#eea267', outline)) +
+						`<path d="M0-106Q18-112 28-98Q49-97 52-79Q69-66 60-47Q65-24 43-17Q27-2 0-7Q-27-2-43-17Q-65-24-60-47Q-69-66-52-79Q-49-97-28-98Q-18-112 0-106Z" fill="#ffd09b" ${outline}/>` +
+						ellipse(0, -30, 30, 18, '#fff0d8') +
+						face(-64, 23, 9, mood)
+					);
+				}
+
+				// Barn: fjäderspröt, armar, fötter och små vingknoppar
+				if (stage === 1) {
+					return (
+						mirrored(
+							`<path d="M40-82Q85-110 88-72Q80-50 40-55Z" fill="#ffd09b" ${outline}/>` +
+								line('M20-143Q24-174 52-184') +
+								line('M31-166L22-178M41-178L38-191M34-169L50-166', '#d65f70', 5) +
+								ellipse(29, -9, 21, 12, '#d65f70', outline) +
+								ellipse(55, -55, 11, 20, '#ff9f91', `transform="rotate(-30 55-55)" ${outline}`)
+						) +
+						ellipse(0, -51, 51, 46, '#ff9f91', outline) +
+						ellipse(0, -44, 29, 27, '#ffe3c9') +
+						ellipse(0, -118, 60, 48, '#ff9f91', outline) +
+						line('M-12-157L0-148L12-157', '#ffe3c9', 6) +
+						face(-119, 25, 10, mood)
+					);
+				}
+
+				// Tonåring: riktiga vingar, krage och långa ben
+				if (stage === 2) {
+					const wing = `<g class="wing">
+						<path d="M30-125Q80-205 125-171Q147-134 105-105Q135-75 102-52Q62-39 28-88Z" fill="#f5b46f" ${outline}/>
+						${ellipse(100, -147, 17, 19, '#fff0b8')}${ellipse(91, -75, 10, 10, '#fff0b8')}
+					</g>`;
+					return (
+						mirrored(
+							wing +
+								line('M20-192Q20-223 60-235') +
+								line('M29-211L17-225M42-225L38-240M36-219L55-216', '#704c9f', 5) +
+								ellipse(27, -11, 19, 14, '#704c9f', outline) +
+								ellipse(48, -81, 12, 27, '#b794dc', `transform="rotate(-25 48-81)" ${outline}`)
+						) +
+						ellipse(0, -71, 46, 61, '#b794dc', outline) +
+						ellipse(0, -62, 27, 38, '#eee0f8') +
+						`<path d="M-48-125L-31-103L-15-117L0-98L15-117L31-103L48-125Z" fill="#fff0d8" ${outline}/>` +
+						ellipse(0, -160, 58, 48, '#b794dc', outline) +
+						face(-162, 24, 10, mood)
+					);
+				}
+
+				// Vuxen: stora vingar med månar och en yvig krage
+				const wing = `<g class="wing">
+					<path d="M35-165Q90-275 163-247Q199-190 133-136Q177-95 145-48Q96-12 35-92Z" fill="#704c9f" ${outline}/>
+					<path d="M52-162Q100-240 149-228Q166-192 117-151Q80-137 52-162Z" fill="#a77bd0"/>
+					<path d="M130-222A23 23 0 1 0 145-185A19 19 0 0 1 130-222Z" fill="#ffd98a"/>
+					${ellipse(126, -78, 17, 20, '#f5a25d')}${ellipse(126, -78, 7, 8, '#ffd98a')}
+				</g>`;
+				return (
+					mirrored(
+						wing +
+							line('M21-238Q22-272 65-285') +
+							line('M30-259L15-274M45-275L40-292M39-269L61-263M54-281L71-273', '#f5a25d', 6) +
+							ellipse(32, -13, 24, 16, '#2f7f86', outline) +
+							ellipse(57, -99, 15, 34, '#59b8b2', `transform="rotate(-25 57-99)" ${outline}`)
+					) +
+					ellipse(0, -86, 55, 75, '#59b8b2', outline) +
+					ellipse(0, -73, 33, 48, '#d5f0df') +
+					`<path d="M-64-157Q-69-119-40-128Q-29-100 0-118Q29-100 40-128Q69-119 64-157Z" fill="#fff0d8" ${outline}/>` +
+					ellipse(0, -198, 65, 54, '#59b8b2', outline) +
+					'<path d="M3-243A13 13 0 1 0 14-222A11 11 0 0 1 3-243Z" fill="#ffd98a"/>' +
+					face(-195, 27, 11, mood)
+				);
+			}
+
+			function petMarkup({ stage, mood, dirty, period, bathing }) {
+				const height = STAGES[stage].height;
+				const width = [70, 80, 85, 95][stage];
+				let extra = '';
+				let zzz = '';
+
+				if (dirty) {
+					extra += `<g opacity="0.65">
+						${ellipse(-width * 0.38, -height * 0.17, 11, 7, '#80604d')}
+						${ellipse(width * 0.35, -height * 0.27, 8, 10, '#80604d')}
+						${ellipse(width * 0.15, -height * 0.12, 6, 5, '#80604d')}
+					</g>`;
+				}
+				if (period === 'night') {
+					// Ett löv som täcke
+					const top = -height * 0.3;
+					extra +=
+						`<path d="M${-width} 6Q${-width} ${top} 0 ${top}Q${width} ${top} ${width + 18} -8Q${width * 0.5} 22 ${-width} 6Z" fill="#76b982" stroke="#3f8060" stroke-width="5" stroke-linejoin="round"/>` +
+						line(`M${-width + 12} 2Q0 ${top / 2} ${width + 5} -8`, '#3f8060', 4);
+				}
+				if (mood === 'sleep') {
+					const y = -height * 0.8;
+					zzz = `<g class="zzz" fill="#fffaf0" stroke="${INK}" stroke-width="1" font-weight="700">
+						<text x="${width}" y="${y}" font-size="22">z</text>
+						<text x="${width + 18}" y="${y - 22}" font-size="30">z</text>
+						<text x="${width + 40}" y="${y - 50}" font-size="38">Z</text>
+					</g>`;
+				}
+				if (bathing) {
+					const top = -Math.max(45, height * 0.3);
+					const w = width + 25;
+					extra +=
+						`<path d="M${-w} ${top}H${w}Q${w} 12 ${w - 45} 12H${45 - w}Q${-w} 12 ${-w} ${top}Z" fill="#a5d8f3" stroke="${INK}" stroke-width="5"/>` +
+						line(`M${-w - 6} ${top}H${w + 6}`, '#fffaf0', 12);
+				}
+
+				return `<g>
+					${ellipse(0, -height / 2, width + 15, height / 2 + 15, 'transparent', 'class="hit"')}
+					${creature(stage, mood)}${extra}${zzz}
+				</g>`;
+			}
+
+			// ---------- Rita ----------
+
+			const petEl = $('pet');
+			let drawnPet = '';
+			let drawnMess = '';
+
+			function drawPet(markup) {
+				if (markup === drawnPet) return; // Annars börjar animationerna om
+				drawnPet = markup;
+				petEl.innerHTML = markup;
+			}
+
+			function animatePet(name) {
+				petEl.classList.remove('hop', 'wobble');
+				petEl.getBoundingClientRect(); // Startar om animationen
+				petEl.classList.add(name);
+			}
+
+			function particles(icons, height = 150) {
+				const x = 200 + offsetX;
+				icons.forEach((icon, i) => {
+					const p = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+					p.setAttribute('x', x - 12 + (Math.random() - 0.5) * 70);
+					p.setAttribute('y', 395 - height * 0.6);
+					p.setAttribute('font-size', 28);
+					p.setAttribute('class', 'particle');
+					p.style.setProperty('--dx', `${(i - (icons.length - 1) / 2) * 38}px`);
+					p.style.setProperty('--dy', `${-70 - Math.random() * 80}px`);
+					p.textContent = icon;
+					$('effects').append(p);
+					setTimeout(() => p.remove(), 1500);
+				});
+			}
+
+			function tell(text, ms = 4500) {
+				message = { text, until: Date.now() + ms };
+				$('bubble').textContent = text;
+			}
+
+			// Högst två ord. Orden efter "vill" är samma som på knapparna
+			function statusText(now, asleep) {
+				if (!state.born) {
+					if (!state.taps) return 'Peta!';
+					return state.taps < TAPS_TO_HATCH / 2 ? 'Mer!' : 'Mer! Mer!';
+				}
+				if (asleep) return 'Sover';
+				if (isHungry(now)) return 'Vill äta';
+				if (visiblePoops(now).length) return 'Bajs!';
+				if (level('clean', now) < 35) return 'Vill bada';
+				if (level('joy', now) < 40) return 'Vill leka';
+				if (sleepPeriod(now)) return 'Vill sova';
+				return 'Mår bra';
+			}
+
+			function setBar(id, value) {
+				$(id).style.width = `${value}%`;
+				$(id).classList.toggle('low', value < 35);
+			}
+
+			function render() {
+				const now = Date.now();
+				const hour = new Date(now).getHours();
+				const born = !!state.born;
+				const asleep = isAsleep(now);
+				const period = asleep ? sleepPeriod(now) : null;
+
+				let sky = 'day';
+				if (hour < 6 || hour >= 21 || period === 'night') sky = 'night';
+				else if (hour < 9) sky = 'morning';
+				else if (hour >= 18) sky = 'evening';
+				document.body.dataset.sky = sky;
+				document.body.classList.toggle('asleep', asleep);
+
+				$('soundBtn').textContent = state.muted ? '🔇' : '🔊';
+				$('soundBtn').setAttribute('aria-label', state.muted ? 'Sätt på ljud' : 'Stäng av ljud');
+				$('meters').hidden = !born;
+				$('controls').hidden = !born;
+				$('renameBtn').hidden = !born;
+				$('resetBtn').hidden = !born;
+				// En pågående animation eller lek skulle annars skriva till det nya ägget
+				$('resetBtn').disabled = !!busy;
+				const text = message.until > now ? message.text : statusText(now, asleep);
+				// Bara vid ändring, annars läser skärmläsare upp den om och om igen
+				if ($('bubble').textContent !== text) $('bubble').textContent = text;
+				petEl.setAttribute('aria-label', !born ? 'Ägg' : asleep ? 'Väck' : 'Klappa');
+
+				if (!born) {
+					$('petName').textContent = 'Ägg';
+					$('age').textContent = '';
+					if (!busy) drawPet(eggMarkup(state.taps));
+					return;
+				}
+
+				const stage = STAGES[evolvingFrom ?? state.stage];
+				$('petName').textContent = state.name || 'Hej';
+				$('age').textContent = `${stage.kind} · ${ageText(now)}`;
+
+				const clean = level('clean', now);
+				const joy = level('joy', now);
+				const hungry = isHungry(now);
+				setBar('foodBar', fullness(now));
+				setBar('cleanBar', clean);
+				setBar('joyBar', joy);
+
+				const grow = evolvingFrom === null ? growth(now) : { progress: 1, ready: true };
+				$('growthBar').style.width = `${grow ? grow.progress * 100 : 100}%`;
+				$('growthText').textContent = !grow ? 'Stor!' : grow.ready ? 'Snart!' : 'Växa';
+
+				const wanted = {
+					feedBtn: hungry,
+					bathBtn: clean < 35,
+					playBtn: joy < 40,
+					sleepBtn: !asleep && !!sleepPeriod(now)
+				};
+				for (const [id, on] of Object.entries(wanted)) {
+					$(id).classList.toggle('wanted', on && !asleep && !busy);
+					$(id).disabled = !!busy;
+				}
+
+				const mess = visiblePoops(now)
+					.map(
+						(at, i) => `<g data-poop="${at}" tabindex="0" role="button" aria-label="Städa">
+							<circle cx="${[65, 335, 115][i]}" cy="${[375, 385, 410][i]}" r="32" fill="transparent"/>
+							<text x="${[65, 335, 115][i]}" y="${[388, 398, 423][i]}" font-size="38" text-anchor="middle">💩</text>
+						</g>`
+					)
+					.join('');
+				if (mess !== drawnMess) {
+					drawnMess = mess;
+					$('mess').innerHTML = mess;
+				}
+
+				if (busy === 'hatch' || busy === 'evolve') return;
+
+				let mood = 'normal';
+				if (asleep) mood = 'sleep';
+				else if (busy === 'eat') mood = 'eat';
+				else if (busy || now < happyUntil) mood = 'happy';
+				else if (hungry || clean < 20 || joy < 20) mood = 'sad';
+
+				const bathing = busy === 'bath';
+				const dirty = bathing ? scrubbed < 0.7 && clean < 70 : clean < 35;
+				drawPet(petMarkup({ stage: state.stage, mood, dirty, period, bathing }));
+			}
+
+			// ---------- Rörelse ----------
+
+			let offsetX = 0;
+			let happyUntil = 0;
+
+			function moveTo(x) {
+				offsetX = x;
+				$('mover').style.transform = `translateX(${x}px)`;
+			}
+
+			function wander() {
+				if (!state.born || busy || isAsleep(Date.now())) return moveTo(0);
+				const room = [80, 60, 35, 10][state.stage];
+				moveTo(Math.round((Math.random() * 2 - 1) * room));
+			}
+
+			function cheer(...icons) {
+				happyUntil = Date.now() + 1800;
+				animatePet('hop');
+				particles(icons, STAGES[state.stage].height);
+				setTimeout(render, 1900);
+			}
+
+			// ---------- Kläckning och utveckling ----------
+
+			async function tapEgg() {
+				state.taps++;
+				navigator.vibrate?.(20);
+				if (state.taps < TAPS_TO_HATCH) {
+					save();
+					sound(220 + state.taps * 35);
+					animatePet('wobble');
+					render();
+					return;
+				}
+
+				const now = Date.now();
+				Object.assign(state, {
+					born: now,
+					stageSince: now,
+					clean: { value: 100, at: now },
+					joy: { value: 90, at: now },
+					awakeUntil: now + 2 * AWAKE_FOR,
+					favorite: Math.floor(Math.random() * FOODS.length)
+				});
+				save();
+				navigator.storage?.persist?.().catch(() => {});
+
+				busy = 'hatch';
+				petEl.classList.remove('hop', 'wobble');
+				drawPet(hatchMarkup());
+				sound(392, 523, 659, 784, 1047);
+				tell('Oj!', 2400);
+				render();
+				await wait(2600);
+				busy = null;
+				render();
+				askName();
+			}
+
+			async function evolve() {
+				const before = state.stage;
+				state.stage++;
+				state.stageSince = Date.now();
+				state.care = 0;
+				stayAwake();
+				save();
+
+				busy = 'evolve';
+				evolvingFrom = before;
+				moveTo(0);
+				const height = STAGES[state.stage].height;
+				const r = Math.max(75, height * 0.4);
+				let threads = '';
+				for (let i = 1; i < 7; i++) {
+					const y = (-height * i) / 7;
+					threads += line(`M${-r * 0.8} ${y + 10}Q0 ${y - 22} ${r * 0.8} ${y + 4}`, '#d5c3ea', 4);
+				}
+				const silk = ellipse(
+					0,
+					-height / 2,
+					r,
+					height / 2 + 12,
+					'#f5eefb',
+					`stroke="${INK}" stroke-width="5"`
+				);
+				const cocoon = `<g class="cocoon">${silk}${threads}</g>`;
+
+				drawPet(`<g>${creature(before, 'happy')}</g>${cocoon}`);
+				tell('Oj!', 3500);
+				render();
+				sound(330, 392, 440, 523);
+				await wait(2750);
+				// Byt figur medan kokongen täcker den
+				while (petEl.firstElementChild && !petEl.firstElementChild.classList.contains('cocoon')) {
+					petEl.firstElementChild.remove();
+				}
+				petEl.insertAdjacentHTML('afterbegin', `<g>${creature(state.stage, 'happy')}</g>`);
+				evolvingFrom = null;
+				render();
+				await wait(450);
+
+				busy = null;
+				drawnPet = '';
+				tell(`En ${STAGES[state.stage].kind}!`, 6000);
+				sound(523, 659, 784, 1047, 1319);
+				cheer('✨', '🎉', '💜', '🎉', '✨');
+				render();
+			}
+
+			function checkGrowth() {
+				const now = Date.now();
+				if (!state.born || !state.name || busy || document.hidden || isAsleep(now)) return;
+				if (document.querySelector('dialog[open]')) return;
+				if (growth(now)?.ready) evolve();
+			}
+
+			// ---------- Omvårdnad ----------
+
+			function canAct() {
+				if (busy || !state.born) return false;
+				if (!isAsleep(Date.now())) return true;
+				tell('Sover');
+				return false;
+			}
+
+			function tapPet() {
+				if (busy || Date.now() < ignoreTapsUntil) return;
+				if (!state.born) return tapEgg();
+
+				const now = Date.now();
+				if (isAsleep(now)) {
+					tell('Hej!');
+					sound(330, 440);
+					animatePet('wobble');
+				} else {
+					state.joy = { value: Math.min(100, level('joy', now) + 2), at: now };
+					if (now - state.lastPetPoint >= PET_POINT_EVERY) {
+						state.lastPetPoint = now;
+						addCare();
+					}
+					sound(784, 988);
+					cheer('💛', '💜');
+				}
+				stayAwake();
+				save();
+				render();
+			}
+
+			function openFood() {
+				if (!canAct()) return;
+				const now = Date.now();
+				if (isHungry(now)) return $('foodDialog').showModal();
+				tell('Mätt!');
+				animatePet('wobble');
+			}
+
+			async function eat(index) {
+				$('foodDialog').close();
+				const now = Date.now();
+				if (!canAct() || !isHungry(now)) return;
+
+				const favorite = index === state.favorite;
+				state.lastFed = now;
+				state.joy = { value: Math.min(100, level('joy', now) + (favorite ? 15 : 3)), at: now };
+				state.poops = [...state.poops, now + POOP_AFTER_MEAL].slice(-3);
+				addCare();
+				stayAwake();
+				save();
+
+				busy = 'eat';
+				moveTo(0);
+				tell('Nam nam', 2000);
+				render();
+				for (let i = 0; i < 3; i++) {
+					particles([FOODS[index][0]], STAGES[state.stage].height);
+					sound(260 + i * 40);
+					await wait(600);
+				}
+				busy = null;
+				tell(favorite ? 'Bäst!' : 'Så gott!');
+				cheer('💛', favorite ? '🤩' : '😋');
+				render();
+			}
+
+			let scrubbed = 0;
+			let lastRub = null;
+			let bathTimeout;
+
+			function startBath() {
+				if (!canAct()) return;
+				busy = 'bath';
+				scrubbed = 0;
+				moveTo(0);
+				document.body.classList.add('bathing');
+				tell('Gno!', 20000);
+				// Avbryt om ingen badar klart
+				bathTimeout = setTimeout(() => endBath(false), 20000);
+				render();
+			}
+
+			function scrub(amount) {
+				if (busy !== 'bath') return;
+				const before = Math.floor(scrubbed * 12);
+				scrubbed += amount;
+				if (Math.floor(scrubbed * 12) !== before) {
+					particles(['🫧', '🫧'], STAGES[state.stage].height);
+					sound(500 + Math.random() * 400);
+					render();
+				}
+				if (scrubbed >= 1) endBath(true);
+			}
+
+			function endBath(done) {
+				clearTimeout(bathTimeout);
+				busy = null;
+				lastRub = null;
+				ignoreTapsUntil = Date.now() + 500;
+				document.body.classList.remove('bathing');
+				if (done) {
+					const now = Date.now();
+					if (level('clean', now) < 70) addCare();
+					state.clean = { value: 100, at: now };
+					stayAwake();
+					save();
+					tell('Så ren!');
+					sound(659, 880, 1175);
+					cheer('✨', '🫧', '✨');
+				} else {
+					tell('Inte ren');
+				}
+				render();
+			}
+
+			let caught = 0;
+			let gameTimers = [];
+			let ignoreTapsUntil = 0; // Sista gnugget eller fångsten ska inte räknas som en klapp
+
+			function startGame() {
+				if (!canAct()) return;
+				busy = 'game';
+				caught = 0;
+				moveTo(0);
+				tell('Ta ljus!', 15000);
+				const game = $('game');
+				game.hidden = false;
+				for (let i = 0; i < 3; i++) addFirefly();
+				gameTimers = [
+					setInterval(() => game.querySelectorAll('.firefly').forEach(placeFirefly), 1200),
+					setTimeout(endGame, 15000)
+				];
+				render();
+			}
+
+			function placeFirefly(fly) {
+				fly.style.left = `${12 + Math.random() * 76}%`;
+				fly.style.top = `${15 + Math.random() * 65}%`;
+			}
+
+			function addFirefly() {
+				const fly = document.createElement('button');
+				fly.type = 'button';
+				fly.className = 'firefly';
+				fly.setAttribute('aria-label', 'Eldfluga');
+				placeFirefly(fly);
+				const grab = () => {
+					if (!fly.isConnected || busy !== 'game') return;
+					fly.remove();
+					caught++;
+					sound(600 + caught * 70);
+					animatePet('hop');
+					tell(`${caught}`, 15000);
+					if (caught >= 8) endGame();
+					else addFirefly();
+				};
+				// pointerdown för att hinna träffa, click för tangentbord
+				fly.addEventListener('pointerdown', grab);
+				fly.addEventListener('click', (e) => e.detail === 0 && grab());
+				$('game').append(fly);
+			}
+
+			function endGame() {
+				gameTimers.forEach(clearTimeout);
+				ignoreTapsUntil = Date.now() + 500;
+				$('game').hidden = true;
+				$('game').replaceChildren();
+				busy = null;
+				if (caught) {
+					const now = Date.now();
+					const joy = level('joy', now);
+					if (joy < 80) addCare();
+					state.joy = { value: Math.min(100, joy + 20 + caught * 5), at: now };
+					stayAwake();
+					save();
+					tell(caught >= 8 ? 'Alla!' : 'Så kul!');
+					sound(523, 659, 784);
+					cheer('✨', '💛', '✨');
+				} else {
+					tell('Igen?');
+				}
+				render();
+			}
+
+			function tuckIn() {
+				if (busy || !state.born) return;
+				const now = Date.now();
+				if (isAsleep(now)) {
+					tell('Sover');
+				} else if (sleepPeriod(now)) {
+					state.awakeUntil = 0;
+					save();
+					moveTo(0);
+					tell('God natt');
+					sound(523, 440, 349);
+					render();
+				} else {
+					tell('Inte sova');
+					animatePet('wobble');
+				}
+			}
+
+			function cleanPoop(target) {
+				const poop = target.closest('[data-poop]');
+				if (!poop || busy) return;
+				const index = state.poops.indexOf(Number(poop.dataset.poop));
+				if (index < 0) return;
+				state.poops.splice(index, 1);
+				addCare();
+				save();
+				sound(880, 660);
+				tell('Så fint!');
+				render();
+			}
+
+			// ---------- Dialoger ----------
+
+			function askName() {
+				if ($('nameDialog').open) return;
+				$('nameInput').value = state.name;
+				$('nameDialog').showModal();
+			}
+
+			// Körs även om dialogen stängs med Esc
+			$('nameDialog').addEventListener('close', () => {
+				state.name = $('nameInput').value.trim() || state.name || 'Pim';
+				save();
+				tell(`Hej ${state.name}!`);
+				render();
+			});
+
+			function openInfo() {
+				const [from, to] = STAGES[state.stage].sleep;
+				$('sleepInfo').textContent = `Sova ${from}–${to}`;
+				$('infoDialog').showModal();
+				$('infoDialog').scrollTop = 0; // Autofokus rullar annars förbi rubriken
+			}
+
+			// Texten visas i versaler, så små bokstäver ska också duga
+			const resetConfirmed = () => $('resetInput').value.trim().toUpperCase() === RESET_WORD;
+
+			function askReset() {
+				if (busy) return;
+				$('infoDialog').close();
+				$('resetInput').value = '';
+				$('resetConfirm').disabled = true;
+				$('resetDialog').showModal();
+			}
+
+			function startOver() {
+				state = { ...freshState(), muted: state.muted };
+				message = { text: '', until: 0 };
+				happyUntil = 0;
+				drawnMess = '';
+				$('mess').replaceChildren();
+				$('effects').replaceChildren();
+				petEl.classList.remove('hop', 'wobble');
+				moveTo(0);
+				save();
+				render();
+			}
+
+			FOODS.forEach(([icon, label], index) => {
+				const button = document.createElement('button');
+				const emoji = document.createElement('span');
+				button.type = 'button';
+				emoji.textContent = icon;
+				button.append(emoji, label);
+				button.addEventListener('click', () => eat(index));
+				$('foods').append(button);
+			});
+
+			// ---------- Händelser ----------
+
+			$('feedBtn').addEventListener('click', openFood);
+			$('bathBtn').addEventListener('click', startBath);
+			$('playBtn').addEventListener('click', startGame);
+			$('sleepBtn').addEventListener('click', tuckIn);
+			$('infoBtn').addEventListener('click', openInfo);
+			$('renameBtn').addEventListener('click', () => {
+				$('infoDialog').close();
+				askName();
+			});
+			$('resetBtn').addEventListener('click', askReset);
+			$('resetCancel').addEventListener('click', () => $('resetDialog').close());
+			$('resetInput').addEventListener('input', () => {
+				$('resetConfirm').disabled = !resetConfirmed();
+			});
+			$('resetForm').addEventListener('submit', (e) => {
+				if (busy || !resetConfirmed()) e.preventDefault();
+				else startOver();
+			});
+			$('soundBtn').addEventListener('click', () => {
+				state.muted = !state.muted;
+				save();
+				sound(660);
+				render();
+			});
+
+			petEl.addEventListener('click', () => (busy === 'bath' ? scrub(0.08) : tapPet()));
+			petEl.addEventListener('keydown', (e) => {
+				if (e.key !== 'Enter' && e.key !== ' ') return;
+				e.preventDefault();
+				if (busy === 'bath') scrub(0.08);
+				else tapPet();
+			});
+
+			$('mess').addEventListener('click', (e) => cleanPoop(e.target));
+			$('mess').addEventListener('keydown', (e) => {
+				if (e.key === 'Enter' || e.key === ' ') cleanPoop(e.target);
+			});
+
+			const scene = $('scene');
+			scene.addEventListener('pointerdown', (e) => {
+				if (busy === 'bath') lastRub = [e.clientX, e.clientY];
+			});
+			scene.addEventListener('pointermove', (e) => {
+				if (busy !== 'bath' || !lastRub) return;
+				const distance = Math.hypot(e.clientX - lastRub[0], e.clientY - lastRub[1]);
+				lastRub = [e.clientX, e.clientY];
+				scrub(distance / 1400);
+			});
+			addEventListener('pointerup', () => (lastRub = null));
+			addEventListener('pointercancel', () => (lastRub = null));
+
+			function refresh() {
+				render();
+				checkGrowth();
+			}
+
+			function resume() {
+				if (document.hidden) return;
+				if (!busy) state = loadState();
+				refresh();
+			}
+
+			document.addEventListener('visibilitychange', resume);
+			addEventListener('pageshow', resume);
+			addEventListener('storage', (e) => {
+				if (e.key !== STORAGE_KEY) return;
+				state = loadState();
+				render();
+			});
+
+			setInterval(refresh, 1000);
+			setInterval(wander, 6000);
+
+			const canCache = location.protocol.startsWith('http') && location.hostname !== 'localhost';
+			if ('serviceWorker' in navigator && canCache) {
+				navigator.serviceWorker
+					.register('sw.js')
+					.catch((err) => console.error('Service worker registration failed', err));
+			}
+
+			drawLandscape();
+			render();
+			if (state.born && !state.name) askName();
+		</script>
+	</body>
+</html>
